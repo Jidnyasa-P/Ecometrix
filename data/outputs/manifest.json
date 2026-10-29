@@ -1,0 +1,130 @@
+{
+  "pipeline_version": "0.4.0",
+  "generated_at": "2026-10-29T15:02:40+00:00",
+  "git_sha": "b10e866bcfb8f123677ee82be15748f66ba7ebcd",
+  "city": "Pune",
+  "h3_resolution": 9,
+  "pixel_m": 30,
+  "boundary": {
+    "source": "Configured bounding box (FALLBACK, not an official boundary)",
+    "osm_ref": null,
+    "name": "Pune",
+    "area_km2": 911.2,
+    "fallback": true,
+    "notes": []
+  },
+  "n_cells": 9273,
+  "columns": [
+    "h3",
+    "lat",
+    "lng",
+    "area_km2",
+    "tree_count",
+    "dist_park_m",
+    "park_ha",
+    "forest_ha",
+    "treecover_pct",
+    "shrub_pct",
+    "grass_pct",
+    "crop_pct",
+    "builtup_pct",
+    "bare_pct",
+    "water_pct",
+    "lst_c",
+    "lst_nobs",
+    "ndvi",
+    "pop",
+    "pop_access",
+    "pop_unserved_300m",
+    "tree_density_ha",
+    "open_land_ha",
+    "access_share"
+  ],
+  "layers": {
+    "trees": {
+      "title": "Pune Tree Census 2019",
+      "evidence": "MEASURED",
+      "license": "Public domain (PMC open data via OpenCity)",
+      "source": "https://data.opencity.in/dataset/pune-tree-census-2019",
+      "status": "ok",
+      "detail": {
+        "vintage": "August 2019",
+        "rows": 4009624,
+        "coordinates": [
+          "combined column 'geom' (lon,lat)"
+        ]
+      }
+    },
+    "osm": {
+      "title": "Mapped green space (OpenStreetMap)",
+      "evidence": "MEASURED",
+      "license": "ODbL, \u00a9 OpenStreetMap contributors",
+      "source": "https://www.openstreetmap.org (Overpass API)",
+      "status": "ok",
+      "detail": {
+        "vintage": "queried 2026-10-29",
+        "public_green_polygons": 667,
+        "public_green_qualifying_polygons": 241,
+        "public_green_total_ha": 773.4,
+        "public_green_qualifying_ha": 692.5,
+        "forest_reserve_polygons": 105,
+        "open_green_polygons": 499
+      }
+    },
+    "worldcover": {
+      "title": "Land cover (ESA WorldCover)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, ESA WorldCover",
+      "source": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover",
+      "status": "ok",
+      "detail": {
+        "vintage": "? (2020, 2021)",
+        "tiles": 2
+      }
+    },
+    "landsat": {
+      "title": "Land-surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-03-07 to 2026-05-16",
+        "scenes": 27,
+        "clear_days": 27
+      }
+    },
+    "sentinel": {
+      "title": "Vegetation index NDVI (Sentinel-2)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-03-04 to 2026-05-08",
+        "scenes": 42,
+        "clear_days": 41
+      }
+    },
+    "population": {
+      "title": "Population (WorldPop 2020, constrained)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/geodata/summary?id=49804",
+      "status": "ok",
+      "detail": {
+        "vintage": "2020",
+        "read": "cached full download (windowed HTTP read failed: Range downloading not supported by this server!)",
+        "pixels": 58750
+      }
+    },
+    "popseries": {
+      "title": "Population history 2000-2020 (WorldPop yearly)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://data.worldpop.org/GIS/Population/Global_2000_2020/2020/IND",
+      "status": "failed",
+      "reason": "RuntimeError: only 0 yearly rasters could be read; first errors: [(2000, 'RasterioIOError: Range downloading not supported by this server!'), (2001, 'RasterioIOError: Range downloading not supported by this server!')]"
+    }
+  }
+}
