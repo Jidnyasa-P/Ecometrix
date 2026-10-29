@@ -1,0 +1,61 @@
+# EcoMetrix pilot configuration. To add another city, copy this file and change the values;
+# nothing else in the code is Pune-specific.
+city: Pune
+country: India
+center: [18.5204, 73.8567]          # lat, lon (used only to sanity-check the boundary)
+h3_resolution: 9                    # about 0.1 km2 per cell
+utm_epsg: 32643                     # UTM zone 43N, metric CRS for distances and areas
+pixel_m: 30                         # common raster grid used by every satellite layer
+fallback_bbox: [73.72, 18.40, 74.02, 18.66]   # west, south, east, north; used ONLY if the boundary lookup fails
+
+boundary:
+  nominatim_url: https://nominatim.openstreetmap.org/search
+  query: Pune Municipal Corporation
+  area_sanity_km2: [150, 1200]      # reject results outside this range
+
+tree_census:
+  ckan_base: https://data.opencity.in
+  package_id: f00d83b8-c70f-4fff-9ac7-9a6ab4255edf   # "Pune Tree Census 2019" on OpenCity
+  published_total_claim: 4090000    # figure quoted in the OpenCity explainer
+  listed_parts_total: 4009000       # 16 parts x 250,000 + 1 part x 9,000, as listed on the dataset page
+
+osm:
+  overpass_url: https://overpass-api.de/api/interpreter
+  timeout_s: 240
+
+satellite:
+  stac_url: https://planetarycomputer.microsoft.com/api/stac/v1
+  season_months: [3, 4, 5]          # pre-monsoon (dry season)
+  years: [2024, 2025, 2026]
+  audit_years: [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+  cloud_cover_max: 20
+  min_clear_obs: 2                  # a pixel needs at least this many clear observations
+
+population:
+  url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/IND/ind_ppp_2020_constrained.tif
+  year: 2020
+
+access:
+  distance_m: 300                   # WHO: green space within 300 m (linear distance) of homes
+  min_area_ha: 0.5                  # WHO: at least 0.5 ha
+
+population_series:                  # yearly history for the demand forecast (WorldPop unconstrained, 100 m)
+  url_template: https://data.worldpop.org/GIS/Population/Global_2000_2020/{year}/IND/ind_ppp_{year}.tif
+  years: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+
+# Candidate-site rules (project choices, not facts). Sites are hexagon-sized patches of OPEN LAND estimated from land cover,
+# not surveyed parcels: every one needs field verification.
+candidates:
+  pocket_park:  { min_site_ha: 0.5, max_site_ha: 2.0 }    # 0.5 ha is the WHO minimum for a space that counts toward access
+  mini_forest:  { min_site_ha: 0.1, max_site_ha: 1.0 }
+
+# Demand forecast and need score
+forecast:
+  train_until: 2014                 # backtest: learn from 2000-2014, test on 2015-2020
+  horizons: [2025, 2030, 2035]
+need:
+  presets:                          # weights are POLICY CHOICES, exposed to users; each sums to 1
+    balanced:     { heat: 0.25, people: 0.25, gap: 0.25, growth: 0.25 }
+    heat_first:   { heat: 0.55, people: 0.20, gap: 0.15, growth: 0.10 }
+    access_first: { heat: 0.15, people: 0.25, gap: 0.50, growth: 0.10 }
+    growth_aware: { heat: 0.15, people: 0.20, gap: 0.20, growth: 0.45 }

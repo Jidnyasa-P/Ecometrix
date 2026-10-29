@@ -1,0 +1,16 @@
+numpy==2.4.6
+pandas==3.1.0
+pyarrow==26.0.0
+h3==4.5.0
+shapely==2.2.0
+pyproj==3.8.0
+rasterio==1.5.2
+osm2geojson==0.3.2
+requests==2.34.2
+pyyaml==6.0.3
+pystac-client==0.9.1
+planetary-computer==1.0.0
+odc-stac==0.5.3
+dask[array]
+scipy==1.17.1
+pytest==9.1.1

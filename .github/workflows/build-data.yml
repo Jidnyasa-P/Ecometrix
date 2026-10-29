@@ -1,0 +1,48 @@
+name: Build data
+# Builds the real baseline from open sources and commits data/outputs, which Render then serves.
+# Run it from the Actions tab ("Run workflow"). It also refreshes monthly.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 1 * *"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      ECOMETRIX_ALLOW_PARTIAL: "1"          # a failed layer is recorded in manifest.json instead of aborting the others
+      ECOMETRIX_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12", cache: pip, cache-dependency-path: pipelines/requirements.txt }
+      - run: pip install -r pipelines/requirements.txt -r model/requirements.txt
+      - name: Run pipeline
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.run
+      - name: Baseline relationship (model/)
+        run: python model/baseline_relationship.py
+      - name: Models (heat model, forecast, need score, candidate sites)
+        run: python model/run_models.py
+      - name: Summarise layer status
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          m = json.load(open("data/outputs/manifest.json"))
+          print("| Layer | Status | Detail |\n|---|---|---|")
+          for k, v in m["layers"].items():
+              print(f"| {k} | {v['status']} | {v.get('reason') or v.get('detail', {}).get('vintage', '')} |")
+          import os
+          if os.path.exists("data/outputs/models_manifest.json"):
+              mm = json.load(open("data/outputs/models_manifest.json"))["modules"]
+              print("\n| Model module | Status | Detail |\n|---|---|---|")
+              for k, v in mm.items():
+                  print(f"| {k} | {v['status']} | {v.get('reason', v.get('count', ''))} |")
+          PY
+      - name: Commit outputs
+        run: |
+          git config user.name "ecometrix-bot"
+          git config user.email "ecometrix-bot@users.noreply.github.com"
+          git add -f data/outputs
+          git diff --cached --quiet && echo "No changes" || (git commit -m "data: rebuild baseline" && git push)
