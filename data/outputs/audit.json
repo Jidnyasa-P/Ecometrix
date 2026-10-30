@@ -1,18 +1,25 @@
 {
-  "generated_at": "2026-10-30T06:55:06+00:00",
+  "generated_at": "2026-10-30T14:11:09+00:00",
   "checks": [
     {
       "id": "boundary",
       "title": "City boundary",
-      "status": "warn",
-      "rule": "An official or OSM boundary polygon is obtained and passes sanity checks.",
+      "status": "pass",
+      "rule": "The 2025 PMC electoral-ward boundary or an OSM administrative boundary is obtained and passes area/geometry sanity checks.",
       "evidence": {
-        "source": "Configured bounding box (FALLBACK, not an official boundary)",
-        "area_km2": 911.2,
+        "source": "PMC Electoral Wards 2025 (41 wards; OpenCity resource credited to Parisar)",
+        "area_km2": 479.9,
         "osm_ref": null,
-        "h3_cells": 9273
+        "boundary_dataset": "pune-wards-info",
+        "boundary_dataset_url": "https://data.opencity.in/dataset/pune-wards-info",
+        "boundary_resource_name": "PMC Electoral Wards 2025",
+        "boundary_resource_credit": "Parisar",
+        "boundary_metadata_modified": "2026-10-22T13:13:19.055121",
+        "boundary_resource_modified": "2025-11-25T15:53:17.215325",
+        "boundary_ward_features": 41,
+        "h3_cells": 4877
       },
-      "note": "Boundary lookup failed; a configured bounding box is used instead."
+      "note": "Boundary polygon accepted."
     },
     {
       "id": "trees",
@@ -22,7 +29,7 @@
       "evidence": {
         "rows_loaded": 4009624,
         "valid_coordinates_pct": 100.0,
-        "rows_inside_study_area": 4009623,
+        "rows_inside_study_area": 3977026,
         "parts_read": 17,
         "published_claim": 4090000,
         "listed_parts_total": 4009000,
@@ -31,6 +38,37 @@
         ]
       },
       "note": "The explainer quotes 4.09 million trees, but the listed parts add up to about 4.009 million. The loaded row count above is what the pipeline actually read."
+    },
+    {
+      "id": "latest_satellite",
+      "title": "Latest satellite observations",
+      "status": "pass",
+      "rule": "Both rolling-window composites must be no older than 45 days and cover at least 50.0% of study-area cells.",
+      "evidence": {
+        "landsat": {
+          "title": "Landsat 8/9 LST",
+          "first_observation": "2026-05-08",
+          "last_observation": "2026-10-23",
+          "age_days": 7,
+          "scenes": 13,
+          "clear_days": 13,
+          "valid_cells_pct": 100.0,
+          "mean_clear_observations_per_cell": 10.288,
+          "window_days": 180
+        },
+        "sentinel2": {
+          "title": "Sentinel-2 NDVI",
+          "first_observation": "2026-05-08",
+          "last_observation": "2026-10-25",
+          "age_days": 5,
+          "scenes": 23,
+          "clear_days": 23,
+          "valid_cells_pct": 100.0,
+          "mean_clear_observations_per_cell": 15.82,
+          "window_days": 180
+        }
+      },
+      "note": "These are the newest cloud-filtered acquisitions available in the provider catalogue, composited over a rolling window; this is near-real-time monitoring, not a live sensor feed. Cloud masking can leave some cells without a value. Pre-monsoon baseline composites remain separate for seasonal consistency."
     },
     {
       "id": "satellite",
@@ -70,8 +108,8 @@
       "rule": "A yearly series over about two decades plus an official census anchor.",
       "evidence": {
         "baseline_dataset": "WorldPop constrained 2020 (100 m)",
-        "people_in_study_area": 6365486,
-        "pixels": 58750,
+        "people_in_study_area": 4088904,
+        "pixels": 34529,
         "read_method": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
         "yearly_series_years_read": 21
       },
@@ -83,12 +121,12 @@
       "status": "pass",
       "rule": "Enough mapped public green space to compute who already has access.",
       "evidence": {
-        "public_green_polygons": 667,
-        "public_green_qualifying_polygons": 241,
-        "public_green_total_ha": 773.4,
-        "public_green_qualifying_ha": 692.5,
-        "forest_reserve_polygons": 105,
-        "open_green_polygons": 499
+        "public_green_polygons": 581,
+        "public_green_qualifying_polygons": 198,
+        "public_green_total_ha": 666.7,
+        "public_green_qualifying_ha": 596.9,
+        "forest_reserve_polygons": 101,
+        "open_green_polygons": 485
       },
       "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
     },

@@ -3,7 +3,7 @@
   "method": "one at a time, others at base, median-cost site of each type",
   "types": {
     "mini_forest": {
-      "site_id": "89608852c27ffff:mini_forest",
+      "site_id": "89608852e43ffff:mini_forest",
       "type": "mini_forest",
       "area_ha": 1.0,
       "base": {
@@ -215,12 +215,12 @@
       ]
     },
     "pocket_park": {
-      "site_id": "8960885191bffff:pocket_park",
+      "site_id": "896088525dbffff:pocket_park",
       "type": "pocket_park",
       "area_ha": 2.0,
       "base": {
         "cost_pv_inr": 13012633.90690118,
-        "inr_per_person_newly_served": 5461.454116539878
+        "inr_per_person_newly_served": 3750.8449863792434
       },
       "rows": [
         {
@@ -235,8 +235,8 @@
               "at_high": 19518950.86035177
             },
             "inr_per_person_newly_served": {
-              "at_low": 2730.727058269939,
-              "at_high": 8192.181174809817
+              "at_low": 1875.4224931896217,
+              "at_high": 5626.267479568865
             }
           },
           "max_relative_swing": 1.0000000000000002
@@ -250,14 +250,14 @@
           "effects": {
             "cost_pv_inr": {
               "at_low": 14542052.50246657,
-              "at_high": 11863423.913328467
+              "at_high": 11863423.91332847
             },
             "inr_per_person_newly_served": {
-              "at_low": 6103.357173555364,
-              "at_high": 4979.126119374152
+              "at_low": 4191.694403360785,
+              "at_high": 3419.589333332471
             }
           },
-          "max_relative_swing": 0.205848301604605
+          "max_relative_swing": 0.2058483016046047
         },
         {
           "parameter": "horizon_years = 5",
@@ -271,8 +271,8 @@
               "at_high": 7447459.172880182
             },
             "inr_per_person_newly_served": {
-              "at_low": 3125.7281845082825,
-              "at_high": 3125.7281845082825
+              "at_low": 2146.7033576535914,
+              "at_high": 2146.7033576535914
             }
           },
           "variant": true,
@@ -290,8 +290,8 @@
               "at_high": 17171256.210326057
             },
             "inr_per_person_newly_served": {
-              "at_low": 7206.8444088256765,
-              "at_high": 7206.8444088256765
+              "at_low": 4949.552928879155,
+              "at_high": 4949.552928879155
             }
           },
           "variant": true,
