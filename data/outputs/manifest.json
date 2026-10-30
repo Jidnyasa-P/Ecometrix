@@ -1,19 +1,28 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-10-30T06:55:06+00:00",
-  "git_sha": "2c8ea84733121a4648d7850e7b4ec05d4571a9b8",
+  "generated_at": "2026-10-30T14:11:09+00:00",
+  "git_sha": "bd25db16d3449d8d478ba4e0c9ea871332613eb7",
   "city": "Pune",
   "h3_resolution": 9,
   "pixel_m": 30,
   "boundary": {
-    "source": "Configured bounding box (FALLBACK, not an official boundary)",
+    "source": "PMC Electoral Wards 2025 (41 wards; OpenCity resource credited to Parisar)",
     "osm_ref": null,
-    "name": "Pune",
-    "area_km2": 911.2,
-    "fallback": true,
+    "name": "Pune Municipal Corporation",
+    "area_km2": 479.9,
+    "fallback": false,
+    "boundary_dataset": "pune-wards-info",
+    "boundary_dataset_url": "https://data.opencity.in/dataset/pune-wards-info",
+    "boundary_resource_id": "2badcc86-489c-4b7e-b7dd-a273ef01b798",
+    "boundary_resource_name": "PMC Electoral Wards 2025",
+    "boundary_resource_format": "KML",
+    "boundary_resource_credit": "Parisar",
+    "boundary_metadata_modified": "2026-10-22T13:13:19.055121",
+    "boundary_resource_modified": "2025-11-25T15:53:17.215325",
+    "boundary_ward_features": 41,
     "notes": []
   },
-  "n_cells": 9273,
+  "n_cells": 4877,
   "columns": [
     "h3",
     "lat",
@@ -33,6 +42,10 @@
     "lst_c",
     "lst_nobs",
     "ndvi",
+    "lst_latest_c",
+    "lst_latest_nobs",
+    "ndvi_latest",
+    "ndvi_latest_nobs",
     "pop",
     "pop_access",
     "pop_unserved_300m",
@@ -63,12 +76,12 @@
       "status": "ok",
       "detail": {
         "vintage": "queried 2026-10-30",
-        "public_green_polygons": 667,
-        "public_green_qualifying_polygons": 241,
-        "public_green_total_ha": 773.4,
-        "public_green_qualifying_ha": 692.5,
-        "forest_reserve_polygons": 105,
-        "open_green_polygons": 499
+        "public_green_polygons": 581,
+        "public_green_qualifying_polygons": 198,
+        "public_green_total_ha": 666.7,
+        "public_green_qualifying_ha": 596.9,
+        "forest_reserve_polygons": 101,
+        "open_green_polygons": 485
       }
     },
     "worldcover": {
@@ -95,7 +108,7 @@
       }
     },
     "sentinel": {
-      "title": "Vegetation index NDVI (Sentinel-2)",
+      "title": "Vegetation index NDVI (Sentinel-2 pre-monsoon baseline)",
       "evidence": "MEASURED",
       "license": "Copernicus Sentinel data, free and open",
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
@@ -104,6 +117,42 @@
         "vintage": "pre-monsoon 2024-03-04 to 2026-05-08",
         "scenes": 42,
         "clear_days": 41
+      }
+    },
+    "landsat_latest": {
+      "title": "Latest surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-04/2026-10-30",
+        "first_observation": "2026-05-08",
+        "last_observation": "2026-10-23",
+        "age_days": 7,
+        "scenes": 13,
+        "clear_days": 13,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 10.288,
+        "window_days": 180
+      }
+    },
+    "sentinel_latest": {
+      "title": "Latest greenness NDVI (Sentinel-2)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-04/2026-10-30",
+        "first_observation": "2026-05-08",
+        "last_observation": "2026-10-25",
+        "age_days": 5,
+        "scenes": 23,
+        "clear_days": 23,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 15.82,
+        "window_days": 180
       }
     },
     "population": {
@@ -115,7 +164,7 @@
       "detail": {
         "vintage": "2020",
         "read": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
-        "pixels": 58750
+        "pixels": 34529
       }
     },
     "popseries": {
