@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-10-30T06:55:06+00:00",
+  "checks": [
+    {
+      "id": "boundary",
+      "title": "City boundary",
+      "status": "warn",
+      "rule": "An official or OSM boundary polygon is obtained and passes sanity checks.",
+      "evidence": {
+        "source": "Configured bounding box (FALLBACK, not an official boundary)",
+        "area_km2": 911.2,
+        "osm_ref": null,
+        "h3_cells": 9273
+      },
+      "note": "Boundary lookup failed; a configured bounding box is used instead."
+    },
+    {
+      "id": "trees",
+      "title": "Tree census loads and is clean",
+      "status": "pass",
+      "rule": "At least 90% of rows have valid coordinates; the loaded count is reconciled with published figures.",
+      "evidence": {
+        "rows_loaded": 4009624,
+        "valid_coordinates_pct": 100.0,
+        "rows_inside_study_area": 4009623,
+        "parts_read": 17,
+        "published_claim": 4090000,
+        "listed_parts_total": 4009000,
+        "coordinate_detection": [
+          "combined column 'geom' (lon,lat)"
+        ]
+      },
+      "note": "The explainer quotes 4.09 million trees, but the listed parts add up to about 4.009 million. The loaded row count above is what the pipeline actually read."
+    },
+    {
+      "id": "satellite",
+      "title": "Satellite coverage (pre-monsoon)",
+      "status": "pass",
+      "rule": "At least 3 cloud-filtered scenes per year for 5 or more years, for Landsat 8/9 and Sentinel-2.",
+      "evidence": {
+        "landsat_scenes_per_year": {
+          "2019": 6,
+          "2020": 6,
+          "2021": 3,
+          "2022": 8,
+          "2023": 7,
+          "2024": 8,
+          "2025": 9,
+          "2026": 10
+        },
+        "sentinel2_scenes_per_year": {
+          "2019": 20,
+          "2020": 17,
+          "2021": 14,
+          "2022": 11,
+          "2023": 21,
+          "2024": 13,
+          "2025": 13,
+          "2026": 16
+        },
+        "years_ok_landsat": 8,
+        "years_ok_sentinel2": 8
+      },
+      "note": ""
+    },
+    {
+      "id": "population",
+      "title": "Gridded population over time",
+      "status": "pass",
+      "rule": "A yearly series over about two decades plus an official census anchor.",
+      "evidence": {
+        "baseline_dataset": "WorldPop constrained 2020 (100 m)",
+        "people_in_study_area": 6365486,
+        "pixels": 58750,
+        "read_method": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "yearly_series_years_read": 21
+      },
+      "note": "The yearly series is WorldPop's modelled product, not a census count. An official census anchor is still to be added; until then the forecast is labelled MODELLED."
+    },
+    {
+      "id": "parks",
+      "title": "Existing parks and open space",
+      "status": "pass",
+      "rule": "Enough mapped public green space to compute who already has access.",
+      "evidence": {
+        "public_green_polygons": 667,
+        "public_green_qualifying_polygons": 241,
+        "public_green_total_ha": 773.4,
+        "public_green_qualifying_ha": 692.5,
+        "forest_reserve_polygons": 105,
+        "open_green_polygons": 499
+      },
+      "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
+    },
+    {
+      "id": "costs",
+      "title": "Cost benchmarks",
+      "status": "manual",
+      "rule": "At least 3 usable cost sources for parks or tree planting.",
+      "evidence": {},
+      "note": "Cannot be automated. Person B collects these from municipal budgets, state rate schedules and published studies (Appendix A of the roadmap)."
+    }
+  ]
+}
