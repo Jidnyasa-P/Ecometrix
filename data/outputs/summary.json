@@ -1,0 +1,23 @@
+{
+  "n_cells": 9273,
+  "area_km2": 914.5,
+  "ndvi_median": 0.238,
+  "lst_c_median": 44.7,
+  "lst_c_p10": 40.9,
+  "lst_c_p90": 49.0,
+  "lst_p90_threshold_c": 49.0,
+  "pop_in_hottest_decile_cells": 138512,
+  "builtup_share_pct": 26.6,
+  "treecover_share_pct": 11.5,
+  "grass_share_pct": 12.6,
+  "water_share_pct": 1.8,
+  "pop_total": 6365486,
+  "pop_with_park_access": 1490679,
+  "pop_without_park_access": 4874807,
+  "pop_without_park_access_pct": 76.6,
+  "public_green_mapped_ha_in_study_area": 745.6,
+  "forest_reserve_mapped_ha_in_study_area": 11866.2,
+  "city": "Pune",
+  "h3_resolution": 9,
+  "access_rule": ">= 0.5 ha public green within 300 m (WHO)"
+}
