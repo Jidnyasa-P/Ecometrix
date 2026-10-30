@@ -2,7 +2,7 @@ import { render, screen, waitFor, fireEvent, within } from "@testing-library/rea
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import App from "../App";
 import { mockApi } from "./fixtures";
-import { t } from "../lib/i18n";
+import { setLanguage, t } from "../lib/i18n";
 
 vi.mock("../components/MapStage", () => ({
   default: (p: { cells: { h3: string }[]; onSelect?: (c: unknown) => void; marked?: string[] | null; highlight?: unknown }) => (
@@ -12,7 +12,11 @@ vi.mock("../components/MapStage", () => ({
   boundsOf: () => [[0, 0], [1, 1]]
 }));
 const go = (path: string) => window.history.pushState({}, "", path);
-beforeEach(() => { localStorage.clear(); document.documentElement.lang = "en"; });
+beforeEach(() => {
+  localStorage.clear();
+  setLanguage("en"); // Reset the module-level language store, not just localStorage.
+  document.documentElement.lang = "en";
+});
 
 describe("plan screen", () => {
   it("shows the plan with labels, the do-nothing baseline and the comparison with the simple list", async () => {
@@ -95,7 +99,7 @@ describe("citizen view", () => {
     await waitFor(() => expect(screen.getByText(/is proposed in this area/)).toBeTruthy());
     expect(screen.getByText(/Trees counted here: about 4 per hectare/)).toBeTruthy();
     expect(screen.getByText(/hotter than 67% of the city/)).toBeTruthy();         // cell a is hotter than 2 of 3 cells
-    expect(screen.getByText(t("en", "parkYes", { p: "10", dist: "300", area: "0.5" }))).toBeTruthy();
+    expect(screen.getByText(/About 10% of people here live within about 300 metres/)).toBeTruthy();
     expect(screen.getByText(/has not been set up/)).toBeTruthy();                // no feedback link configured: said, not faked
   });
   it("explains why a place has no site: no open land versus lower need", async () => {
@@ -108,12 +112,11 @@ describe("citizen view", () => {
     mockApi(); go("/city"); render(<App />);
     await waitFor(() => expect(screen.getByText(t("en", "title"))).toBeTruthy());
     expect(screen.queryByRole("note")).toBeNull();
-    const citizenLanguageSwitch = document.querySelector(".citizen .langswitch");
-    expect(citizenLanguageSwitch).toBeTruthy();
-    fireEvent.click(within(citizenLanguageSwitch as HTMLElement).getByRole("button", { name: "मराठी" }));
+    fireEvent.click(screen.getByRole("button", { name: "मराठी" }));
     await waitFor(() => expect(screen.getByText(t("mr", "title"))).toBeTruthy());
-    expect(screen.getByRole("note").textContent).toContain("Please treat the English as the reference");
-    expect(screen.getByRole("note").textContent).toContain(t("mr", "review"));
+    const notice = screen.getByRole("note");
+    expect(notice.textContent).toContain(t("mr", "translation_notice"));
+    expect(notice.textContent).toContain("इंग्रजी आवृत्ती प्रमाण मानावी.");
     expect(document.documentElement.lang).toBe("mr");
     expect(localStorage.getItem("ecometrix-lang")).toBe("mr");
   });
