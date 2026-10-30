@@ -268,3 +268,107 @@ def test_unserved_pairs_match_the_aggregate_and_identify_shared_pixels():
     assert 3 not in set(pi)                                        # the served pixel is never a catchment member
     e0, e1 = metrics.unserved_pairs(xy, people, np.full(4, 10.0), 300, cent, 300)
     assert e0.size == 0 and e1.size == 0
+
+
+def test_tree_census_uses_current_ckan_catalogue():
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"result": {"resources": [
+                {"id": "part-2", "name": "Tree Census - Part 2", "format": "CSV",
+                 "url": "https://newdata.opencity.in/part-2.csv", "position": 1},
+                {"id": "part-1", "name": "Tree Census - Part 1", "format": "CSV",
+                 "url": "https://newdata.opencity.in/part-1.csv", "position": 0},
+            ]}}
+
+    class Session:
+        def get(self, url, params, timeout):
+            self.url, self.params, self.timeout = url, params, timeout
+            return Response()
+
+    session = Session()
+    resources = tree_census.list_resources(CFG, session)
+    assert session.url == "https://newdata.opencity.in/api/3/action/package_show"
+    assert session.params["id"] == "f00d83b8-c70f-4fff-9ac7-9a6ab4255edf"
+    assert [resource["id"] for resource in resources] == ["part-1", "part-2"]
+
+
+def test_population_series_falls_back_to_arcgis_window_on_range_error(monkeypatch, grid):
+    cfg = dict(CFG)
+    cfg["population_series"] = {
+        "url_template": "https://data.worldpop.org/unsupported/{year}.tif",
+        "arcgis_export_url": "https://worldpop.arcgis.com/arcgis/rest/services/test/ImageServer/exportImage",
+        "pixel_size_deg": 1 / 1200,
+        "years": [2000],
+    }
+
+    def no_range_support(_url):
+        raise rasterio.errors.RasterioIOError("Range downloading not supported by this server!")
+
+    bbox = population._padded(grid)
+    west, south, east, north = bbox
+    px = (east - west) / 20
+    py = (north - south) / 20
+    values = np.full((20, 20), 2.0, dtype="float32")
+    transform = from_origin(west, north, px, py)
+    calls = []
+
+    def arcgis_window(sc, used_grid, year, sess=None):
+        calls.append((sc["arcgis_export_url"], year, sess))
+        return values, transform
+
+    monkeypatch.setattr(population, "_open_remote_or_local", no_range_support)
+    monkeypatch.setattr(population, "_read_arcgis_series_window", arcgis_window)
+    marker_session = object()
+    result = population.load_series(cfg, grid, sess=marker_session)
+
+    assert list(result["per_cell_by_year"]) == [2000]
+    assert result["missing"] == {}
+    assert result["per_cell_by_year"][2000].sum() > 0
+    assert calls == [(cfg["population_series"]["arcgis_export_url"], 2000, marker_session)]
+
+
+def test_arcgis_series_export_requests_the_selected_year(monkeypatch, grid):
+    cfg = dict(CFG["population_series"])
+    cfg["arcgis_export_url"] = "https://worldpop.arcgis.com/arcgis/rest/services/test/ImageServer/exportImage"
+    cfg["pixel_size_deg"] = 1 / 1200
+    bbox = population._padded(grid)
+    west, south, east, north = bbox
+    px = (east - west) / 20
+    py = (north - south) / 20
+    with rasterio.io.MemoryFile() as memfile:
+        with memfile.open(driver="GTiff", height=20, width=20, count=1, dtype="float32",
+                          crs="EPSG:4326", transform=from_origin(west, north, px, py)) as dst:
+            dst.write(np.full((20, 20), 3.0, dtype="float32"), 1)
+        raster_bytes = memfile.read()
+
+    class Response:
+        headers = {"Content-Type": "image/tiff"}
+        content = raster_bytes
+        text = ""
+
+        def raise_for_status(self):
+            return None
+
+        def close(self):
+            return None
+
+        def json(self):
+            return {}
+
+    class Client:
+        def get(self, url, params, timeout):
+            self.url, self.params, self.timeout = url, params, timeout
+            return Response()
+
+    client = Client()
+    arr, transform = population._read_arcgis_series_window(cfg, grid, 2000, sess=client)
+
+    assert arr.shape == (20, 20)
+    assert np.ma.filled(arr, 0).mean() == pytest.approx(3.0)
+    assert client.url == cfg["arcgis_export_url"]
+    assert client.params["time"] == "946684800000"
+    assert client.params["bboxSR"] == client.params["imageSR"] == 4326
+    assert client.params["format"] == "tiff" and client.params["f"] == "image"

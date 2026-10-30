@@ -7,8 +7,11 @@ These two products are different WorldPop models and are never mixed in one calc
 from __future__ import annotations
 import os
 import tempfile
+from datetime import datetime, timezone
 import numpy as np
 import rasterio
+import requests
+from rasterio.io import MemoryFile
 from rasterio.windows import from_bounds
 from .grid import StudyGrid, latlng_to_cells
 
@@ -54,19 +57,82 @@ def _open_remote_or_local(url: str):
     return rasterio.open(url)
 
 
-def load_series(cfg: dict, grid: StudyGrid, years=None) -> dict:
-    """Yearly population per cell. Windowed reads only: each yearly file is about 1.7 GB, so a year that
-    cannot be read is skipped and reported in `missing`, never filled in."""
+def _read_arcgis_series_window(sc: dict, grid: StudyGrid, year: int, sess=None):
+    """Export one native-resolution year from WorldPop's cloud-optimised ImageServer.
+
+    The public data.worldpop.org GeoTIFF host may reject HTTP byte-range requests, which
+    prevents GDAL's /vsicurl reader from opening the large national raster. The ImageServer
+    serves the same WorldPop annual 100 m estimates and can export just the study-area window.
+    """
+    service_url = sc.get("arcgis_export_url")
+    if not service_url:
+        raise RuntimeError("no ArcGIS ImageServer fallback is configured")
+
+    bbox = _padded(grid)
+    west, south, east, north = bbox
+    pixel_size = float(sc.get("pixel_size_deg", 1.0 / 1200.0))
+    if pixel_size <= 0:
+        raise ValueError("population_series.pixel_size_deg must be positive")
+    width = max(1, int(round((east - west) / pixel_size)))
+    height = max(1, int(round((north - south) / pixel_size)))
+
+    # ArcGIS ImageServer time values are milliseconds since the Unix epoch.
+    instant = int(datetime(int(year), 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
+    params = {
+        "bbox": f"{west},{south},{east},{north}",
+        "bboxSR": 4326,
+        "imageSR": 4326,
+        "size": f"{width},{height}",
+        "time": str(instant),
+        "format": "tiff",
+        "pixelType": "F32",
+        "interpolation": "RSP_NearestNeighbor",
+        "f": "image",
+    }
+    client = sess or requests
+    response = client.get(service_url, params=params, timeout=(20, 180))
+    try:
+        response.raise_for_status()
+        content_type = response.headers.get("Content-Type", "").lower()
+        if "json" in content_type or not response.content:
+            try:
+                detail = response.json()
+            except Exception:
+                detail = response.text[:500]
+            raise RuntimeError(f"WorldPop ImageServer did not return a raster: {detail}")
+        with MemoryFile(response.content) as memfile:
+            with memfile.open() as src:
+                return _read_window(src, bbox)
+    finally:
+        response.close()
+
+
+def load_series(cfg: dict, grid: StudyGrid, years=None, sess=None) -> dict:
+    """Yearly population per cell, preferring windowed GeoTIFF reads and falling back to
+    study-area exports when the source server does not support HTTP byte ranges. A year
+    that cannot be read from either source is reported in `missing`, never filled in."""
     sc = cfg["population_series"]
     out: dict[int, np.ndarray] = {}
     missing: dict[int, str] = {}
     for y in years or sc["years"]:
+        year = int(y)
+        primary_error = None
         try:
-            with _open_remote_or_local(sc["url_template"].format(year=y)) as src:
+            with _open_remote_or_local(sc["url_template"].format(year=year)) as src:
                 arr, tr = _read_window(src, _padded(grid))
-            out[int(y)] = window_pixels(arr, tr, grid)["per_cell"]
         except Exception as ex:
-            missing[int(y)] = f"{type(ex).__name__}: {ex}"
+            primary_error = ex
+            source_url = sc["url_template"].format(year=year)
+            if not source_url.startswith(("http://", "https://")):
+                missing[year] = f"{type(primary_error).__name__}: {primary_error}"
+                continue
+            try:
+                arr, tr = _read_arcgis_series_window(sc, grid, year, sess=sess)
+            except Exception as fallback_error:
+                missing[year] = (f"{type(primary_error).__name__}: {primary_error}; "
+                                 f"ArcGIS fallback: {type(fallback_error).__name__}: {fallback_error}")
+                continue
+        out[year] = window_pixels(arr, tr, grid)["per_cell"]
     return {"per_cell_by_year": out, "missing": missing}
 
 

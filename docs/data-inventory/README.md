@@ -2,7 +2,7 @@
 
 | Dataset | Used for | Access | Licence | Verified by |
 |---|---|---|---|---|
-| Pune Tree Census 2019 (17 CSV parts) | tree density | CKAN API at data.opencity.in, package `d8bab2a0-df7c-420f-9445-6d9238cf683d` | Public domain | Dataset page checked. CSV column names are NOT known in advance: the pipeline detects them and records what it found |
+| Pune Tree Census 2019 (17 CSV parts) | tree density | CKAN API at newdata.opencity.in, package `f00d83b8-c70f-4fff-9ac7-9a6ab4255edf` | Public domain | Dataset page and current resource metadata checked. CSV column names are NOT known in advance: the pipeline detects them and records what it found |
 | OpenStreetMap parks, forests | park access, mapped green | Overpass API | ODbL | Standard API; completeness for Pune unknown, reported in the audit |
 | Landsat 8/9 Collection 2 Level-2 | surface temperature | Microsoft Planetary Computer STAC (`landsat-c2-l2`), free anonymous access | Public domain | Catalog documented; scenes counted by the audit at build time |
 | Sentinel-2 L2A | NDVI | Planetary Computer (`sentinel-2-l2a`) | Copernicus, free and open | As above |
@@ -18,7 +18,7 @@ Known data-quality note: the OpenCity explainer quotes 4.09 million trees, but t
 
 | Dataset | Used for | Access | Licence | Verified by |
 |---|---|---|---|---|
-| WorldPop unconstrained yearly 2000 to 2020, India, 100 m (`ind_ppp_{year}.tif`, about 1.7 GB each) | demand forecast history | data.worldpop.org, windowed HTTP reads (years that cannot be read are reported, not filled) | CC BY 4.0 | Directory listing seen for 2019 and 2020; other years are read at build time and missing ones reported |
+| WorldPop unconstrained yearly 2000 to 2020, 100 m | demand forecast history | data.worldpop.org windowed GeoTIFF read; falls back to a study-area TIFF export from WorldPop's time-aware ArcGIS ImageServer if byte-range reads are unavailable | CC BY 4.0 | ImageServer exposes annual 2000–2020 slices; years that fail on both sources are reported, not filled |
 | Cost and carbon sources | assumptions register | see `config/assumptions.yaml` | n/a | Searched and recorded with citations; no Pune rate schedule found |
 
 ## Added in milestones M6 to M8

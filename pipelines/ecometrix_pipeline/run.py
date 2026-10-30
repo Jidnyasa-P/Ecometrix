@@ -159,7 +159,7 @@ def main(argv=None):
     run_step("population", _pop)
 
     def _popseries():
-        r = population.load_series(cfg, grid)
+        r = population.load_series(cfg, grid, sess=sess)
         if len(r["per_cell_by_year"]) < 5:
             raise RuntimeError(f"only {len(r['per_cell_by_year'])} yearly rasters could be read; first errors: {list(r['missing'].items())[:2]}")
         ps = pd.DataFrame({"h3": grid.hex_ids()})
