@@ -9,7 +9,7 @@ import { fmtDate, fmtInr, fmtInt, fmtNum, fmtPct } from "../lib/format";
 
 export default function Report() {
   const d = useData();
-  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled === true);
   const [q] = useSearchParams();
   const [assump, setAssump] = useState<AssumptionRow[]>([]);
   useEffect(() => {

@@ -11,4 +11,6 @@ Replace `pune` with `london`, `new-york` or `athens` to build a different config
 
 Core modules are heat model, greenness targets, forecast, need score and candidate sites. Financial sensitivity and exact portfolio optimisation run only when that city's assumptions pack has a validated finance model enabled. In this archive that is Pune only. Other city packs deliberately disable financial cost and carbon estimates rather than reusing INR-based or geographically inappropriate assumptions.
 
+If yearly population history is absent, the forecast is recorded as failed and its previous output is removed; the heat, need-score and candidate-site modules can still produce a partial diagnostic run without the growth component. The model command exits successfully when those core modules succeed. This does not make the city release-ready: the publication quality gate still requires a valid forecast and all other required data, model and audit checks.
+
 Models are trained and validated per city. Do not transfer Pune model weights, validation metrics or conclusions to London, New York or Athens. Complete the city-specific audit and release quality gate before presenting results.

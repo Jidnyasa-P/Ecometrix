@@ -25,7 +25,7 @@ const CANNOT = [
 
 export default function Evaluation() {
   const d = useData();
-  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled === true);
   const [mr, setMr] = useState<ModelReport | null>(null);
   const [fc, setFc] = useState<Forecast | null>(null);
   const [sv, setSv] = useState<Sensitivity | null>(null);

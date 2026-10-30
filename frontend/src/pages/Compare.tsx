@@ -29,7 +29,7 @@ const METRICS: { key: string; label: string; badge: "ASSUMED" | "MODELLED"; get:
 
 export default function Compare() {
   const d = useData();
-  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled === true);
   const [picks, setPicks] = useState<Pick[] | null>(null);
 
   const P = pf.status === "ready" ? pf.data : null;

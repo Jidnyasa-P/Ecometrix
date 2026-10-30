@@ -21,7 +21,7 @@ export default function Plan() {
   const [lang] = useLanguage();
   const [theme] = useTheme();
   const vp = useViewport();
-  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled === true);
   const [preset, setPreset] = useState<string | null>(null);
   const [bIdx, setBIdx] = useState<number | null>(null);
   const [eq, setEq] = useState(0);

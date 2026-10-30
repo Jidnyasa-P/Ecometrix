@@ -73,10 +73,15 @@ def main(argv=None) -> int:
 
     fc_cells, growth_col = None, None
     ps_path = out / "popseries.parquet"
+    forecast_path = out / "forecast.json"
+    # Invalidate the previous forecast before inspecting current inputs. Otherwise
+    # a failed/missing population-series build could leave yesterday's forecast
+    # visible through the API beside a manifest that says forecast=failed.
+    forecast_path.unlink(missing_ok=True)
     if ps_path.exists():
         fres = step("forecast", lambda: forecast.run(pd.read_parquet(ps_path), cfg["forecast"]["train_until"], cfg["forecast"]["horizons"]))
         if fres is not None and fres.get("status") == "ok":
-            _dump(out / "forecast.json", fres)
+            _dump(forecast_path, fres)
             fc_cells, growth_col = fres["_cells"], f"pop_growth_{max(cfg['forecast']['horizons'])}"
         elif fres is not None:
             status["forecast"] = {"status": "failed", "reason": fres.get("reason", "unavailable")}
@@ -146,7 +151,13 @@ def main(argv=None) -> int:
     _dump(out / "models_manifest.json", {"city": cfg["city"], "city_slug": cfg.get("city_slug"),
                                          "currency": cfg.get("currency"), "modules": status})
     print({k: v["status"] for k, v in status.items()})
-    return 0 if all(v["status"] in ("ok", "skipped") for k, v in status.items() if k in ("heat_model", "greenness_targets", "forecast", "need_score", "sites")) else 1
+    # Forecast is an optional analytical layer: when yearly population history is
+    # absent, the need score and candidate-site modules still run without its growth
+    # component. Keep the diagnostic in models_manifest.json, but do not fail this
+    # partial model run. The publication quality gate separately requires a valid
+    # forecast before a city can be marked as a release-ready pilot.
+    core_modules = ("heat_model", "greenness_targets", "need_score", "sites")
+    return 0 if all(status.get(k, {}).get("status") in ("ok", "skipped") for k in core_modules) else 1
 
 
 if __name__ == "__main__":

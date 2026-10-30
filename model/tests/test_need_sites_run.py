@@ -105,4 +105,6 @@ def test_run_models_end_to_end_records_missing_pieces(tmp_path):
     assert run_models.main([str(tmp_path)]) == 0
     man2 = json.loads((tmp_path / "models_manifest.json").read_text())["modules"]
     assert man2["forecast"]["status"] == "failed" and man2["sites"]["status"] == "ok"
+    # A missing current input must not leave the previous run's forecast available.
+    assert not (tmp_path / "forecast.json").exists()
     assert "need_growth" not in pd.read_parquet(tmp_path / "analysis.parquet").columns

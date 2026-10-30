@@ -41,7 +41,7 @@ export function Nav() {
         <HexMark /> <span>EcoMetrix</span> <em className="nav__tag">{cityMeta?.name ?? "City platform"}</em>
       </Link>
       <nav className="nav__links" aria-label="Main">
-        {LINKS.map(l => <NavLink key={l.to} to={cityPath(l.to, loc.search)} end={l.end} className={({ isActive }) => `pill ${isActive ? "is-active" : ""}`}>{t(lang, l.key)}</NavLink>)}
+        {LINKS.map(l => <NavLink key={l.to} to={cityPath(l.to, loc.search)} end={"end" in l ? l.end : false} className={({ isActive }) => `pill ${isActive ? "is-active" : ""}`}>{t(lang, l.key)}</NavLink>)}
         <div className="more">
           <button className={`pill ${MORE.some(m => loc.pathname.startsWith(m.to)) ? "is-active" : ""}`} aria-expanded={more} aria-haspopup="true" onClick={() => setMore(m => !m)}>{t(lang, "nav_more")} ▾</button>
           {more && <div className="more__menu">{MORE.map(l => <NavLink key={l.to} to={cityPath(l.to, loc.search)} className={({ isActive }) => `sheetlink ${isActive ? "is-active" : ""}`}>{t(lang, l.key)}</NavLink>)}</div>}
@@ -65,7 +65,7 @@ export function Nav() {
       </button>
       <button className="pill pill--menu" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-controls="mobile-links">{t(lang, "nav_menu")}</button>
       <nav id="mobile-links" className="nav__sheet" aria-label="Mobile">
-        {[...LINKS, ...MORE].map(l => <NavLink key={l.to} to={cityPath(l.to, loc.search)} end={(l as { end?: boolean }).end} className={({ isActive }) => `sheetlink ${isActive ? "is-active" : ""}`}>{t(lang, l.key)}</NavLink>)}
+        {[...LINKS, ...MORE].map(l => <NavLink key={l.to} to={cityPath(l.to, loc.search)} end={"end" in l ? l.end : false} className={({ isActive }) => `sheetlink ${isActive ? "is-active" : ""}`}>{t(lang, l.key)}</NavLink>)}
         <div className="sheet-languages" role="group" aria-label={t(lang, "nav_language")}>
           {(Object.keys(LANG_NAME) as Lang[]).map(code => <button type="button" key={code} className={`chip ${lang === code ? "is-on" : ""}`} onClick={() => setLang(code)} aria-pressed={lang === code}>{LANG_NAME[code]}</button>)}
         </div>

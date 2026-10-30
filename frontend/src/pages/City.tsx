@@ -17,7 +17,7 @@ export default function City() {
   const d = useData();
   const [theme] = useTheme();
   const vp = useViewport();
-  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled === true);
   const [lang, setLang] = useLanguage();
   const [sel, setSel] = useState<Cell | null>(null);
   const [candidateHexes, setCandidates] = useState<Set<string> | null>(null);
