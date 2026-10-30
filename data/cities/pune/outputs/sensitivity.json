@@ -1,0 +1,303 @@
+{
+  "status": "ok",
+  "method": "one at a time, others at base, median-cost site of each type",
+  "types": {
+    "mini_forest": {
+      "site_id": "89608852e37ffff:mini_forest",
+      "type": "mini_forest",
+      "area_ha": 1.0,
+      "base": {
+        "cost_pv_inr": 8457282.185965596,
+        "carbon_t_co2e": 580.1599408000001,
+        "inr_per_t_co2e": 14577.501118577049
+      },
+      "rows": [
+        {
+          "parameter": "mini_forest.carbon_scale",
+          "low": 0.5,
+          "base": 0.8,
+          "high": 1.0,
+          "unit": "multiplier on the measured curve",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8457282.185965596,
+              "at_high": 8457282.185965596
+            },
+            "carbon_t_co2e": {
+              "at_low": 362.59996299999995,
+              "at_high": 725.1999259999999
+            },
+            "inr_per_t_co2e": {
+              "at_low": 23324.001789723286,
+              "at_high": 11662.000894861643
+            }
+          },
+          "max_relative_swing": 0.8000000000000003
+        },
+        {
+          "parameter": "mini_forest.capex_inr_per_m2",
+          "low": 300,
+          "base": 550,
+          "high": 800,
+          "unit": "INR per m2",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 5957282.185965596,
+              "at_high": 10957282.185965596
+            },
+            "carbon_t_co2e": {
+              "at_low": 580.1599408000001,
+              "at_high": 580.1599408000001
+            },
+            "inr_per_t_co2e": {
+              "at_low": 10268.344583996819,
+              "at_high": 18886.65765315728
+            }
+          },
+          "max_relative_swing": 0.5912064762716834
+        },
+        {
+          "parameter": "mini_forest.carbon_after_year5_factor",
+          "low": 0.5,
+          "base": 0.75,
+          "high": 1.0,
+          "unit": "multiplier on the year-5 rate",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8457282.185965596,
+              "at_high": 8457282.185965596
+            },
+            "carbon_t_co2e": {
+              "at_low": 458.85083800000007,
+              "at_high": 701.4690436
+            },
+            "inr_per_t_co2e": {
+              "at_low": 18431.44108187418,
+              "at_high": 12056.52945504493
+            }
+          },
+          "max_relative_swing": 0.43731168840078427
+        },
+        {
+          "parameter": "mini_forest.maintenance_inr_per_m2_yr",
+          "low": 44.2,
+          "base": 88.4,
+          "high": 132.6,
+          "unit": "INR per m2 per year",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 7275810.904303553,
+              "at_high": 9638753.467627639
+            },
+            "carbon_t_co2e": {
+              "at_low": 580.1599408000001,
+              "at_high": 580.1599408000001
+            },
+            "inr_per_t_co2e": {
+              "at_low": 12541.0432410599,
+              "at_high": 16613.9589960942
+            }
+          },
+          "max_relative_swing": 0.27939738929904245
+        },
+        {
+          "parameter": "mini_forest.sapling_survival",
+          "low": 0.5,
+          "base": 0.79,
+          "high": 0.92,
+          "unit": "fraction",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 9278036.902946727,
+              "at_high": 8089357.657663709
+            },
+            "carbon_t_co2e": {
+              "at_low": 580.1599408000001,
+              "at_high": 580.1599408000001
+            },
+            "inr_per_t_co2e": {
+              "at_low": 15992.205339363765,
+              "at_high": 13943.323364431279
+            }
+          },
+          "max_relative_swing": 0.14055097360421154
+        },
+        {
+          "parameter": "mini_forest.sapling_cost_inr",
+          "low": 80,
+          "base": 100,
+          "high": 140,
+          "unit": "INR per sapling",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8338414.261437293,
+              "at_high": 8695018.0350222
+            },
+            "carbon_t_co2e": {
+              "at_low": 580.1599408000001,
+              "at_high": 580.1599408000001
+            },
+            "inr_per_t_co2e": {
+              "at_low": 14372.612921083799,
+              "at_high": 14987.277513563546
+            }
+          },
+          "max_relative_swing": 0.0421652920812635
+        },
+        {
+          "parameter": "common.discount_rate",
+          "low": 0.0372,
+          "base": 0.06,
+          "high": 0.08,
+          "unit": "fraction per year",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8573680.154382879,
+              "at_high": 8361487.070060458
+            },
+            "carbon_t_co2e": {
+              "at_low": 580.1599408000001,
+              "at_high": 580.1599408000001
+            },
+            "inr_per_t_co2e": {
+              "at_low": 14778.13194506393,
+              "at_high": 14412.382658703651
+            }
+          },
+          "max_relative_swing": 0.025089985134295785
+        },
+        {
+          "parameter": "horizon_years = 5",
+          "low": null,
+          "base": null,
+          "high": null,
+          "unit": "years",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8457282.185965596,
+              "at_high": 8457282.185965596
+            },
+            "carbon_t_co2e": {
+              "at_low": 216.23263240000003,
+              "at_high": 216.23263240000003
+            },
+            "inr_per_t_co2e": {
+              "at_low": 39111.96054035364,
+              "at_high": 39111.96054035364
+            }
+          },
+          "variant": true,
+          "max_relative_swing": 0.0
+        },
+        {
+          "parameter": "horizon_years = 15",
+          "low": null,
+          "base": null,
+          "high": null,
+          "unit": "years",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 8457282.185965596,
+              "at_high": 8457282.185965596
+            },
+            "carbon_t_co2e": {
+              "at_low": 944.0872492000002,
+              "at_high": 944.0872492000002
+            },
+            "inr_per_t_co2e": {
+              "at_low": 8958.15740879047,
+              "at_high": 8958.15740879047
+            }
+          },
+          "variant": true,
+          "max_relative_swing": 0.0
+        }
+      ]
+    },
+    "pocket_park": {
+      "site_id": "89608852633ffff:pocket_park",
+      "type": "pocket_park",
+      "area_ha": 2.0,
+      "base": {
+        "cost_pv_inr": 13012633.90690118,
+        "inr_per_person_newly_served": 6763.694246208283
+      },
+      "rows": [
+        {
+          "parameter": "pocket_park.annual_all_in_cost_inr_per_m2",
+          "low": 44.2,
+          "base": 88.4,
+          "high": 132.6,
+          "unit": "INR per m2 per year",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 6506316.95345059,
+              "at_high": 19518950.86035177
+            },
+            "inr_per_person_newly_served": {
+              "at_low": 3381.8471231041417,
+              "at_high": 10145.541369312425
+            }
+          },
+          "max_relative_swing": 1.0
+        },
+        {
+          "parameter": "common.discount_rate",
+          "low": 0.0372,
+          "base": 0.06,
+          "high": 0.08,
+          "unit": "fraction per year",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 14542052.50246657,
+              "at_high": 11863423.913328467
+            },
+            "inr_per_person_newly_served": {
+              "at_low": 7558.653962195023,
+              "at_high": 6166.358989040209
+            }
+          },
+          "max_relative_swing": 0.20584830160460502
+        },
+        {
+          "parameter": "horizon_years = 5",
+          "low": null,
+          "base": null,
+          "high": null,
+          "unit": "years",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 7447459.172880182,
+              "at_high": 7447459.172880182
+            },
+            "inr_per_person_newly_served": {
+              "at_low": 3871.0331141926686,
+              "at_high": 3871.0331141926686
+            }
+          },
+          "variant": true,
+          "max_relative_swing": 0.0
+        },
+        {
+          "parameter": "horizon_years = 15",
+          "low": null,
+          "base": null,
+          "high": null,
+          "unit": "years",
+          "effects": {
+            "cost_pv_inr": {
+              "at_low": 17171256.210326057,
+              "at_high": 17171256.210326057
+            },
+            "inr_per_person_newly_served": {
+              "at_low": 8925.258918438933,
+              "at_high": 8925.258918438933
+            }
+          },
+          "variant": true,
+          "max_relative_swing": 0.0
+        }
+      ]
+    }
+  }
+}

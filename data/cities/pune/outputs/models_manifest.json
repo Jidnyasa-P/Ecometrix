@@ -1,0 +1,34 @@
+{
+  "city": "Pune",
+  "city_slug": "pune",
+  "currency": "INR",
+  "modules": {
+    "heat_model": {
+      "status": "ok"
+    },
+    "greenness_targets": {
+      "status": "ok"
+    },
+    "forecast": {
+      "status": "ok"
+    },
+    "need_score": {
+      "status": "ok"
+    },
+    "sites": {
+      "status": "ok",
+      "count": 6624,
+      "by_type": {
+        "mini_forest": 3398,
+        "pocket_park": 3226
+      }
+    },
+    "sensitivity": {
+      "status": "ok"
+    },
+    "portfolio": {
+      "status": "ok",
+      "solutions": 48
+    }
+  }
+}
