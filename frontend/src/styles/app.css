@@ -371,6 +371,6 @@ h1, h2, h3, p { margin: 0; }
 .language-picker { display: inline-flex; align-items: center; min-width: 0; }
 .language-picker__select { min-width: 88px; max-width: 96px; padding-left: 12px; padding-right: 22px; }
 .translation-banner { position: fixed; z-index: 49; top: calc(14px + var(--nav-h) + 8px); left: 50%; transform: translateX(-50%); width: min(1180px, 100% - 24px); padding: 9px 16px; border: 1px solid var(--warn); border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); font-size: 0.875rem; line-height: 1.4; }
-@media (max-width: 899px) { .language-picker__select { min-width: 84px; max-width: 92px; } .translation-banner { top: calc(14px + var(--nav-h) + 6px); font-size: 0.78rem; padding: 7px 10px; } }
+@media (max-width: 899px) { .language-picker__select { min-width: 84px; max-width: 92px; } .translation-banner { top: calc(14px + var(--nav-h) + 6px); font-size: 0.8125rem; padding: 7px 10px; } }
 
 @media (max-width: 899px) { .sheet-languages { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); margin-top: 4px; } .sheet-languages .chip { min-height: 38px; padding: 0 14px; } }

@@ -59,7 +59,7 @@ export function Nav() {
           {(Object.keys(LANG_NAME) as Lang[]).map(code => <option key={code} value={code}>{LANG_NAME[code]}</option>)}
         </select>
       </label>
-      <button className="pill pill--tool" onClick={toggle} aria-label={`${t(lang, "nav_light")} / ${t(lang, "nav_dark")}`}>
+      <button className="pill pill--tool" onClick={toggle} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}>
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8 8 0 0 1 9.500 4 8.500 8.500 0 1 0 20 14.500z" fill={theme === "dark" ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>
         {theme === "dark" ? t(lang, "nav_light") : t(lang, "nav_dark")}
       </button>
