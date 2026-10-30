@@ -10,7 +10,10 @@ export interface LayerStatus {
 }
 export interface Manifest {
   pipeline_version: string; generated_at: string; git_sha: string | null; city: string; h3_resolution: number; pixel_m: number;
-  boundary: { source: string; area_km2: number; fallback: boolean; osm_ref?: string | null; name?: string; notes?: string[] };
+  boundary: { source: string; area_km2: number; fallback: boolean; osm_ref?: string | null; name?: string; notes?: string[];
+    boundary_dataset?: string; boundary_dataset_url?: string; boundary_resource_id?: string; boundary_resource_name?: string;
+    boundary_resource_credit?: string; boundary_metadata_modified?: string; boundary_resource_modified?: string;
+    boundary_ward_features?: number };
   n_cells: number; columns: string[]; layers: Record<string, LayerStatus>;
 }
 export interface Meta {

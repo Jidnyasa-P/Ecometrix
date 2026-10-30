@@ -6,7 +6,8 @@ import { useData } from "../lib/data";
 
 const LIMITS = [
   ["Surface temperature is not air temperature.", "Landsat sees the ground and rooftops at a mid-morning pass. It shows where heat builds, not what a person feels at 3 pm."],
-  ["Population is modelled.", "WorldPop distributes census totals over the map using land features. It is a good guide to where people are, not a head-count."],
+  ["Population is modelled.", "WorldPop distributes census totals over the map using land features. The current baseline is the 2020 constrained product, while the yearly history ends in 2020. It is a guide to where people are, not a current head-count."],
+  ["WorldCover is a historical reference.", "The ESA WorldCover product used here has 2020 and 2021 editions. It is a static land-cover classification, not a live or annual current-year layer. The loaded edition is recorded in the data audit."],
   ["Parks come from OpenStreetMap.", "Volunteers map parks. Some may be missing or mis-tagged, which can overstate the gap in access. Private and gated spaces tagged as such are excluded."],
   ["Access uses straight-line distance.", "The WHO recommendation is stated as linear distance. Walking routes (barriers, roads, rivers) will change the answer and are planned for later."],
   ["No land ownership data.", "A hexagon with little green is not proof that land is available to plant. Every site needs field verification."],
@@ -15,7 +16,8 @@ const LIMITS = [
   ["The forecast projects a modelled series.", "WorldPop's yearly history is itself a model, and the uncertainty band is the range of errors seen when testing on past years, not a statistical interval. Policy changes are not modelled."],
   ["Costs and carbon are sourced ranges, not Pune rate schedules.", "Mini-forest costs come from Delhi-region quotes and press estimates; park costs from PMC's average garden spending. Carbon comes from three measured South Indian forests; no pocket-park carbon is estimated. Every value and its source is on this page below."],
   ["Heat response is an association.", "The heat model learns how surface temperature varies with greenness across Pune today. It does not prove that planting a given site will cool it by that amount, and cooling appears as the planting matures."],
-  ["Dry-season greenness.", "Pre-monsoon NDVI is low for grass and crops by design. It is chosen so that greenness and heat are measured in the same season."]
+  ["Dry-season greenness.", "Pre-monsoon NDVI is low for grass and crops by design. It is chosen so that greenness and heat are measured in the same season. The separate latest NDVI layer is not used to retrain the heat model."],
+  ["Latest satellite layers are near-real-time, not live.", "Landsat surface temperature and Sentinel-2 NDVI are queried from the public satellite catalogue over a rolling 180-day window during each daily data build. In Explore, select the 'Latest observations' group to view these separate rolling composites. The audit shows the newest acquisition date, age and percentage of study-area cells with valid pixels. Cloud cover, revisit schedules and catalogue publication delays can leave gaps. Historical tree census, population and WorldCover layers retain their original vintage and are not presented as live data."]
 ];
 
 const NEXT = [

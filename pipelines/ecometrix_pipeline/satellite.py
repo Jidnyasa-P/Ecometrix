@@ -1,13 +1,14 @@
-"""Satellite layers from the Microsoft Planetary Computer STAC API (free, anonymous signed access).
+"""Satellite layers from STAC catalogues.
 
-  ESA WorldCover (10 m)   land-cover shares per cell
-  Landsat 8/9 C2 L2       land-surface temperature (LST), pre-monsoon median
-  Sentinel-2 L2A          NDVI, pre-monsoon median
-
-Landsat and Sentinel-2 are cloud-masked, composited by median over several pre-monsoon seasons.
-LST is a mid-morning snapshot of SURFACE temperature, not air temperature.
+The stable model inputs remain multi-year pre-monsoon composites for fair seasonal
+comparison. Separate rolling-window Landsat LST and Sentinel-2 NDVI layers are queried
+every build to expose the latest published observations in the dashboard. These are
+near-real-time observations, not a live sensor feed. LST is surface temperature, not air
+or human-exposure temperature.
 """
 from __future__ import annotations
+
+from datetime import date, datetime, timedelta, timezone
 import numpy as np
 from .grid import StudyGrid
 
@@ -30,18 +31,39 @@ def _season_ranges(cfg: dict, years=None):
     return out
 
 
+def latest_ranges(cfg: dict, as_of: date | None = None) -> list[str]:
+    """Inclusive rolling window ending today (UTC), so each scheduled build checks new data."""
+    end = as_of or datetime.now(timezone.utc).date()
+    days = int(cfg["satellite"].get("latest_window_days", 180))
+    if days < 1:
+        raise ValueError("satellite.latest_window_days must be at least 1")
+    start = end - timedelta(days=days - 1)
+    return [f"{start.isoformat()}/{end.isoformat()}"]
+
+
 def search_items(cat, collection: str, bbox, ranges, extra_query=None) -> list:
     seen, items = set(), []
     for rng in ranges:
         s = cat.search(collections=[collection], bbox=list(bbox), datetime=rng, query=extra_query or {})
         for it in s.items():
             if it.id not in seen:
-                seen.add(it.id); items.append(it)
+                seen.add(it.id)
+                items.append(it)
+    # STAC item datetimes can be a mix of naive and timezone-aware values. Search
+    # results are already constrained by the requested interval; retaining their
+    # provider order avoids unsafe datetime comparisons and preserves pagination order.
     return items
 
 
+def _observation_dates(ds) -> tuple[list[str], str, str]:
+    dates = sorted({str(t)[:10] for t in ds["time"].values})
+    if not dates:
+        raise RuntimeError("STAC items were returned but the raster has no acquisition dates")
+    return dates, dates[0], dates[-1]
+
+
 def scene_counts(cfg: dict, grid: StudyGrid, cat=None) -> dict:
-    """Usable (cloud-filtered) pre-monsoon scene counts per year: the audit's satellite-coverage check."""
+    """Usable (cloud-filtered) pre-monsoon scene counts per year: the audit's coverage check."""
     cat = cat or open_catalog(cfg)
     cc = {"eo:cloud_cover": {"lt": cfg["satellite"]["cloud_cover_max"]}}
     out = {"landsat": {}, "sentinel2": {}}
@@ -55,6 +77,7 @@ def scene_counts(cfg: dict, grid: StudyGrid, cat=None) -> dict:
 
 
 def worldcover(cfg: dict, grid: StudyGrid, cat=None) -> dict:
+    """Static ESA WorldCover reference layer (only 2020 and 2021 editions exist)."""
     import odc.stac
     cat = cat or open_catalog(cfg)
     items = search_items(cat, "esa-worldcover", grid.bbox_wgs, ["2020-01-01/2025-12-31"])
@@ -78,14 +101,18 @@ def worldcover(cfg: dict, grid: StudyGrid, cat=None) -> dict:
     return {"layers": out, "version": best, "years": year, "items": len(chosen)}
 
 
-def landsat_lst(cfg: dict, grid: StudyGrid, cat=None) -> dict:
+def landsat_lst(cfg: dict, grid: StudyGrid, cat=None, ranges=None, latest=False) -> dict:
+    """Cloud-masked Landsat LST median over pre-monsoon or caller-supplied date ranges."""
     import odc.stac
     cat = cat or open_catalog(cfg)
-    cc = {"eo:cloud_cover": {"lt": cfg["satellite"]["cloud_cover_max"]},
+    cloud_limit = cfg["satellite"].get("latest_cloud_cover_max", 70) if latest else cfg["satellite"]["cloud_cover_max"]
+    min_obs = cfg["satellite"].get("latest_min_clear_obs", 1) if latest else cfg["satellite"]["min_clear_obs"]
+    cc = {"eo:cloud_cover": {"lt": cloud_limit},
           "platform": {"in": ["landsat-8", "landsat-9"]}}
-    items = search_items(cat, "landsat-c2-l2", grid.bbox_wgs, _season_ranges(cfg), cc)
+    items = search_items(cat, "landsat-c2-l2", grid.bbox_wgs, ranges or _season_ranges(cfg), cc)
     if not items:
-        raise RuntimeError("No Landsat scenes found for the configured seasons")
+        label = "rolling latest window" if latest else "configured pre-monsoon seasons"
+        raise RuntimeError(f"No Landsat scenes found for the {label}")
     ds = odc.stac.load(items, bands=["lwir11", "qa_pixel"], geobox=grid.geobox(),
                        groupby="solar_day", resampling="nearest", chunks={"x": 1024, "y": 1024})
     dn = ds["lwir11"].astype("float32")
@@ -96,28 +123,36 @@ def landsat_lst(cfg: dict, grid: StudyGrid, cat=None) -> dict:
     nobs = clear.sum("time")
     med = lst_c.median("time", skipna=True).compute().values
     nobs = nobs.compute().values
-    med = np.where(nobs >= cfg["satellite"]["min_clear_obs"], med, np.nan)
-    mean, cnt = grid.zonal_mean(med)
+    med = np.where(nobs >= min_obs, med, np.nan)
+    mean, _ = grid.zonal_mean(med)
     n_mean, _ = grid.zonal_mean(nobs.astype(float))
-    dates = sorted({str(t)[:10] for t in ds["time"].values})
+    dates, first, last = _observation_dates(ds)
+    valid_cells_pct = round(float(np.isfinite(mean).mean() * 100.0), 2)
+    mean_clear_observations = round(float(np.nanmean(n_mean)), 3) if np.isfinite(n_mean).any() else 0.0
     return {"lst_c": mean, "lst_nobs": n_mean, "scenes": len(items), "days": len(dates),
-            "first": dates[0], "last": dates[-1]}
+            "first": first, "last": last, "valid_cells_pct": valid_cells_pct,
+            "mean_clear_observations_per_cell": mean_clear_observations}
 
 
-def sentinel_ndvi(cfg: dict, grid: StudyGrid, cat=None) -> dict:
+def sentinel_ndvi(cfg: dict, grid: StudyGrid, cat=None, ranges=None, latest=False) -> dict:
+    """Cloud-masked Sentinel-2 NDVI median over pre-monsoon or caller-supplied date ranges."""
     import odc.stac
     cat = cat or open_catalog(cfg)
-    items = search_items(cat, "sentinel-2-l2a", grid.bbox_wgs, _season_ranges(cfg),
-                         {"eo:cloud_cover": {"lt": cfg["satellite"]["cloud_cover_max"]}})
-    # reflectance offset of -1000 applies from processing baseline 04.00 (January 2022) onward
+    cloud_limit = cfg["satellite"].get("latest_cloud_cover_max", 70) if latest else cfg["satellite"]["cloud_cover_max"]
+    min_obs = cfg["satellite"].get("latest_min_clear_obs", 1) if latest else cfg["satellite"]["min_clear_obs"]
+    items = search_items(cat, "sentinel-2-l2a", grid.bbox_wgs, ranges or _season_ranges(cfg),
+                         {"eo:cloud_cover": {"lt": cloud_limit}})
+
+    # Sentinel L2A reflectance offset of -1000 applies from processing baseline 04.00 (January 2022) onward.
     def baseline_ok(it):
         try:
             return float(str(it.properties.get("s2:processing_baseline", "0")).replace("N", "")) >= 4.0
-        except ValueError:
+        except (TypeError, ValueError):
             return False
     items = [it for it in items if baseline_ok(it)]
     if not items:
-        raise RuntimeError("No Sentinel-2 L2A scenes (baseline >= 04.00) found for the configured seasons")
+        label = "rolling latest window" if latest else "configured pre-monsoon seasons"
+        raise RuntimeError(f"No Sentinel-2 L2A scenes (baseline >= 04.00) found for the {label}")
     ds = odc.stac.load(items, bands=["B04", "B08", "SCL"], geobox=grid.geobox(), groupby="solar_day",
                        resampling={"B04": "average", "B08": "average", "SCL": "nearest"},
                        chunks={"x": 1024, "y": 1024})
@@ -128,7 +163,12 @@ def sentinel_ndvi(cfg: dict, grid: StudyGrid, cat=None) -> dict:
     nobs = clear.sum("time")
     med = ndvi.median("time", skipna=True).compute().values
     nobs = nobs.compute().values
-    med = np.where(nobs >= cfg["satellite"]["min_clear_obs"], med, np.nan)
+    med = np.where(nobs >= min_obs, med, np.nan)
     mean, _ = grid.zonal_mean(med)
-    dates = sorted({str(t)[:10] for t in ds["time"].values})
-    return {"ndvi": mean, "scenes": len(items), "days": len(dates), "first": dates[0], "last": dates[-1]}
+    n_mean, _ = grid.zonal_mean(nobs.astype(float))
+    dates, first, last = _observation_dates(ds)
+    valid_cells_pct = round(float(np.isfinite(mean).mean() * 100.0), 2)
+    mean_clear_observations = round(float(np.nanmean(n_mean)), 3) if np.isfinite(n_mean).any() else 0.0
+    return {"ndvi": mean, "ndvi_nobs": n_mean, "scenes": len(items), "days": len(dates),
+            "first": first, "last": last, "valid_cells_pct": valid_cells_pct,
+            "mean_clear_observations_per_cell": mean_clear_observations}

@@ -9,9 +9,19 @@ pixel_m: 30                         # common raster grid used by every satellite
 fallback_bbox: [73.72, 18.40, 74.02, 18.66]   # west, south, east, north; used ONLY if the boundary lookup fails
 
 boundary:
+  # 2025 PMC electoral-ward map (41 wards), published by OpenCity and credited to Parisar.
+  # The union should match the expanded municipal limits (reported at about 519 km2).
+  opencity_ckan_base: https://data.opencity.in
+  opencity_package_id: pune-wards-info
+  opencity_resource_name: PMC Electoral Wards 2025
+  opencity_resource_format: KML
+  min_ward_features: 35
   nominatim_url: https://nominatim.openstreetmap.org/search
-  query: Pune Municipal Corporation
-  area_sanity_km2: [150, 1200]      # reject results outside this range
+  query: Pune Municipal Corporation, Maharashtra, India
+  nominatim_queries:
+    - Pune Municipal Corporation, Maharashtra, India
+    - Pune, Maharashtra, India
+  area_sanity_km2: [450, 600]      # PMC expanded municipal area is about 519 km2; reject stale / oversized boundaries
 
 tree_census:
   ckan_base: https://data.opencity.in
@@ -29,7 +39,12 @@ satellite:
   years: [2024, 2025, 2026]
   audit_years: [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
   cloud_cover_max: 20
-  min_clear_obs: 2                  # a pixel needs at least this many clear observations
+  min_clear_obs: 2                  # pre-monsoon baseline: require repeat clear observations
+  latest_window_days: 180           # rolling latest-observation product, evaluated on every build
+  latest_cloud_cover_max: 70        # scene-level prefilter; pixel QA/SCL still masks clouds
+  latest_min_clear_obs: 1           # recent layer uses all available clear observations
+  latest_max_age_days: 45           # data-quality threshold used by the audit/demo quality gate
+  latest_min_valid_cells_pct: 50   # prevent a tiny cloud-free footprint being presented as a citywide layer
 
 population:
   url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/IND/ind_ppp_2020_constrained.tif

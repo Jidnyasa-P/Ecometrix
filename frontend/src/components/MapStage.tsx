@@ -34,9 +34,53 @@ export interface MapStageProps {
 
 const DIM: RGBA = [120, 128, 124, 38];
 
-export function boundsOf(cells: Cell[]): [[number, number], [number, number]] {
-  let w = 180, s = 90, e = -180, n = -90;
-  for (const c of cells) { if (c.lng < w) w = c.lng; if (c.lng > e) e = c.lng; if (c.lat < s) s = c.lat; if (c.lat > n) n = c.lat; }
+const PUNE_BOUNDS: [[number, number], [number, number]] = [
+  [73.72, 18.40],
+  [74.02, 18.66]
+];
+
+export function boundsOf(
+  cells: Cell[]
+): [[number, number], [number, number]] {
+  const valid = cells.filter(
+    c =>
+      Number.isFinite(c.lng) &&
+      Number.isFinite(c.lat) &&
+      c.lng >= -180 &&
+      c.lng <= 180 &&
+      c.lat >= -90 &&
+      c.lat <= 90
+  );
+
+  if (!valid.length) {
+    return PUNE_BOUNDS;
+  }
+
+  let w = 180;
+  let s = 90;
+  let e = -180;
+  let n = -90;
+
+  for (const c of valid) {
+    w = Math.min(w, c.lng);
+    e = Math.max(e, c.lng);
+    s = Math.min(s, c.lat);
+    n = Math.max(n, c.lat);
+  }
+
+  // Prevent zero-width or zero-height bounds.
+  const epsilon = 0.001;
+
+  if (e - w < epsilon) {
+    w -= epsilon;
+    e += epsilon;
+  }
+
+  if (n - s < epsilon) {
+    s -= epsilon;
+    n += epsilon;
+  }
+
   return [[w, s], [e, n]];
 }
 

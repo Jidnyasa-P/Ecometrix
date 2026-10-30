@@ -19,8 +19,9 @@ def grid():
 
 
 class FakeCat:
-    def __init__(self, items): self.items_ = items
+    def __init__(self, items): self.items_ = items; self.queries = []
     def search(self, **kw):
+        self.queries.append(kw)
         items = self.items_
         class S:
             def items(self): return iter(items)
@@ -70,6 +71,14 @@ def test_landsat_scaling_and_cloud_mask(tmp_path, grid):
     assert np.nanmin(v) == pytest.approx(41.0, abs=0.01)     # cloudy half: median of 40 and 42
     assert np.nanmax(v) == pytest.approx(42.0, abs=0.01)     # clear half: median of 40, 44, 42
     assert r["days"] == 3
+    assert r["valid_cells_pct"] == 100.0
+    assert r["mean_clear_observations_per_cell"] > 0
+    recent_cat = FakeCat(items)
+    recent = satellite.landsat_lst(CFG, grid, recent_cat,
+                                   ranges=["2025-01-01/2025-12-31"], latest=True)
+    assert recent_cat.queries[0]["datetime"] == "2025-01-01/2025-12-31"
+    assert recent_cat.queries[0]["query"]["eo:cloud_cover"] == {"lt": CFG["satellite"]["latest_cloud_cover_max"]}
+    assert recent["valid_cells_pct"] == 100.0
 
 
 def test_sentinel_ndvi_value_and_cloud_scene_ignored(tmp_path, grid):
@@ -82,3 +91,11 @@ def test_sentinel_ndvi_value_and_cloud_scene_ignored(tmp_path, grid):
     r = satellite.sentinel_ndvi(CFG, grid, FakeCat([mk("x", 3, 4), mk("y", 8, 4), mk("z", 13, 9)]))
     # reflectance = (DN - 1000) / 10000 -> red 0.2, nir 0.6 -> NDVI 0.5
     assert np.nanmin(r["ndvi"]) == pytest.approx(0.5, abs=1e-4) and np.nanmax(r["ndvi"]) == pytest.approx(0.5, abs=1e-4)
+    assert r["ndvi_nobs"].shape == (grid.n_cells,)
+    assert r["valid_cells_pct"] == 100.0
+    recent_cat = FakeCat([mk("recent", 18, 4)])
+    recent = satellite.sentinel_ndvi(CFG, grid, recent_cat,
+                                     ranges=["2025-01-01/2025-12-31"], latest=True)
+    assert recent_cat.queries[0]["datetime"] == "2025-01-01/2025-12-31"
+    assert recent_cat.queries[0]["query"]["eo:cloud_cover"] == {"lt": CFG["satellite"]["latest_cloud_cover_max"]}
+    assert recent["valid_cells_pct"] == 100.0

@@ -1,10 +1,10 @@
 name: Build data
 # Builds the real baseline from open sources and commits data/outputs, which Render then serves.
-# Run it from the Actions tab ("Run workflow"). It also refreshes monthly.
+# Run it from the Actions tab ("Run workflow"). The public-data catalogue is checked daily.
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 1 * *"
+    - cron: "0 3 * * *"            # daily at 03:00 UTC (08:30 India time)
 permissions:
   contents: write
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 330
     env:
-      ECOMETRIX_ALLOW_PARTIAL: "1"          # a failed layer is recorded in manifest.json instead of aborting the others
+      ECOMETRIX_ALLOW_PARTIAL: "1"          # collect diagnostics; the release gate below decides whether outputs may be published
       ECOMETRIX_CONTACT: ${{ github.server_url }}/${{ github.repository }}
     steps:
       - uses: actions/checkout@v6
@@ -30,9 +30,15 @@ jobs:
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           m = json.load(open("data/outputs/manifest.json"))
+          b = m["boundary"]
+          print(f"Boundary: {b['source']} · {b['area_km2']} km² · fallback={b['fallback']}")
           print("| Layer | Status | Detail |\n|---|---|---|")
           for k, v in m["layers"].items():
-              print(f"| {k} | {v['status']} | {v.get('reason') or v.get('detail', {}).get('vintage', '')} |")
+              detail = v.get('reason') or v.get('detail', {}).get('vintage', '')
+              if k in ('landsat_latest', 'sentinel_latest') and v.get('detail'):
+                  d = v['detail']
+                  detail = f"{d.get('last_observation')} · {d.get('age_days')} days old · {d.get('valid_cells_pct')}% cell coverage"
+              print(f"| {k} | {v['status']} | {detail} |")
           import os
           if os.path.exists("data/outputs/models_manifest.json"):
               mm = json.load(open("data/outputs/models_manifest.json"))["modules"]
@@ -40,6 +46,8 @@ jobs:
               for k, v in mm.items():
                   print(f"| {k} | {v['status']} | {v.get('reason', v.get('count', ''))} |")
           PY
+      - name: Validate judge-facing data freshness and boundary
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.quality_gate
       - name: Commit outputs
         run: |
           git config user.name "ecometrix-bot"

@@ -13,8 +13,15 @@ def build_audit(cfg: dict, ctx: dict) -> dict:
     if b:
         ok = not b["fallback"]
         checks.append(_check("boundary", "City boundary", "pass" if ok else "warn",
-                             "An official or OSM boundary polygon is obtained and passes sanity checks.",
+                             "The 2025 PMC electoral-ward boundary or an OSM administrative boundary is obtained and passes area/geometry sanity checks.",
                              {"source": b["source"], "area_km2": b["area_km2"], "osm_ref": b.get("osm_ref"),
+                              "boundary_dataset": b.get("boundary_dataset"),
+                              "boundary_dataset_url": b.get("boundary_dataset_url"),
+                              "boundary_resource_name": b.get("boundary_resource_name"),
+                              "boundary_resource_credit": b.get("boundary_resource_credit"),
+                              "boundary_metadata_modified": b.get("boundary_metadata_modified"),
+                              "boundary_resource_modified": b.get("boundary_resource_modified"),
+                              "boundary_ward_features": b.get("boundary_ward_features"),
                               "h3_cells": ctx.get("n_cells")},
                              "; ".join(b.get("notes", [])) or ("Boundary polygon accepted." if ok else
                               "Boundary lookup failed; a configured bounding box is used instead.")))
@@ -30,6 +37,32 @@ def build_audit(cfg: dict, ctx: dict) -> dict:
                              "At least 90% of rows have valid coordinates; the loaded count is reconciled with published figures.",
                              recon, "The explainer quotes 4.09 million trees, but the listed parts add up to about 4.009 million. "
                                     "The loaded row count above is what the pipeline actually read."))
+    # Recent satellite acquisitions are separate from the stable pre-monsoon model inputs.
+    latest = ctx.get("latest_satellite") or {}
+    latest_max_age = int(cfg.get("satellite", {}).get("latest_max_age_days", 45))
+    latest_min_coverage = float(cfg.get("satellite", {}).get("latest_min_valid_cells_pct", 50.0))
+    latest_evidence = {}
+    latest_ok = True
+    for key, label in (("landsat", "Landsat 8/9 LST"), ("sentinel2", "Sentinel-2 NDVI")):
+        record = latest.get(key)
+        if record:
+            latest_evidence[key] = {"title": label, **record}
+            age_ok = (isinstance(record.get("age_days"), int)
+                      and 0 <= record["age_days"] <= latest_max_age)
+            coverage_ok = (isinstance(record.get("valid_cells_pct"), (int, float))
+                           and record["valid_cells_pct"] >= latest_min_coverage)
+            latest_ok = latest_ok and age_ok and coverage_ok
+        else:
+            latest_evidence[key] = {"title": label, "available": False}
+            latest_ok = False
+    checks.append(_check(
+        "latest_satellite", "Latest satellite observations", "pass" if latest_ok else "warn",
+        f"Both rolling-window composites must be no older than {latest_max_age} days and cover at least {latest_min_coverage}% of study-area cells.",
+        latest_evidence,
+        "These are the newest cloud-filtered acquisitions available in the provider catalogue, composited over a rolling window; this is near-real-time monitoring, not a live sensor feed. "
+        "Cloud masking can leave some cells without a value. Pre-monsoon baseline composites remain separate for seasonal consistency."
+    ))
+
     sc = ctx.get("scene_counts")
     if sc:
         ok_ls = sum(1 for v in sc["landsat"].values() if v >= 3)

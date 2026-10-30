@@ -1,6 +1,7 @@
 """Tests use small synthetic inputs built here in the test. They exist only to verify the code paths;
 nothing in this file is ever shipped as application data."""
 import json
+from datetime import date
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,7 +10,7 @@ from rasterio.transform import from_origin
 from shapely.geometry import box, Polygon
 from h3.api import basic_int as h3i
 
-from ecometrix_pipeline import grid as G, tree_census, osm_green, population, metrics, audit, boundary, run
+from ecometrix_pipeline import grid as G, tree_census, osm_green, population, metrics, audit, boundary, run, satellite, quality_gate
 from ecometrix_pipeline.config import load_config
 
 CFG = load_config()
@@ -180,8 +181,128 @@ class _Sess:
         return _Resp(self.payload)
 
 
+
+
+def test_open_city_2025_electoral_ward_kml_is_preferred_boundary():
+    # Forty-one adjacent synthetic wards approximate the expanded PMC footprint (~519 km2).
+    west, east, south, north = 73.745, 73.965, 18.43, 18.63
+    placemarks = []
+    for index in range(41):
+        x0 = west + (east - west) * index / 41
+        x1 = west + (east - west) * (index + 1) / 41
+        coordinates = " ".join((
+            f"{x0},{south},0", f"{x1},{south},0", f"{x1},{north},0",
+            f"{x0},{north},0", f"{x0},{south},0",
+        ))
+        placemarks.append(
+            f"<Placemark><name>Ward {index + 1}</name><Polygon><outerBoundaryIs>"
+            f"<LinearRing><coordinates>{coordinates}</coordinates></LinearRing>"
+            f"</outerBoundaryIs></Polygon></Placemark>"
+        )
+    kml = ("<?xml version='1.0' encoding='UTF-8'?>"
+           "<kml xmlns='http://www.opengis.net/kml/2.2'><Document>"
+           + "".join(placemarks) + "</Document></kml>").encode("utf-8")
+    package = {"result": {"metadata_modified": "2026-10-22T13:13:00", "author": "Vaidyanathan R",
+        "resources": [{"id": "2badcc86-489c-4b7e-b7dd-a273ef01b798", "name": "PMC Electoral Wards 2025",
+                       "format": "KML", "url": "https://data.opencity.in/download/pmc-electoral-wards-2025.kml",
+                       "credit": "Parisar", "last_modified": "2025-11-25"}]}}
+
+    class KmlResponse:
+        content = kml
+        def raise_for_status(self): pass
+
+    class Session:
+        def __init__(self): self.calls = []
+        def get(self, url, **kwargs):
+            self.calls.append((url, kwargs))
+            return _Resp(package) if "package_show" in url else KmlResponse()
+
+    client = Session()
+    result = boundary.fetch_boundary(CFG, client)
+    assert result["fallback"] is False
+    assert result["boundary_dataset"] == "pune-wards-info"
+    assert result["boundary_resource_id"] == "2badcc86-489c-4b7e-b7dd-a273ef01b798"
+    assert result["boundary_resource_format"] == "KML"
+    assert result["boundary_ward_features"] == 41
+    assert result["boundary_resource_credit"] == "Parisar"
+    assert result["boundary_dataset_url"] == "https://data.opencity.in/dataset/pune-wards-info"
+    assert result["boundary_metadata_modified"] == "2026-10-22T13:13:00"
+    assert result["boundary_resource_modified"] == "2025-11-25"
+    assert 450 <= result["area_km2"] <= 600
+    assert len(client.calls) == 2
+
+
+def test_latest_satellite_window_is_rolling_and_inclusive():
+    assert satellite.latest_ranges(CFG, as_of=date(2026, 10, 30)) == ["2026-05-04/2026-10-30"]
+
+
+def test_stac_search_deduplicates_without_datetime_timezone_comparison():
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+
+    naive = SimpleNamespace(id="naive", datetime=datetime(2026, 10, 1))
+    aware = SimpleNamespace(id="aware", datetime=datetime(2026, 10, 2, tzinfo=timezone.utc))
+
+    class Search:
+        def __init__(self, values): self.values = values
+        def items(self): return iter(self.values)
+
+    class Catalog:
+        def __init__(self): self.calls = 0
+        def search(self, **kwargs):
+            self.calls += 1
+            return Search([naive, aware] if self.calls == 1 else [aware])
+
+    result = satellite.search_items(Catalog(), "landsat-c2-l2", [73.7, 18.4, 74.0, 18.6],
+                                    ["2026-10-01/2026-10-02", "2026-10-02/2026-10-03"])
+    assert [item.id for item in result] == ["naive", "aware"]
+
+
+def test_release_quality_gate_requires_verified_boundary_and_recent_coverage():
+    manifest = {
+        "boundary": {"fallback": False, "boundary_resource_id": "pmc-admin-wards-2025", "source": "PMC wards", "area_km2": 540.0},
+        "layers": {name: {"status": "ok"} for name in quality_gate.REQUIRED_DATA_LAYERS},
+    }
+    manifest["layers"]["landsat_latest"]["detail"] = {"last_observation": "2026-10-20", "age_days": 10, "valid_cells_pct": 86.5}
+    manifest["layers"]["sentinel_latest"]["detail"] = {"last_observation": "2026-10-25", "age_days": 5, "valid_cells_pct": 93.2}
+    assert quality_gate.validate_manifest(manifest, CFG) == []
+    stale = json.loads(json.dumps(manifest))
+    stale["boundary"]["fallback"] = True
+    stale["layers"]["landsat_latest"]["detail"]["age_days"] = 90
+    stale["layers"]["sentinel_latest"]["detail"]["valid_cells_pct"] = 12
+    issues = quality_gate.validate_manifest(stale, CFG)
+    assert any("bounding-box fallback" in issue for issue in issues)
+    assert any("freshness limit" in issue for issue in issues)
+    assert any("coverage" in issue for issue in issues)
+    stale["boundary"]["fallback"] = False
+    stale["boundary"]["area_km2"] = float("nan")
+    stale["layers"]["landsat_latest"]["detail"]["last_observation"] = "2099-01-01"
+    stale["layers"]["sentinel_latest"]["detail"]["age_days"] = float("nan")
+    strict_issues = quality_gate.validate_manifest(stale, CFG)
+    assert any("Boundary area" in issue for issue in strict_issues)
+    assert any("future-dated" in issue for issue in strict_issues)
+    assert any("age" in issue for issue in strict_issues)
+
+
+def test_release_quality_gate_checks_every_layer_model_and_core_audit():
+    manifest = {
+        "boundary": {"fallback": False, "boundary_resource_id": "pmc-admin-wards-2025", "source": "PMC wards", "area_km2": 540.0},
+        "layers": {name: {"status": "ok", "detail": {"last_observation": "2026-10-25", "age_days": 5, "valid_cells_pct": 90}}
+                   for name in quality_gate.REQUIRED_DATA_LAYERS},
+    }
+    models = {"modules": {name: {"status": "ok"} for name in quality_gate.REQUIRED_MODEL_MODULES}}
+    audit_doc = {"checks": [{"id": name, "status": "pass"} for name in quality_gate.REQUIRED_AUDIT_CHECKS]}
+    assert quality_gate.validate_outputs(manifest, models, audit_doc, CFG) == []
+    models["modules"]["portfolio"]["status"] = "failed"
+    audit_doc["checks"][0]["status"] = "warn"
+    issues = quality_gate.validate_outputs(manifest, models, audit_doc, CFG)
+    assert any("portfolio" in issue for issue in issues)
+    assert any("boundary" in issue for issue in issues)
+
+
 def test_boundary_accepts_valid_and_falls_back():
-    good = Polygon([(73.7, 18.4), (74.0, 18.4), (74.0, 18.65), (73.7, 18.65)])
+    good = Polygon([(73.745, 18.43), (73.965, 18.43), (73.965, 18.63),
+                    (73.745, 18.63), (73.745, 18.43)])
     hit = {"category": "boundary", "osm_type": "relation", "osm_id": 1, "display_name": "Pune", "geojson": good.__geo_interface__}
     b = boundary.fetch_boundary(CFG, _Sess([hit]))
     assert not b["fallback"] and b["area_km2"] > 150

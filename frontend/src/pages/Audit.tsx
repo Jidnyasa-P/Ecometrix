@@ -63,7 +63,7 @@ export default function AuditPage() {
       {manifest && (
         <Section>
           <h2 className="display display--sm">Layers in the baseline</h2>
-          <p className="muted">Pipeline {manifest.pipeline_version} · built {fmtDate(manifest.generated_at)} · {manifest.n_cells} hexagons · study area {manifest.boundary.area_km2} km² ({manifest.boundary.source}{manifest.boundary.fallback ? ", fallback in use" : ""}).</p>
+          <p className="muted">Pipeline {manifest.pipeline_version} · built {fmtDate(manifest.generated_at)} · {manifest.n_cells} hexagons · study area {manifest.boundary.area_km2} km² ({manifest.boundary.source}{manifest.boundary.fallback ? ", fallback in use" : ""}). {manifest.boundary.boundary_dataset_url && <a href={manifest.boundary.boundary_dataset_url} target="_blank" rel="noreferrer">Boundary dataset source</a>}</p>
           <div className="tablewrap">
             <table className="table">
               <thead><tr><th>Layer</th><th>Label</th><th>Status</th><th>Vintage and detail</th><th>Licence</th></tr></thead>

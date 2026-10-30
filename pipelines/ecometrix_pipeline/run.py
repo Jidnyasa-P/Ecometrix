@@ -12,7 +12,7 @@ import argparse
 import json
 import os
 import traceback
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -32,8 +32,12 @@ LAYER_META = {
                    "source": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover"},
     "landsat": {"title": "Land-surface temperature (Landsat 8/9)", "evidence": "MEASURED", "license": "Public domain (USGS/NASA)",
                 "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2"},
-    "sentinel": {"title": "Vegetation index NDVI (Sentinel-2)", "evidence": "MEASURED", "license": "Copernicus Sentinel data, free and open",
+    "sentinel": {"title": "Vegetation index NDVI (Sentinel-2 pre-monsoon baseline)", "evidence": "MEASURED", "license": "Copernicus Sentinel data, free and open",
                  "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a"},
+    "landsat_latest": {"title": "Latest surface temperature (Landsat 8/9)", "evidence": "MEASURED", "license": "Public domain (USGS/NASA)",
+                       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2"},
+    "sentinel_latest": {"title": "Latest greenness NDVI (Sentinel-2)", "evidence": "MEASURED", "license": "Copernicus Sentinel data, free and open",
+                        "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a"},
     "popseries": {"title": "Population history 2000-2020 (WorldPop yearly)", "evidence": "MODELLED", "license": "CC BY 4.0, WorldPop",
                   "source": "https://data.worldpop.org/GIS/Population/Global_2000_2020/2020/IND"},
     "population": {"title": "Population (WorldPop 2020, constrained)", "evidence": "MODELLED", "license": "CC BY 4.0, WorldPop",
@@ -113,13 +117,13 @@ def main(argv=None):
     run_step("osm", _osm)
 
     print("4/7 land cover, 5/7 LST, 6/7 NDVI")
-    need_sat = any(want(n) for n in ("worldcover", "landsat", "sentinel"))
+    need_sat = any(want(n) for n in ("worldcover", "landsat", "sentinel", "landsat_latest", "sentinel_latest"))
     cat = None
     if need_sat:
         try:
             cat = satellite.open_catalog(cfg)
         except Exception as e:
-            for n in ("worldcover", "landsat", "sentinel"):
+            for n in ("worldcover", "landsat", "sentinel", "landsat_latest", "sentinel_latest"):
                 layers_status[n] = {**LAYER_META[n], "status": "failed", "reason": f"STAC catalog unavailable: {e!r}"}
     def _wc():
         r = satellite.worldcover(cfg, grid, cat); cols.update(r["layers"])
@@ -130,9 +134,34 @@ def main(argv=None):
     def _s2():
         r = satellite.sentinel_ndvi(cfg, grid, cat); cols["ndvi"] = r["ndvi"]
         vintages["sentinel"] = {"vintage": f"pre-monsoon {r['first']} to {r['last']}", "scenes": r["scenes"], "clear_days": r["days"]}
+    def _latest_meta(r):
+        observation_date = date.fromisoformat(r["last"])
+        age = (datetime.now(timezone.utc).date() - observation_date).days
+        return {"first_observation": r["first"], "last_observation": r["last"], "age_days": age,
+                "scenes": r["scenes"], "clear_days": r["days"],
+                "valid_cells_pct": r["valid_cells_pct"],
+                "mean_clear_observations_per_cell": r["mean_clear_observations_per_cell"],
+                "window_days": int(cfg["satellite"].get("latest_window_days", 180))}
+    def _ls_latest():
+        ranges = satellite.latest_ranges(cfg)
+        r = satellite.landsat_lst(cfg, grid, cat, ranges=ranges, latest=True)
+        cols["lst_latest_c"] = r["lst_c"]
+        cols["lst_latest_nobs"] = r["lst_nobs"]
+        detail = _latest_meta(r)
+        vintages["landsat_latest"] = {"vintage": f"latest available; rolling window {ranges[0]}", **detail}
+        ctx.setdefault("latest_satellite", {})["landsat"] = detail
+    def _s2_latest():
+        ranges = satellite.latest_ranges(cfg)
+        r = satellite.sentinel_ndvi(cfg, grid, cat, ranges=ranges, latest=True)
+        cols["ndvi_latest"] = r["ndvi"]
+        cols["ndvi_latest_nobs"] = r["ndvi_nobs"]
+        detail = _latest_meta(r)
+        vintages["sentinel_latest"] = {"vintage": f"latest available; rolling window {ranges[0]}", **detail}
+        ctx.setdefault("latest_satellite", {})["sentinel2"] = detail
     if cat is not None:
         run_step("worldcover", _wc); run_step("landsat", _ls); run_step("sentinel", _s2)
-        if want("worldcover") or want("landsat") or want("sentinel"):
+        run_step("landsat_latest", _ls_latest); run_step("sentinel_latest", _s2_latest)
+        if any(want(n) for n in ("worldcover", "landsat", "sentinel", "landsat_latest", "sentinel_latest")):
             try:
                 ctx["scene_counts"] = satellite.scene_counts(cfg, grid, cat)
             except Exception as e:
@@ -186,8 +215,26 @@ def main(argv=None):
                 "layers": layers_status}
     dump_json(out / "manifest.json", manifest)
     failed = [k for k, v in layers_status.items() if v.get("status") == "failed"]
+    quality_warnings = []
+    if b.get("fallback"):
+        quality_warnings.append("Study-area boundary is a configured bounding-box fallback.")
+    max_age = int(cfg.get("satellite", {}).get("latest_max_age_days", 45))
+    min_coverage = float(cfg.get("satellite", {}).get("latest_min_valid_cells_pct", 50.0))
+    for layer_name, key in (("landsat_latest", "landsat"), ("sentinel_latest", "sentinel2")):
+        if not want(layer_name):
+            continue
+        detail = ctx.get("latest_satellite", {}).get(key)
+        if not detail:
+            quality_warnings.append(f"{layer_name} has no latest-observation metadata.")
+            continue
+        if detail["age_days"] < 0 or detail["age_days"] > max_age:
+            quality_warnings.append(f"{layer_name} newest observation age is {detail['age_days']} days (allowed range 0-{max_age}).")
+        if detail["valid_cells_pct"] < min_coverage:
+            quality_warnings.append(f"{layer_name} covers only {detail['valid_cells_pct']}% of cells (limit {min_coverage}%).")
+    if quality_warnings:
+        print("data-quality warnings:", quality_warnings)
     print("done. layers:", {k: v["status"] for k, v in layers_status.items()})
-    return 1 if failed and not os.environ.get("ECOMETRIX_ALLOW_PARTIAL") else 0
+    return 1 if (failed or quality_warnings) and not os.environ.get("ECOMETRIX_ALLOW_PARTIAL") else 0
 
 
 def _clean(o):
