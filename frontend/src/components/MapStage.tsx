@@ -82,8 +82,7 @@ export default function MapStage(p: MapStageProps) {
         center: [(west + east) / 2, (south + north) / 2], zoom: 9,
         pitch: p.camera.pitch, bearing: p.camera.bearing, interactive: !!p.interactive,
         attributionControl: { compact: true }, maxPitch: 55, cooperativeGestures: false,
-        fadeDuration: 0, refreshExpiredTiles: false,
-        antialias: false
+        fadeDuration: 0, refreshExpiredTiles: false
       });
     } catch (e) {
       setFailed(e instanceof Error ? e.message : "WebGL unavailable");
