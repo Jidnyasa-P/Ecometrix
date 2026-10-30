@@ -99,7 +99,7 @@ describe("citizen view", () => {
     await waitFor(() => expect(screen.getByText(/is proposed in this area/)).toBeTruthy());
     expect(screen.getByText(/Trees counted here: about 4 per hectare/)).toBeTruthy();
     expect(screen.getByText(/hotter than 67% of the city/)).toBeTruthy();         // cell a is hotter than 2 of 3 cells
-    expect(screen.getByText(/About 10% of people here live within about 300 metres/)).toBeTruthy();
+    expect(   screen.getByText(t("en", "parkYes", { p: "10", dist: "300", area: "0.5" })) ).toBeTruthy();
     expect(screen.getByText(/has not been set up/)).toBeTruthy();                // no feedback link configured: said, not faked
   });
   it("explains why a place has no site: no open land versus lower need", async () => {
@@ -112,7 +112,12 @@ describe("citizen view", () => {
     mockApi(); go("/city"); render(<App />);
     await waitFor(() => expect(screen.getByText(t("en", "title"))).toBeTruthy());
     expect(screen.queryByRole("note")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "मराठी" }));
+    const citizenLanguageSwitch = document.querySelector(".citizen .langswitch");
+expect(citizenLanguageSwitch).toBeTruthy();
+
+fireEvent.click(
+  within(citizenLanguageSwitch as HTMLElement).getByRole("button", { name: "मराठी" })
+);
     await waitFor(() => expect(screen.getByText(t("mr", "title"))).toBeTruthy());
     const notice = screen.getByRole("note");
     expect(notice.textContent).toContain(t("mr", "translation_notice"));
