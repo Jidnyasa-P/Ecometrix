@@ -2,7 +2,7 @@
 
 | Dataset | Used for | Access | Licence | Verified by |
 |---|---|---|---|---|
-| Pune Tree Census 2019 (17 CSV parts) | tree density | CKAN API at newdata.opencity.in, package `f00d83b8-c70f-4fff-9ac7-9a6ab4255edf` | Public domain | Dataset page and current resource metadata checked. CSV column names are NOT known in advance: the pipeline detects them and records what it found |
+| Pune Tree Census 2019 (17 CSV parts) | tree density | CKAN API at data.opencity.in, package slug `pune-tree-census-2019` | Public domain | Dataset page and current resource metadata checked. CSV column names are NOT known in advance: the pipeline detects them and records what it found |
 | OpenStreetMap parks, forests | park access, mapped green | Overpass API | ODbL | Standard API; completeness for Pune unknown, reported in the audit |
 | Landsat 8/9 Collection 2 Level-2 | surface temperature | Microsoft Planetary Computer STAC (`landsat-c2-l2`), free anonymous access | Public domain | Catalog documented; scenes counted by the audit at build time |
 | Sentinel-2 L2A | NDVI | Planetary Computer (`sentinel-2-l2a`) | Copernicus, free and open | As above |

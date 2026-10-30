@@ -14,8 +14,8 @@ boundary:
   area_sanity_km2: [150, 1200]      # reject results outside this range
 
 tree_census:
-  ckan_base: https://newdata.opencity.in
-  package_id: f00d83b8-c70f-4fff-9ac7-9a6ab4255edf   # "Pune Tree Census 2019" on OpenCity
+  ckan_base: https://data.opencity.in
+  package_id: pune-tree-census-2019   # canonical OpenCity dataset slug
   published_total_claim: 4090000    # figure quoted in the OpenCity explainer
   listed_parts_total: 4009000       # 16 parts x 250,000 + 1 part x 9,000, as listed on the dataset page
 

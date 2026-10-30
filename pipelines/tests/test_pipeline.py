@@ -278,9 +278,9 @@ def test_tree_census_uses_current_ckan_catalogue():
         def json(self):
             return {"result": {"resources": [
                 {"id": "part-2", "name": "Tree Census - Part 2", "format": "CSV",
-                 "url": "https://newdata.opencity.in/part-2.csv", "position": 1},
+                 "url": "https://data.opencity.in/part-2.csv", "position": 1},
                 {"id": "part-1", "name": "Tree Census - Part 1", "format": "CSV",
-                 "url": "https://newdata.opencity.in/part-1.csv", "position": 0},
+                 "url": "https://data.opencity.in/part-1.csv", "position": 0},
             ]}}
 
     class Session:
@@ -290,8 +290,8 @@ def test_tree_census_uses_current_ckan_catalogue():
 
     session = Session()
     resources = tree_census.list_resources(CFG, session)
-    assert session.url == "https://newdata.opencity.in/api/3/action/package_show"
-    assert session.params["id"] == "f00d83b8-c70f-4fff-9ac7-9a6ab4255edf"
+    assert session.url == "https://data.opencity.in/api/3/action/package_show"
+    assert session.params["id"] == "pune-tree-census-2019"
     assert [resource["id"] for resource in resources] == ["part-1", "part-2"]
 
 
