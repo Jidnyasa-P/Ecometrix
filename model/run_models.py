@@ -7,6 +7,7 @@ sites.parquet and models_manifest.json. Each module is independent: if one canno
 """
 from __future__ import annotations
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -16,7 +17,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import heat_model, forecast, need_score, sites  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+import heat_model, forecast, need_score, sites, portfolio, sensitivity  # noqa: E402
 
 
 def _clean(o):
@@ -35,7 +37,7 @@ def _dump(path: Path, obj):
 def main(argv=None) -> int:
     argv = argv or sys.argv[1:]
     out = Path(argv[0]) if argv else ROOT / "data" / "outputs"
-    cfg = yaml.safe_load((ROOT / "config" / "pilot_pune.yaml").read_text(encoding="utf-8"))
+    cfg = yaml.safe_load(Path(os.environ.get("ECOMETRIX_CONFIG") or ROOT / "config" / "pilot_pune.yaml").read_text(encoding="utf-8"))
     cells = pd.read_parquet(out / "cells.parquet")
     status: dict[str, dict] = {}
 
@@ -100,6 +102,24 @@ def main(argv=None) -> int:
                 s.to_parquet(out / "sites.parquet", index=False)
                 status["sites"]["count"] = int(len(s))
                 status["sites"]["by_type"] = s["type"].value_counts().to_dict()
+    sp = out / "sites.parquet"
+    if sp.exists():
+        from app.engine import params as eparams
+        A = eparams.load(ROOT / "config" / "assumptions.yaml")
+        sdf = pd.read_parquet(sp)
+        step("sensitivity", lambda: _dump(out / "sensitivity.json", sensitivity.run(sdf, A)))
+        pix = out / "site_pixels.parquet"
+        if not pix.exists():
+            status["portfolio"] = {"status": "failed", "reason": "site_pixels.parquet not found: exact catchments need the population layer; portfolios are not computed without them (no double-counting shortcuts)"}
+        else:
+            def _port():
+                inst = portfolio.build_instance(sdf, pd.read_parquet(pix), A, rings=cfg["portfolio"].get("min_separation_rings", 0))
+                g = portfolio.run_grid(inst, sdf, A, cfg, time_limit=cfg["portfolio"].get("solver_time_limit_s", 90))
+                _dump(out / "portfolios.json", g)
+                return g
+            g = step("portfolio", _port)
+            if g is not None:
+                status["portfolio"]["solutions"] = len(g["results"])
     _dump(out / "models_manifest.json", {"modules": status})
     print({k: v["status"] for k, v in status.items()})
     return 0

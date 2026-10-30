@@ -87,6 +87,15 @@ def create_app(data_dir: str | Path | None = None) -> FastAPI:
     def forecast():
         return need(store.json_file("forecast.json"), "forecast")
 
+    @app.get("/api/portfolios")
+    def portfolios():
+        body = need(store.json_file("portfolios.json"), "portfolios")
+        return body
+
+    @app.get("/api/sensitivity")
+    def sensitivity():
+        return need(store.json_file("sensitivity.json"), "sensitivity")
+
     @app.get("/api/model-report")
     def model_report():
         mm = store.json_file("models_manifest.json")

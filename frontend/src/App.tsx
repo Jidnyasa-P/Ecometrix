@@ -6,6 +6,11 @@ import Atlas from "./pages/Atlas";
 import Explore from "./pages/Explore";
 import ForecastPage from "./pages/Forecast";
 import Priority from "./pages/Priority";
+import Plan from "./pages/Plan";
+import Compare from "./pages/Compare";
+import Report from "./pages/Report";
+import City from "./pages/City";
+import Evaluation from "./pages/Evaluation";
 import AuditPage from "./pages/Audit";
 import Method from "./pages/Method";
 
@@ -25,12 +30,17 @@ function Shell() {
         <Route path="/" element={<Atlas />} />
         <Route path="/forecast" element={<ForecastPage />} />
         <Route path="/priority" element={<Priority />} />
+        <Route path="/plan" element={<Plan />} />
+        <Route path="/compare" element={<Compare />} />
+        <Route path="/report" element={<Report />} />
+        <Route path="/city" element={<City />} />
+        <Route path="/evaluation" element={<Evaluation />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/method" element={<Method />} />
         <Route path="*" element={<div className="fullstate"><h1 className="display display--sm">Page not found</h1></div>} />
       </Routes></main>
-      {pathname !== "/explore" && pathname !== "/priority" && <Footer />}
+      {!["/explore", "/priority", "/plan", "/city"].includes(pathname) && <Footer />}
     </>
   );
 }

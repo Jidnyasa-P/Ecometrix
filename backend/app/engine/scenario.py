@@ -26,7 +26,7 @@ def _disc(r: np.ndarray, t: np.ndarray) -> np.ndarray:
 
 
 def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_years: int | None = None,
-        budget_inr: float | None = None, draws: int = 2000, seed: int = 42, mode: str = "mc") -> dict:
+        budget_inr: float | None = None, draws: int = 2000, seed: int = 42, mode: str = "mc", return_draws: bool = False) -> dict:
     t = site["type"]
     if t not in TYPES:
         raise ValueError(f"unknown intervention type {t}")
@@ -64,6 +64,7 @@ def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_yea
 
     # ---- benefits
     cool = None
+    pdeg = None
     p10, p50, p90 = site.get("dlst_p10"), site.get("dlst_p50"), site.get("dlst_p90")
     cool_note = ""
     if p50 is None or not np.isfinite(p50):
@@ -73,7 +74,8 @@ def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_yea
         lo, mid, hi = float(p10) * scale, float(p50) * scale, float(p90) * scale
         d = np.full(n, mid) if (mode == "base" or hi == lo) else rng.triangular(min(lo, mid), mid, max(hi, mid), n)
         pop = float(site["pop"])
-        cool = {"delta_lst_c": _q(d), "person_degrees": _q(-d * pop), "cell_population": pop}
+        pdeg = -d * pop
+        cool = {"delta_lst_c": _q(d), "person_degrees": _q(pdeg), "cell_population": pop}
         cool_note = ("Modelled change in surface temperature of the hexagon once the planting matures (about five years for a forest), "
                      "from the heat model. Surface temperature is not air temperature. Range is an approximation from bootstrap runs.")
 
@@ -131,6 +133,8 @@ def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_yea
         "cost_effectiveness": ce,
         "label_note": "SIMULATED: none of this has been built. Costs and carbon are ASSUMED ranges; cooling and people are MODELLED.",
     }
+    if return_draws:
+        out["_draws"] = {"cost": pv, "person_degrees": pdeg, "carbon": co2}
     if budget_inr is not None:
         b = float(budget_inr)
         p50 = float(np.percentile(pv, 50))

@@ -10,7 +10,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 330
     env:
       ECOMETRIX_ALLOW_PARTIAL: "1"          # a failed layer is recorded in manifest.json instead of aborting the others
       ECOMETRIX_CONTACT: ${{ github.server_url }}/${{ github.repository }}

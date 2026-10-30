@@ -46,6 +46,20 @@ def unserved_within(pop_xy: np.ndarray, people: np.ndarray, pixel_distance_m: np
     return np.array([w[h].sum() if len(h) else 0.0 for h in hits])
 
 
+def unserved_pairs(pop_xy: np.ndarray, people: np.ndarray, pixel_distance_m: np.ndarray, access_m: float,
+                   centroids_xy: np.ndarray, radius_m: float):
+    """Exact catchments: (centroid index, pixel index) pairs for every NOT-yet-served pixel within radius_m of each centroid.
+    The pixel index refers to the original arrays, so two sites that reach the same pixel can be recognised (no double counting)."""
+    idx = np.flatnonzero(pixel_distance_m > access_m)
+    if idx.size == 0:
+        return np.array([], dtype=int), np.array([], dtype=int)
+    tree = cKDTree(pop_xy[idx])
+    hits = tree.query_ball_point(centroids_xy, r=radius_m)
+    c = np.concatenate([np.full(len(h), i, dtype=int) for i, h in enumerate(hits)]) if len(hits) else np.array([], dtype=int)
+    k = np.concatenate([idx[np.asarray(h, dtype=int)] for h in hits]) if len(hits) else np.array([], dtype=int)
+    return c, k
+
+
 def _nan_pct(a: np.ndarray, q: float):
     a = a[np.isfinite(a)]
     return float(np.percentile(a, q)) if a.size else None

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EvidenceBadge, Notice, PageHead, Section } from "../components/Bits";
 import { getJson } from "../lib/api";
+import { flattenAssumptions, type AssumptionRow } from "../lib/assumptions";
 import { useData } from "../lib/data";
 
 const LIMITS = [
@@ -18,29 +19,15 @@ const LIMITS = [
 ];
 
 const NEXT = [
-  ["M6", "Budget-constrained portfolio optimiser (avoids double-counting people reached by neighbouring sites); uncertainty on the need score."],
-  ["M7", "Side-by-side scenario comparison against doing nothing, evidence cards per site, PDF report, citizen view."],
-  ["M8–M9", "Usability testing with planners and residents, full evaluation report, freeze."],
-  ["Later", "Street-tree corridors and green roofs (need road-side tree and rooftop data), walking-network distance, a census anchor for population, a municipal park list and rate schedule."]
+  ["Human checks", "Five-person usability test, independent spreadsheet recomputation of one site, 30-site satellite spot-check, expert review of 20 sites, fluent-speaker review of the Marathi text, and a comparison of OpenStreetMap parks with the municipality's own list. Protocols are in docs/evaluation."],
+  ["Data to add", "A Pune rate schedule for new parks and plantations, a census anchor for population, a vulnerability layer (age, income, health), walking-network distance for access."],
+  ["More interventions", "Street-tree corridors (need road-side tree counts) and green or cool roofs (need rooftop areas and a cost source)."],
+  ["Real-world evidence", "Before and after satellite greenness and surface temperature for anything that gets built, tree-survival surveys and resident feedback."]
 ];
 
-type Row = { path: string; low?: number; base?: number; high?: number; value?: unknown; unit?: string; label?: string; source?: string; note?: string };
-function flatten(o: Record<string, unknown>, path = ""): Row[] {
-  const out: Row[] = [];
-  for (const [k, v] of Object.entries(o)) {
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      const e = v as Record<string, unknown>;
-      if ("source" in e || "low" in e || "value" in e || "points" in e) out.push({ path: path + k, low: e.low as number, base: e.base as number, high: e.high as number,
-        value: e.value ?? (e.points ? JSON.stringify(e.points) : e.estimated === false ? "not estimated" : undefined), unit: e.unit as string, label: e.label as string, source: e.source as string, note: e.note as string });
-      else out.push(...flatten(e, path + k + "."));
-    }
-  }
-  return out;
-}
-
 export default function Method() {
-  const [assump, setAssump] = useState<Row[] | null>(null);
-  useEffect(() => { getJson<Record<string, unknown>>("/api/assumptions").then(a => setAssump(flatten(a))).catch(() => setAssump(null)); }, []);
+  const [assump, setAssump] = useState<AssumptionRow[] | null>(null);
+  useEffect(() => { getJson<Record<string, unknown>>("/api/assumptions").then(a => setAssump(flattenAssumptions(a))).catch(() => setAssump(null)); }, []);
   const d = useData();
   const meta = d.status === "ready" ? d.meta : d.status === "not_built" ? d.meta : null;
   const fields = meta?.fields ?? [];
@@ -94,8 +81,8 @@ export default function Method() {
       </Section>
 
       <Section>
-        <h2 className="display display--sm">What is not built yet</h2>
-        <p className="lede">This release covers milestones M0 to M5: baseline, heat model, cost and impact engine, demand forecast, need score, candidate sites and a single-site scenario. Nothing below exists yet.</p>
+        <h2 className="display display--sm">What is still open</h2>
+        <p className="lede">This release covers all ten weeks of the build: baseline, heat model, cost and impact engine, forecast, need score, candidate sites, the portfolio optimiser, plan comparison, evidence cards, report, citizen view and evaluation. What follows is what still needs people, data or a real project.</p>
         <div className="tablewrap"><table className="table"><thead><tr><th>Milestone</th><th>Planned</th></tr></thead><tbody>{NEXT.map(([m, t]) => <tr key={m}><td><strong>{m}</strong></td><td>{t}</td></tr>)}</tbody></table></div>
       </Section>
     </>

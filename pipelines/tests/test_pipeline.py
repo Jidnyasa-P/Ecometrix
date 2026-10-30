@@ -141,47 +141,6 @@ def test_population_window(tmp_path, grid):
     assert np.all(acc["pop_access"] <= p["per_cell"] + 1e-9)
 
 
-def test_population_download_fallback_is_cached(tmp_path, grid, monkeypatch):
-    px = 0.0009
-    f = tmp_path / "pop.tif"
-    with rasterio.open(f, "w", driver="GTiff", height=80, width=80, count=1, dtype="float32",
-                       crs="EPSG:4326", transform=from_origin(73.82, 18.54, px, px), nodata=-99999) as dst:
-        dst.write(np.full((80, 80), 2.0, dtype="float32"), 1)
-
-    class Response:
-        headers = {"Content-Length": str(f.stat().st_size)}
-
-        def __enter__(self): return self
-        def __exit__(self, *args): return False
-        def raise_for_status(self): pass
-        def iter_content(self, chunk_size):
-            with f.open("rb") as source:
-                while chunk := source.read(chunk_size):
-                    yield chunk
-
-    class Session:
-        calls = 0
-
-        def get(self, *args, **kwargs):
-            self.calls += 1
-            return Response()
-
-    def unsupported_range(_url):
-        raise rasterio.errors.RasterioIOError("Range downloading not supported by this server!")
-
-    monkeypatch.setattr(population, "_open_remote_or_local", unsupported_range)
-    sess = Session()
-    cache = tmp_path / "cache" / "population.tif"
-    first = population.load_population(CFG, grid, sess, cache_path=cache)
-    second = population.load_population(CFG, grid, sess, cache_path=cache)
-
-    assert sess.calls == 1
-    assert first["total"] == pytest.approx(second["total"])
-    assert "cached full download" in first["how"]
-    assert "cached local file" in second["how"]
-    assert not cache.with_suffix(".tif.part").exists()
-
-
 def test_cell_table_and_summary(grid):
     n = grid.n_cells
     rng = np.random.default_rng(0)
@@ -251,8 +210,7 @@ def test_run_end_to_end_records_failures(tmp_path, monkeypatch):
                        transform=from_origin(73.82, 18.54, px, px), nodata=-99999) as d:
         d.write(np.full((80, 80), 3.0, dtype="float32"), 1)
     real_pop = population.load_population
-    monkeypatch.setattr(run.population, "load_population",
-                        lambda cfg, g, s, **kwargs: real_pop(cfg, g, s, local_path=str(tif)))
+    monkeypatch.setattr(run.population, "load_population", lambda cfg, g, s: real_pop(cfg, g, s, local_path=str(tif)))
     monkeypatch.setenv("ECOMETRIX_ALLOW_PARTIAL", "1")
     out = tmp_path / "out"
     assert run.main(["--out", str(out), "--workdir", str(tmp_path / "raw")]) == 0
@@ -296,3 +254,17 @@ def test_population_series_reads_each_year_and_reports_missing(tmp_path, grid):
     r = population.load_series(cfg, grid)
     assert sorted(r["per_cell_by_year"]) == [2018, 2019] and list(r["missing"]) == [2020]
     assert r["per_cell_by_year"][2019].sum() == pytest.approx(2 * r["per_cell_by_year"][2018].sum())
+
+
+def test_unserved_pairs_match_the_aggregate_and_identify_shared_pixels():
+    xy = np.array([[0, 0], [100, 0], [200, 0], [400, 0.0]]); people = np.array([10.0, 20.0, 30.0, 40.0])
+    dist = np.array([500.0, 500.0, 500.0, 100.0])
+    cent = np.array([[0.0, 0.0], [150.0, 0.0]])
+    ci, pi = metrics.unserved_pairs(xy, people, dist, 300, cent, 300)
+    agg = metrics.unserved_within(xy, people, dist, 300, cent, 300)
+    for c in (0, 1):
+        assert people[pi[ci == c]].sum() == agg[c]                 # pairs and aggregate agree exactly
+    assert set(pi[ci == 0]) & set(pi[ci == 1]) == {0, 1, 2}        # all three unserved pixels are reachable from both sites
+    assert 3 not in set(pi)                                        # the served pixel is never a catchment member
+    e0, e1 = metrics.unserved_pairs(xy, people, np.full(4, 10.0), 300, cent, 300)
+    assert e0.size == 0 and e1.size == 0

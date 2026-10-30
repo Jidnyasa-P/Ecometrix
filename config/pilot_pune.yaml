@@ -15,7 +15,7 @@ boundary:
 
 tree_census:
   ckan_base: https://data.opencity.in
-  package_id: f00d83b8-c70f-4fff-9ac7-9a6ab4255edf   # "Pune Tree Census 2019" on OpenCity
+  package_id: d8bab2a0-df7c-420f-9445-6d9238cf683d   # "Pune Tree Census 2019" on OpenCity
   published_total_claim: 4090000    # figure quoted in the OpenCity explainer
   listed_parts_total: 4009000       # 16 parts x 250,000 + 1 part x 9,000, as listed on the dataset page
 
@@ -59,3 +59,16 @@ need:
     heat_first:   { heat: 0.55, people: 0.20, gap: 0.15, growth: 0.10 }
     access_first: { heat: 0.15, people: 0.25, gap: 0.50, growth: 0.10 }
     growth_aware: { heat: 0.15, people: 0.20, gap: 0.20, growth: 0.45 }
+
+# Portfolio optimiser (M6). Weights, budgets and the equity share are POLICY CHOICES shown in the app.
+portfolio:
+  presets:                           # weights on the three normalised benefits; each sums to 1
+    balanced:     { cooling: 0.34, people: 0.33, carbon: 0.33 }
+    heat_first:   { cooling: 0.60, people: 0.20, carbon: 0.20 }
+    access_first: { cooling: 0.20, people: 0.60, carbon: 0.20 }
+    carbon_first: { cooling: 0.20, people: 0.20, carbon: 0.60 }
+  budget_multiples_of_median_site_cost: [5, 10, 20, 40, 80, 160]   # budgets are solved on this grid so every result is an exact optimum
+  equity_shares_pct: [0, 50]         # 0 = no rule; 50 = at least half of spend in the top third of need
+  no_regret_min_share: 0.75
+  min_separation_rings: 0            # 0 = at most one site per hexagon; 1 = no two chosen sites in neighbouring hexagons
+  solver_time_limit_s: 90

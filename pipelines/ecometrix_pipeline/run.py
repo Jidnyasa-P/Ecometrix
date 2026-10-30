@@ -140,10 +140,7 @@ def main(argv=None):
 
     print("7/7 population and access")
     def _pop():
-        p = population.load_population(
-            cfg, grid, sess,
-            cache_path=Path(args.workdir) / "population" / "ind_ppp_2020_constrained.tif",
-        )
+        p = population.load_population(cfg, grid, sess)
         ctx["population"] = p
         cols["pop"] = p["per_cell"]
         vintages["population"] = {"vintage": f"{cfg['population']['year']}", "read": p["how"], "pixels": p["pixels"]}
@@ -152,9 +149,13 @@ def main(argv=None):
             cols["pop_access"] = acc["pop_access"]
             lat, lng = grid.centroids()
             cx, cy = grid.to_utm.transform(lng, lat)
+            cxy = np.column_stack([cx, cy])
             cols["pop_unserved_300m"] = metrics.unserved_within(p["xy"], p["people"], acc["pixel_distance_m"],
-                                                                cfg["access"]["distance_m"], np.column_stack([cx, cy]),
-                                                                cfg["access"]["distance_m"])
+                                                                cfg["access"]["distance_m"], cxy, cfg["access"]["distance_m"])
+            ci, pi = metrics.unserved_pairs(p["xy"], p["people"], acc["pixel_distance_m"], cfg["access"]["distance_m"], cxy,
+                                            cfg["access"]["distance_m"])
+            hexes = np.array(grid.hex_ids())
+            pd.DataFrame({"h3": hexes[ci], "pixel": pi.astype("int64"), "people": p["people"][pi]}).to_parquet(out / "site_pixels.parquet", index=False)
     run_step("population", _pop)
 
     def _popseries():

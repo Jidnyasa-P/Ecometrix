@@ -3,7 +3,9 @@ install:
 	pip install -r pipelines/requirements.txt -r model/requirements.txt -r backend/requirements-dev.txt
 	cd frontend && npm ci
 data:            ## build the real baseline (needs internet; takes a while)
-	python scripts/build_data.py
+	PYTHONPATH=pipelines python -m ecometrix_pipeline.run
+	python model/baseline_relationship.py
+	python model/run_models.py
 api:
 	python -m uvicorn app.main:app --app-dir backend --reload --port 8000
 web:

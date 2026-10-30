@@ -6,11 +6,10 @@ These two products are different WorldPop models and are never mixed in one calc
 """
 from __future__ import annotations
 import os
-from pathlib import Path
+import tempfile
 import numpy as np
 import rasterio
 from rasterio.windows import from_bounds
-from .config import REPO_ROOT
 from .grid import StudyGrid, latlng_to_cells
 
 
@@ -71,69 +70,34 @@ def load_series(cfg: dict, grid: StudyGrid, years=None) -> dict:
     return {"per_cell_by_year": out, "missing": missing}
 
 
-def _download_population(url: str, sess, cache_path: Path) -> None:
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    partial_path = cache_path.with_suffix(cache_path.suffix + ".part")
-    downloaded = 0
-    expected_size = None
-    print(f"Downloading WorldPop raster to {cache_path} (the source does not support windowed HTTP reads).",
-          flush=True)
-    try:
-        with sess.get(url, stream=True, timeout=600) as response:
-            response.raise_for_status()
-            content_length = response.headers.get("Content-Length")
-            expected_size = int(content_length) if content_length else None
-            with partial_path.open("wb") as target:
-                for chunk in response.iter_content(1 << 22):
-                    if chunk:
-                        target.write(chunk)
-                        downloaded += len(chunk)
-                        if downloaded % (64 << 20) < len(chunk):
-                            size = f"{downloaded / (1 << 20):.0f} MiB"
-                            if expected_size:
-                                size += f" / {expected_size / (1 << 20):.0f} MiB"
-                            print(f"  WorldPop download: {size}", flush=True)
-        if expected_size is not None and downloaded != expected_size:
-            raise IOError(f"WorldPop download was incomplete: received {downloaded} of {expected_size} bytes")
-        partial_path.replace(cache_path)
-    finally:
-        partial_path.unlink(missing_ok=True)
-
-
-def load_population(
-    cfg: dict,
-    grid: StudyGrid,
-    sess,
-    local_path: str | None = None,
-    cache_path: str | Path | None = None,
-) -> dict:
+def load_population(cfg: dict, grid: StudyGrid, sess, local_path: str | None = None) -> dict:
     """Constrained 2020 baseline: pixel centres (metric), people per pixel and per-cell totals."""
     bbox = _padded(grid)
     url = cfg["population"]["url"]
     how = "windowed read over HTTP"
-    if local_path:
-        with rasterio.open(local_path) as src:
-            arr, tr = _read_window(src, bbox)
-        how = "local file"
-    else:
-        cache = Path(cache_path) if cache_path else (
-            REPO_ROOT / "data" / "raw" / "population" / "ind_ppp_2020_constrained.tif"
-        )
-        if cache.exists():
-            with rasterio.open(cache) as src:
-                arr, tr = _read_window(src, bbox)
-            how = "cached local file (downloaded after windowed HTTP read failed)"
+    tmp = None
+    try:
+        if local_path:
+            src = rasterio.open(local_path); how = "local file"
         else:
-            try:
-                with _open_remote_or_local(url) as src:
-                    arr, tr = _read_window(src, bbox)
-            except rasterio.errors.RasterioIOError as exc:
-                if "Range downloading not supported" not in str(exc):
-                    raise
-                _download_population(url, sess, cache)
-                with rasterio.open(cache) as src:
-                    arr, tr = _read_window(src, bbox)
-                how = f"cached full download (windowed HTTP read failed: {exc})"
+            src = _open_remote_or_local(url)
+        with src:
+            arr, tr = _read_window(src, bbox)
+    except Exception as e_http:
+        # fall back to a full download (about 0.5 GB); fine on a CI runner
+        tmp = tempfile.NamedTemporaryFile(suffix=".tif", delete=False)
+        with sess.get(url, stream=True, timeout=600) as r:
+            r.raise_for_status()
+            for chunk in r.iter_content(1 << 22):
+                tmp.write(chunk)
+        tmp.close()
+        how = f"full download (windowed read failed: {e_http!r})"
+        with rasterio.open(tmp.name) as src:
+            arr, tr = _read_window(src, bbox)
+    finally:
+        if tmp is not None:
+            try: os.unlink(tmp.name)
+            except OSError: pass
     res = window_pixels(arr, tr, grid)
     res["how"] = how
     return res

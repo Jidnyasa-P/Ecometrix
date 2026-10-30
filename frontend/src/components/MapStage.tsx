@@ -25,6 +25,8 @@ export interface MapStageProps {
   /** When set, cells that fail the test are dimmed and flattened (exploratory filter). */
   highlight?: ((c: Cell) => boolean) | null;
   selectedHex?: string | null;
+  /** Hexagons to outline (for example the sites chosen in a plan). */
+  marked?: string[] | null;
   onHover?: (c: Cell | null, x: number, y: number) => void;
   onSelect?: (c: Cell | null) => void;
   label: string;
@@ -121,6 +123,13 @@ export default function MapStage(p: MapStageProps) {
         onClick: info => cb.current.onSelect?.((info.object as Cell) ?? null)
       })
     ];
+    if (p.marked && p.marked.length) {
+      const set = new Set(p.marked);
+      layers.push(new H3HexagonLayer<Cell>({
+        id: "marked", data: p.cells.filter(c => set.has(c.h3)), getHexagon: d => d.h3, filled: false, stroked: true, extruded: false, pickable: false,
+        getLineColor: p.theme === "dark" ? [200, 240, 60, 255] : [11, 122, 75, 255], lineWidthMinPixels: 2.5
+      }));
+    }
     if (p.selectedHex) {
       const sel = p.cells.find(c => c.h3 === p.selectedHex);
       if (sel) layers.push(new H3HexagonLayer<Cell>({
@@ -129,7 +138,7 @@ export default function MapStage(p: MapStageProps) {
       }));
     }
     overlay.setProps({ layers: layers as never });
-  }, [p.cells, p.field, p.theme, p.extrude, p.highlight, p.selectedHex, p.interactive, ready]);
+  }, [p.cells, p.field, p.theme, p.extrude, p.highlight, p.selectedHex, p.marked, p.interactive, ready]);
 
   return (
     <div className="mapstage" role="img" aria-label={p.label}>

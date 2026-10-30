@@ -66,7 +66,7 @@ describe("pages", () => {
     await waitFor(() => expect(screen.getByText(/Where does/)).toBeTruthy());
     expect(screen.getByText(/9\.1 trees per hectare/)).toBeTruthy();
     expect(screen.getByText(/33% of residents/)).toBeTruthy();
-    expect(screen.getByText(/simulated and labelled as such/)).toBeTruthy();
+    expect(screen.getByText(/Every plan is a simulation/)).toBeTruthy();
     expect(screen.getByTestId("map").dataset.field).toBe("tree_density_ha");
   });
 
@@ -114,7 +114,7 @@ describe("pages", () => {
     window.history.pushState({}, "", "/method");
     render(<App />);
     await waitFor(() => expect(screen.getByText(/Surface temperature is not air temperature/)).toBeTruthy());
-    expect(screen.getByText(/Nothing below exists yet/)).toBeTruthy();
+    expect(screen.getByText(/What is still open/)).toBeTruthy();
   });
 
   it("theme toggle flips and persists", async () => {

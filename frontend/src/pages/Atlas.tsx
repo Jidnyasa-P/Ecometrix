@@ -67,9 +67,9 @@ function buildSteps(summary: Summary | null, cells: Cell[], fields: Record<strin
   steps.push({
     id: "next", kicker: "05 · Next", title: "From a baseline to a decision.", field: has("tree_density_ha") ? "tree_density_ha" : Object.keys(fields)[0], extrude: true, pitch: 52, bearing: -12, drift: true,
     body: <>
-      <p>Everything above is what is on the ground today. The next screens project where the city is heading, score where green space is needed most, and run a what-if for one candidate site: cost, cooling, people reached and carbon, each with a range.</p>
-      <p className="step__caveat">Those what-ifs are simulated and labelled as such. A budget-constrained portfolio comparison is still to come.</p>
-      <div className="step__cta"><Link className="btn btn--solid" to="/priority">Where is the need? <Arrow /></Link><Link className="btn btn--ghost" to="/forecast">Where is the city heading?</Link></div>
+      <p>Everything above is what is on the ground today. The next screens project where the city is heading, score where green space is needed most, choose the best set of sites for a budget with an exact optimiser, and compare plans against doing nothing.</p>
+      <p className="step__caveat">Every plan is a simulation, labelled as such. Costs and carbon are sourced ranges, nothing has been built, and no payback is claimed.</p>
+      <div className="step__cta"><Link className="btn btn--solid" to="/plan">Best plan under a budget <Arrow /></Link><Link className="btn btn--ghost" to="/priority">Where is the need?</Link></div>
     </>
   });
   return steps;

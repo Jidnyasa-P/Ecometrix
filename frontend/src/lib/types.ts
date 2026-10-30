@@ -77,3 +77,27 @@ export interface ScenarioResult {
   cost_effectiveness: { inr_per_person_newly_served?: Range; inr_per_t_co2e?: Range | null; inr_per_person_degree_c?: Range };
   budget?: { budget_inr: number; probability_within_budget: number; p50_within_budget: boolean; max_area_ha_at_p50_cost: number | null; note: string };
 }
+
+export interface PortfolioSite {
+  site_id: string; h3: string; type: "pocket_park" | "mini_forest"; area_ha: number; cost_p50_inr: number; cooling_person_degrees_p50: number;
+  carbon_t_co2e_p50: number; people_newly_served_marginal: number; high_need: boolean; lat: number; lng: number;
+}
+export interface PortfolioResult {
+  preset: string; budget_inr: number; equity_pct: number; solver: { status: string; gap: number | null; prefiltered: boolean; candidates: number };
+  n_sites: number; by_type: Record<string, number>; cost_pv_inr: Range; cooling_person_degrees: Range; carbon_t_co2e: Range; people_newly_served: number;
+  prob_within_budget: number; high_need_share_of_spend: number; objective_norm: number; sites: PortfolioSite[];
+  baseline_top_need: { n_sites: number; people_newly_served: number; cost_pv_inr: Range; cooling_person_degrees: Range; carbon_t_co2e: Range; objective_norm: number };
+  gain_vs_top_need_pct: number | null;
+}
+export interface Portfolios {
+  status: string; presets: Record<string, Record<string, number>>; budgets_inr: number[]; equity_shares_pct: number[]; median_site_cost_inr: number;
+  candidate_sites: number; no_regret_site_ids: string[]; no_regret_rule: string; high_need_rule: string; normalisation: string; results: PortfolioResult[];
+}
+export interface SensitivityRow {
+  parameter: string; low: number | null; base: number | null; high: number | null; unit?: string | null; variant?: boolean; max_relative_swing: number;
+  effects: Record<string, { at_low: number | null; at_high: number | null }>;
+}
+export interface Sensitivity {
+  status: string; method: string;
+  types: Record<string, { site_id: string; type: string; area_ha: number; base: Record<string, number | null>; rows: SensitivityRow[] }>;
+}

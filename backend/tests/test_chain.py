@@ -13,8 +13,9 @@ import run_models  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
-@pytest.fixture()
-def chain_dir(tmp_path):
+@pytest.fixture(scope="module")
+def chain_dir(tmp_path_factory):
+    tmp_path = tmp_path_factory.mktemp("chain")
     centre = h3.latlng_to_cell(18.52, 73.85, 9)
     ring = sorted(h3.grid_disk(centre, 35))
     n = len(ring); rng = np.random.default_rng(11)
@@ -38,6 +39,20 @@ def chain_dir(tmp_path):
     for y in range(2000, 2021):
         ps[f"y{y}"] = base * (1 + 0.025 * (y - 2000)) * (1 + rng.normal(0, 0.02, n))
     ps.to_parquet(tmp_path / "popseries.parquet", index=False)
+    # exact catchments as the pipeline would write them: each hexagon reaches a few unserved pixels, shared with its neighbours
+    rows = []
+    for i, h in enumerate(df["h3"]):
+        for k in range(i * 2, i * 2 + 5):
+            rows.append((h, k, 5.0 + (k % 7) * 3))
+    sp = pd.DataFrame(rows, columns=["h3", "pixel", "people"])
+    sp["people"] = sp["pixel"].map(sp.drop_duplicates("pixel").set_index("pixel")["people"])
+    sp.to_parquet(tmp_path / "site_pixels.parquet", index=False)
+    import yaml, os
+    cfg = yaml.safe_load((ROOT / "config" / "pilot_pune.yaml").read_text())
+    cfg["portfolio"].update({"budget_multiples_of_median_site_cost": [5, 20], "equity_shares_pct": [0, 50], "solver_time_limit_s": 2,
+                             "presets": {"balanced": cfg["portfolio"]["presets"]["balanced"], "heat_first": cfg["portfolio"]["presets"]["heat_first"]}})
+    (tmp_path / "test_config.yaml").write_text(yaml.safe_dump(cfg))
+    os.environ["ECOMETRIX_CONFIG"] = str(tmp_path / "test_config.yaml")
     (tmp_path / "manifest.json").write_text('{"city":"T","layers":{},"n_cells":%d}' % n)
     assert run_models.main([str(tmp_path)]) == 0
     return tmp_path
@@ -77,3 +92,20 @@ def test_cell_with_missing_satellite_value_is_null_not_zero(chain_dir):
     d = c.get("/api/cells").json()
     if "ndvi" in d["values"]:
         assert d["values"]["ndvi"][5] is None
+
+
+def test_portfolios_and_sensitivity_are_served_and_coherent(chain_dir):
+    c = TestClient(create_app(chain_dir))
+    p = c.get("/api/portfolios").json()
+    assert p["status"] == "ok" and p["candidate_sites"] > 10 and len(p["results"]) == 2 * len(p["budgets_inr"]) * 2
+    for r in p["results"]:
+        assert r["solver"]["status"] in ("OPTIMAL", "FEASIBLE")
+        assert r["cost_pv_inr"]["p50"] <= r["budget_inr"] * 1.5                          # median cost near or under the budget (MC sums can exceed it)
+        assert r["people_newly_served"] >= 0 and 0 <= r["prob_within_budget"] <= 1
+        if r["equity_pct"] == 0 and r["gain_vs_top_need_pct"] is not None:
+            assert r["gain_vs_top_need_pct"] >= -1e-6
+    ids = {s["site_id"] for s in c.get("/api/sites").json()["columns"]["site_id"] and [{"site_id": x} for x in c.get("/api/sites").json()["columns"]["site_id"]]}
+    assert all(s["site_id"] in ids for r in p["results"] for s in r["sites"])
+    sv = c.get("/api/sensitivity").json()
+    assert sv["status"] == "ok" and sv["types"]["mini_forest"]["rows"][0]["max_relative_swing"] >= sv["types"]["mini_forest"]["rows"][-1]["max_relative_swing"]
+    assert c.get("/api/model-report").json()["modules"]["portfolio"]["status"] == "ok"

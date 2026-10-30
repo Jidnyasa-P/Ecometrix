@@ -11,7 +11,7 @@ function R({ r, f, suffix = "" }: { r: Range | null | undefined; f: (n: number) 
   return <><strong>{f(r.p50)}{suffix}</strong> <span className="muted">(range {f(r.p10)} to {f(r.p90)})</span></>;
 }
 
-export default function ScenarioPanel({ site, onClose }: { site: Site; onClose: () => void }) {
+export default function ScenarioPanel({ site, onClose, embedded = false }: { site: Site; onClose: () => void; embedded?: boolean }) {
   const [area, setArea] = useState(site.area_ha);
   const [budgetLakh, setBudgetLakh] = useState("");
   const [horizon, setHorizon] = useState(10);
@@ -35,7 +35,7 @@ export default function ScenarioPanel({ site, onClose }: { site: Site; onClose: 
   const step = 0.1;
   const min = Math.min(0.1, site.area_ha);
   return (
-    <aside className="scenario" aria-label="Scenario for the selected site">
+    <aside className={`scenario ${embedded ? "scenario--embedded" : ""}`} aria-label="Scenario for the selected site">
       <div className="cellcard__head">
         <div>
           <p className="kicker">Scenario · {TYPE_NAME[site.type]}</p>
