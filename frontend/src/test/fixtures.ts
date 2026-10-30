@@ -43,7 +43,7 @@ export function mockApi(extra: Record<string, { status?: number; body: unknown }
     "/api/cells": { body: cells }, "/api/sites": { body: sites }, "/api/portfolios": { body: portfolios }, "/api/sensitivity": { body: sensitivity }, "/api/model-report": { body: report },
     "/api/forecast": { body: forecast }, "/api/assumptions": { body: assumptions }, "/api/scenarios/run": { body: scenario }, ...extra };
   const fn = vi.fn(async (url: string) => {
-    const r = routes[String(url).replace(/^https?:\/\/[^/]+/, "")];
+    const pathname = new URL(String(url), window.location.origin).pathname; const r = routes[pathname];
     if (!r) return new Response("{}", { status: 404 });
     return new Response(JSON.stringify(r.body), { status: r.status ?? 200 });
   });
