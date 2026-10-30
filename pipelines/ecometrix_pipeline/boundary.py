@@ -1,9 +1,8 @@
-"""Study-area boundary from the 2025 PMC electoral wards, then OSM, then a flagged bbox.
+"""Load a city-specific boundary, otherwise use OSM administrative limits or a flagged bbox.
 
-The preferred source is the 2025 41-ward KML published in OpenCity's PMC Wards Info
-catalogue and credited to Parisar. Ward polygons are dissolved into the city outline and
-checked against the expanded PMC area. The OSM Nominatim lookup is secondary; the
-configured rectangle is the last resort and is always explicitly marked as a fallback.
+Pune can use its configured 2025 PMC electoral-ward resource. Other profiles use
+OpenStreetMap Nominatim. A configured rectangle is the last resort and is always marked
+as a fallback; the release quality gate will not publish a fallback boundary.
 """
 from __future__ import annotations
 
@@ -128,7 +127,7 @@ def _validate(geom, cfg) -> tuple[bool, str]:
     if not geom.buffer(0).covers(Point(lon, lat)):
         return False, "polygon does not cover the city centre point"
     a = area_km2(geom, cfg["utm_epsg"])
-    lo, hi = cfg["boundary"]["area_sanity_km2"]
+    lo, hi = cfg.get("boundary", {}).get("area_sanity_km2", [1.0, 100000.0])
     if not (lo <= a <= hi):
         return False, f"area {a:.1f} km2 outside sanity range {lo}-{hi}"
     return True, f"{a:.1f} km2"
@@ -213,7 +212,7 @@ def _nominatim_boundary(cfg: dict, sess, notes: list[str]) -> dict | None:
         try:
             r = sess.get(b["nominatim_url"], params={
                 "q": query, "format": "jsonv2", "polygon_geojson": 1, "limit": 10,
-                "countrycodes": "in", "addressdetails": 1,
+                "countrycodes": b.get("countrycodes", cfg.get("country_code", "").lower()), "addressdetails": 1,
             }, timeout=60)
             r.raise_for_status()
             hits = r.json()
@@ -257,16 +256,20 @@ def _nominatim_boundary(cfg: dict, sess, notes: list[str]) -> dict | None:
 def fetch_boundary(cfg: dict, sess) -> dict:
     """Try the current PMC ward dataset, then OSM, then a transparent rectangle fallback."""
     notes: list[str] = []
-    try:
-        return _open_city_ward_boundary(cfg, sess)
-    except Exception as exc:
-        notes.append(f"OpenCity PMC ward boundary unavailable: {type(exc).__name__}: {exc}")
+    if cfg.get("boundary", {}).get("opencity_package_id"):
+        try:
+            return _open_city_ward_boundary(cfg, sess)
+        except Exception as exc:
+            notes.append(f"Configured OpenCity boundary unavailable: {type(exc).__name__}: {exc}")
 
     osm_result = _nominatim_boundary(cfg, sess, notes)
     if osm_result is not None:
         return osm_result
 
-    w, s, e_, n = cfg["fallback_bbox"]
+    bbox = cfg.get("fallback_bbox")
+    if not bbox or len(bbox) != 4:
+        raise RuntimeError("No valid administrative boundary was found and no explicit fallback_bbox is configured.")
+    w, s, e_, n = bbox
     geom = box(w, s, e_, n)
     return {
         "geometry": geom,

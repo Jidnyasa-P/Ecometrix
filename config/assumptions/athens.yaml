@@ -1,0 +1,55 @@
+version: 1
+city: Athens
+country: Greece
+currency: EUR
+finance:
+  enabled: false
+  reason: No sufficiently comparable, city-specific capital and maintenance cost schedule
+    has been validated yet. Cost scenarios and budget optimisation are disabled rather
+    than populated with invented currency values.
+common:
+  discount_rate:
+    low: 0.05
+    base: 0.05
+    high: 0.05
+    label: ASSUMED
+    source: 'European Commission, Guide to Cost-Benefit Analysis of Investment Projects
+      (2014–2020): 5% social discount-rate benchmark for Cohesion Member States, including
+      Greece. https://ec.europa.eu/regional_policy/sources/studies/cba_guide.pdf'
+    note: Historical EU programme-period benchmark only; not evidence of a current
+      Athens-specific municipal rate. Replace after local appraisal review.
+  horizon_years:
+    value: 10
+    label: ASSUMED
+    source: Project configuration; editable after local appraisal review.
+  co2_per_c:
+    value: 3.6667
+    label: CONSTANT
+    source: Molecular mass ratio CO2:C = 44:12
+mini_forest:
+  counts_for_access:
+    value: false
+    label: ASSUMED
+    source: 'Policy setting: dense plantation is not counted as publicly accessible
+      park unless verified as open.'
+  carbon_enabled: false
+  carbon:
+    estimated: false
+    source: No city-specific planting survival and sequestration series has been validated
+      for this city.
+pocket_park:
+  counts_for_access:
+    value: true
+    label: ASSUMED
+    source: A pocket park only counts if it meets the city access-area threshold.
+  min_area_ha_for_access:
+    value: 0.5
+    label: ASSUMED
+    source: https://www.who.int/europe/publications/i/item/9789289052498
+  carbon:
+    estimated: false
+    source: No city-specific park-tree carbon estimate has been validated for this
+      city.
+provenance_note: This country pack contains a cited appraisal discount-rate reference
+  and access benchmark only. Financial cost and carbon assumptions are deliberately
+  disabled until locally sourced.

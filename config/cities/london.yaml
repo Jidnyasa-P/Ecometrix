@@ -1,0 +1,169 @@
+city: London
+country: United Kingdom
+city_slug: london
+country_code: GB
+country_iso3: GBR
+currency: GBP
+locale: en-GB
+language: en
+unit_system: metric
+center:
+- 51.5072
+- -0.1276
+h3_resolution: 8
+pixel_m: 30
+fallback_bbox:
+- -0.51
+- 51.28
+- 0.335
+- 51.7
+assumptions_path: config/assumptions/london.yaml
+data_output: data/cities/london/outputs
+boundary:
+  source: nominatim
+  nominatim_url: https://nominatim.openstreetmap.org/search
+  query: Greater London, England, United Kingdom
+  nominatim_queries:
+  - Greater London, England, United Kingdom
+  - London, England, United Kingdom
+  countrycodes: gb
+  area_sanity_km2:
+  - 1200
+  - 1900
+tree_census:
+  enabled: false
+  reason: No city-specific open tree inventory has been configured. Canopy is derived
+    from global land-cover products instead; tree counts are intentionally not imputed.
+osm:
+  overpass_url: https://overpass-api.de/api/interpreter
+  timeout_s: 240
+satellite:
+  stac_url: https://planetarycomputer.microsoft.com/api/stac/v1
+  season_months:
+  - 5
+  - 6
+  - 7
+  years:
+  - 2024
+  - 2025
+  - 2026
+  audit_years:
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+  - 2026
+  cloud_cover_max: 25
+  min_clear_obs: 2
+  latest_window_days: 180
+  latest_cloud_cover_max: 70
+  latest_min_clear_obs: 1
+  latest_max_age_days: 60
+  latest_min_valid_cells_pct: 50
+population:
+  url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/GBR/gbr_ppp_2020_constrained.tif
+  year: 2020
+access:
+  distance_m: 300
+  min_area_ha: 2.0
+  standard: Natural England Accessible Greenspace Standards — Local Standard
+  method: straight_line
+  source: https://designatedsites.naturalengland.org.uk/GreenInfrastructure/AccessibleGreenspaceStandard.aspx
+  note: The Local Standard specifies at least 2 ha within 300 m. Current implementation
+    measures straight-line distance; it does not yet implement the separate 15-minute
+    walk area-wide standard.
+population_series:
+  url_template: https://data.worldpop.org/GIS/Population/Global_2000_2020/{year}/GBR/gbr_ppp_{year}.tif
+  arcgis_export_url: https://worldpop.arcgis.com/arcgis/rest/services/WorldPop_Total_Population_100m/ImageServer/exportImage
+  pixel_size_deg: 0.0008333333333333334
+  years:
+  - 2000
+  - 2001
+  - 2002
+  - 2003
+  - 2004
+  - 2005
+  - 2006
+  - 2007
+  - 2008
+  - 2009
+  - 2010
+  - 2011
+  - 2012
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+candidates:
+  pocket_park:
+    min_site_ha: 0.5
+    max_site_ha: 2.0
+  mini_forest:
+    min_site_ha: 0.1
+    max_site_ha: 1.0
+forecast:
+  train_until: 2014
+  horizons:
+  - 2025
+  - 2030
+  - 2035
+need:
+  presets:
+    balanced:
+      heat: 0.25
+      people: 0.25
+      gap: 0.25
+      growth: 0.25
+    heat_first:
+      heat: 0.55
+      people: 0.2
+      gap: 0.15
+      growth: 0.1
+    access_first:
+      heat: 0.15
+      people: 0.25
+      gap: 0.5
+      growth: 0.1
+    growth_aware:
+      heat: 0.15
+      people: 0.2
+      gap: 0.2
+      growth: 0.45
+portfolio:
+  presets:
+    balanced:
+      cooling: 0.34
+      people: 0.33
+      carbon: 0.33
+    heat_first:
+      cooling: 0.6
+      people: 0.2
+      carbon: 0.2
+    access_first:
+      cooling: 0.2
+      people: 0.6
+      carbon: 0.2
+    carbon_first:
+      cooling: 0.2
+      people: 0.2
+      carbon: 0.6
+  budget_multiples_of_median_site_cost:
+  - 5
+  - 10
+  - 20
+  - 40
+  - 80
+  - 160
+  equity_shares_pct:
+  - 0
+  - 50
+  no_regret_min_share: 0.75
+  min_separation_rings: 0
+  solver_time_limit_s: 90

@@ -1,0 +1,4 @@
+# Canonical, fully pinned environment for local development and CI.
+-r backend/requirements-dev.txt
+-r model/requirements.txt
+-r pipelines/requirements.txt

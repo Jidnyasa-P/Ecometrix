@@ -1,21 +1,14 @@
-# model/
+# EcoMetrix model layer
 
-Analytical modules. All run from `python model/run_models.py` after the pipeline (reads `data/outputs`).
+Run from the repository root after the selected city's data pipeline has completed:
 
-| Module | Milestone | File | Status |
-|---|---|---|---|
-| NDVI vs surface-temperature baseline | M3 | `baseline_relationship.py` | Built |
-| Heat–greenery model (spatial CV vs simple baselines, monotonic constraints, bootstrap ranges) | M4 | `heat_model.py` | Built |
-| Demand forecast (backtest, error envelope) | M5 | `forecast.py` | Built |
-| Need score (four components, presets, stability) | M5 | `need_score.py` | Built |
-| Candidate sites (pocket park, mini-forest) | M5 | `sites.py` | Built |
-| Budget-constrained portfolio optimiser | M6 | n/a | Not built |
-
-Model cards: `docs/model-cards/`. Rules: every model is compared with a simple baseline and kept only if it wins; validation uses spatial block cross-validation; no accuracy figure is published before it comes from such a test.
-
-```bash
-pip install -r model/requirements.txt
-python model/run_models.py
-python -m pytest model/tests
+```powershell
+python model/baseline_relationship.py --city pune
+python model/run_models.py --city pune
 ```
-The cost and impact engine for one site lives in `backend/app/engine/` (it reads `config/assumptions.yaml`).
+
+Replace `pune` with `london`, `new-york` or `athens` to build a different configured city. Outputs are written to that city's `data/cities/<slug>/outputs/` folder. The model layer reads the same city configuration as the pipeline; its metric projection is calculated from the city's centre rather than being fixed to Pune's UTM zone.
+
+Core modules are heat model, greenness targets, forecast, need score and candidate sites. Financial sensitivity and exact portfolio optimisation run only when that city's assumptions pack has a validated finance model enabled. In this archive that is Pune only. Other city packs deliberately disable financial cost and carbon estimates rather than reusing INR-based or geographically inappropriate assumptions.
+
+Models are trained and validated per city. Do not transfer Pune model weights, validation metrics or conclusions to London, New York or Athens. Complete the city-specific audit and release quality gate before presenting results.

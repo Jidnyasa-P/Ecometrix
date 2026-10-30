@@ -4,8 +4,8 @@ from __future__ import annotations
 # key -> definition. `evidence` follows the roadmap's four labels.
 FIELDS: dict[str, dict] = {
     "tree_density_ha": {"label": "Trees per hectare", "unit": "trees/ha", "evidence": "MEASURED", "group": "Green", "decimals": 1,
-        "source": "Pune Tree Census 2019 (PMC open data)", "ramp": "green",
-        "about": "Every tree counted in the 2019 census, divided by the hexagon area."},
+        "source": "City-specific tree inventory (where available)", "ramp": "green",
+        "about": "Recorded trees divided by hexagon area. This field is omitted when a city has no suitable open tree inventory; satellite canopy is not converted into an individual tree count."},
     "treecover_pct": {"label": "Tree cover", "unit": "% of area", "evidence": "MODELLED", "group": "Green", "decimals": 1,
         "source": "ESA WorldCover (satellite classification, 10 m)", "ramp": "green",
         "about": "Share of the hexagon classified as tree cover from Sentinel-1 and Sentinel-2 imagery."},
@@ -29,10 +29,10 @@ FIELDS: dict[str, dict] = {
         "about": "Modelled number of residents in the hexagon (2020). A model estimate, not a census count."},
     "access_share": {"label": "Park access", "unit": "% of people", "evidence": "MODELLED", "group": "Access", "decimals": 3, "scale": 100,
         "source": "WorldPop + OpenStreetMap", "ramp": "access",
-        "about": "Share of residents within 300 m (straight line) of a mapped public green space of at least 0.5 ha, the WHO recommendation."},
+        "about": "Share of residents meeting the selected city profile’s configured park-access distance and minimum qualifying green-space area. The city Method page states the benchmark and whether the distance is a straight-line or network-based measure."},
     "dist_park_m": {"label": "Distance to nearest park", "unit": "m", "evidence": "MEASURED", "group": "Access", "decimals": 0,
         "source": "OpenStreetMap, measured from the hexagon centre", "ramp": "distance",
-        "about": "Straight-line distance from the hexagon centre to the nearest mapped public green space of at least 0.5 ha."},
+        "about": "Distance from the hexagon centre to the nearest mapped public green space that meets the selected city profile’s minimum qualifying area. See the city Method page for the measurement method."},
     "park_ha": {"label": "Mapped public green", "unit": "ha", "evidence": "MEASURED", "group": "Access", "decimals": 2,
         "source": "OpenStreetMap", "ramp": "green",
         "about": "Hectares of mapped parks, gardens and playgrounds inside the hexagon. OpenStreetMap may be incomplete."},
@@ -53,7 +53,7 @@ FIELDS: dict[str, dict] = {
     "need_people": {"label": "Need: residents", "unit": "percentile", "evidence": "MODELLED", "group": "Need", "decimals": 0, "scale": 100,
         "source": "WorldPop 2020, ranked", "ramp": "need", "about": "Percentile rank of residents among populated hexagons."},
     "need_gap": {"label": "Need: park-access gap", "unit": "percentile", "evidence": "MODELLED", "group": "Need", "decimals": 0, "scale": 100,
-        "source": "WorldPop + OpenStreetMap, ranked", "ramp": "need", "about": "Percentile rank of the share of residents beyond 300 m of a park."},
+        "source": "WorldPop + OpenStreetMap, ranked", "ramp": "need", "about": "Percentile rank of the share of residents beyond the selected city profile’s configured park-access distance."},
     "need_growth": {"label": "Need: growth", "unit": "percentile", "evidence": "MODELLED", "group": "Need", "decimals": 0, "scale": 100,
         "source": "Demand forecast, ranked", "ramp": "need", "about": "Percentile rank of projected people added by 2035."},
 }

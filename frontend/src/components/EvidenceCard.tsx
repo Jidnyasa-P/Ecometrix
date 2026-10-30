@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { cityPath } from "../lib/city";
 import { fmtInr, fmtInt, fmtNum } from "../lib/format";
+import { useData } from "../lib/data";
 import type { Cell, FieldDef, PortfolioResult, PortfolioSite, Site } from "../lib/types";
 import { EvidenceBadge } from "./Bits";
 import ScenarioPanel from "./ScenarioPanel";
@@ -16,6 +18,9 @@ export default function EvidenceCard({ site, cell, fields, result, noRegret, onC
   site: PortfolioSite; cell?: Cell; fields: Record<string, FieldDef>; result: PortfolioResult; noRegret: boolean; onClose: () => void;
 }) {
   const [whatIf, setWhatIf] = useState(false);
+  const data = useData();
+  const cityName = data.status === "ready" ? data.meta.city.name : "the selected city";
+  const accessDistance = data.status === "ready" ? data.meta.city.access?.distance_m ?? 300 : 300;
   const asSite: Site = { id: site.site_id, h3: site.h3, type: site.type, area_ha: site.area_ha, open_land_ha: site.area_ha, pop: cell?.v.pop ?? 0, unserved: 0,
     dlst_p50: null, noRegret, lat: site.lat, lng: site.lng };
   const bars = COMPS.filter(([k]) => k in fields && cell?.v[k] != null);
@@ -38,7 +43,7 @@ export default function EvidenceCard({ site, cell, fields, result, noRegret, onC
           <div key={k} className="bar"><span className="bar__label">{label}</span>
             <span className="bar__track"><span className="bar__fill" style={{ width: `${Math.min(100, Math.max(0, cell?.v[k] ?? 0))}%` }} /></span>
             <span className="bar__num">{fmtNum(cell?.v[k], 0)}</span></div>)) : <p className="muted">Need components are not available for this build.</p>}
-        <p className="muted">Percentile of this hexagon among populated hexagons (100 = highest need). A high percentile means high compared with the rest of Pune, not high in absolute terms.</p>
+        <p className="muted">Percentile of this hexagon among populated hexagons (100 = highest need). A high percentile means high compared with the rest of {cityName}, not high in absolute terms.</p>
         {cell?.v.need_balanced != null && <p>Balanced need score: <strong>{fmtNum(cell.v.need_balanced, 0)}</strong> of 100</p>}
       </section>
 
@@ -47,7 +52,7 @@ export default function EvidenceCard({ site, cell, fields, result, noRegret, onC
         <dl className="kv kv--nested">
           <div><dt>Cost (median, present value) <EvidenceBadge kind="ASSUMED" /></dt><dd>{fmtInr(site.cost_p50_inr)}</dd></div>
           <div><dt>Cooling (person-degrees) <EvidenceBadge kind="MODELLED" /></dt><dd>{site.cooling_person_degrees_p50 > 0 ? fmtInt(site.cooling_person_degrees_p50) : "not estimated"}</dd></div>
-          <div><dt>People newly within 300 m of a park, not reached by another chosen site <EvidenceBadge kind="MODELLED" /></dt><dd>{fmtInt(site.people_newly_served_marginal)}</dd></div>
+          <div><dt>People newly within {fmtNum(accessDistance, 0)} m of a park, not reached by another chosen site <EvidenceBadge kind="MODELLED" /></dt><dd>{fmtInt(site.people_newly_served_marginal)}</dd></div>
           <div><dt>Carbon stored (t CO₂e) <EvidenceBadge kind="ASSUMED" /></dt><dd>{site.type === "mini_forest" ? fmtInt(site.carbon_t_co2e_p50) : "not estimated"}</dd></div>
         </dl>
         <p className="muted">Everything is compared with doing nothing here. This is simulated: nothing has been built.</p>
@@ -65,7 +70,7 @@ export default function EvidenceCard({ site, cell, fields, result, noRegret, onC
 
       <section className="evidence__sec">
         <h3>Assumptions behind the cost</h3>
-        <p className="muted">{COST_BASIS[site.type]} Every parameter, range and source is in the <Link to="/method">assumptions register</Link>.</p>
+        <p className="muted">{COST_BASIS[site.type]} Every parameter, range and source is in the <Link to={cityPath("/method")}>assumptions register</Link>.</p>
       </section>
 
       <button className="btn btn--ghost" onClick={() => setWhatIf(w => !w)} aria-expanded={whatIf}>{whatIf ? "Hide detailed what-if" : "Run a detailed what-if"}</button>

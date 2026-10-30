@@ -1,6 +1,12 @@
-# data/
+# City data folders
 
-* `outputs/` : what the pipeline produces and the API serves (`cells.parquet`, `manifest.json`, `summary.json`, `audit.json`, `relationship.json`). **Committed**, so Render can serve it. It is empty until you run the "Build data" workflow or `make data`.
-* `raw/` : downloads, git-ignored, recreated by the pipeline.
+Each city has an isolated folder:
 
-Nothing in this folder is hand-written or sample data. If a layer could not be built, `manifest.json` says so and the app shows the reason.
+```text
+data/cities/<city-slug>/raw/       # downloaded source files (git-ignored)
+data/cities/<city-slug>/outputs/  # manifest, layers, parquet, audit and models
+```
+
+Configured slugs: `pune`, `london`, `new-york`, `athens`. Outputs are not shared between cities. A `release_check.json` is written only after the city-specific data, core model and audit checks pass. The website marks a city built only when that marker exists and has `status: passed`.
+
+`data/outputs/` is retained as a legacy Pune path for compatibility with older local builds. New builds write to `data/cities/pune/outputs/`.

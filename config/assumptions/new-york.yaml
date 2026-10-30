@@ -1,0 +1,55 @@
+version: 1
+city: New York City
+country: United States
+currency: USD
+finance:
+  enabled: false
+  reason: No sufficiently comparable, city-specific capital and maintenance cost schedule
+    has been validated yet. Cost scenarios and budget optimisation are disabled rather
+    than populated with invented currency values.
+common:
+  discount_rate:
+    low: 0.014
+    base: 0.016
+    high: 0.02
+    label: ASSUMED
+    source: 'US OMB Circular A-94 Appendix C, 2026 rates: real Treasury rates are
+      1.4% at 7 years, 1.6% at 10 years and 2.0% at 20/30 years. https://www.whitehouse.gov/wp-content/uploads/2026/03/M-26-09-2026-Discount-Rates-for-OMB-Circular-No.-A-94.pdf'
+    note: Federal cost-effectiveness comparator, not a New York City-specific social
+      discount policy; maturity interpolation is approximated by the displayed range.
+  horizon_years:
+    value: 10
+    label: ASSUMED
+    source: Project configuration; editable after local appraisal review.
+  co2_per_c:
+    value: 3.6667
+    label: CONSTANT
+    source: Molecular mass ratio CO2:C = 44:12
+mini_forest:
+  counts_for_access:
+    value: false
+    label: ASSUMED
+    source: 'Policy setting: dense plantation is not counted as publicly accessible
+      park unless verified as open.'
+  carbon_enabled: false
+  carbon:
+    estimated: false
+    source: No city-specific planting survival and sequestration series has been validated
+      for this city.
+pocket_park:
+  counts_for_access:
+    value: true
+    label: ASSUMED
+    source: A pocket park only counts if it meets the city access-area threshold.
+  min_area_ha_for_access:
+    value: 0.0
+    label: ASSUMED
+    source: https://www.tpl.org/parkserve/about
+    note: No minimum park-area floor is applied in this proxy. Only mapped public green-space polygons are eligible; the 0.5-mile circle remains straight-line and is not a TPL walk-network service area.
+  carbon:
+    estimated: false
+    source: No city-specific park-tree carbon estimate has been validated for this
+      city.
+provenance_note: This country pack contains a cited appraisal discount-rate reference
+  and access benchmark only. Financial cost and carbon assumptions are deliberately
+  disabled until locally sourced.

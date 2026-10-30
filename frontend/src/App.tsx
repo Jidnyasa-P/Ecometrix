@@ -13,6 +13,7 @@ import City from "./pages/City";
 import Evaluation from "./pages/Evaluation";
 import AuditPage from "./pages/Audit";
 import Method from "./pages/Method";
+import { t, useLanguage } from "./lib/i18n";
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -22,10 +23,13 @@ function ScrollTop() {
 
 function Shell() {
   const { pathname } = useLocation();
+  const [lang] = useLanguage();
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
       <Nav />
+      {lang !== "en" && <aside className="translation-banner" role="note">{t(lang, "translation_notice")}</aside>}
       <main id="main"><Routes>
         <Route path="/" element={<Atlas />} />
         <Route path="/forecast" element={<ForecastPage />} />

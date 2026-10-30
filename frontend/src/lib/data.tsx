@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { ApiError, getJson } from "./api";
 import type { Cell, CellsPayload, FieldDef, Meta, Summary } from "./types";
+import { setFormatContext } from "./format";
 
 export type DataState =
   | { status: "loading"; slow: boolean }
@@ -26,11 +28,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [slow, setSlow] = useState(false);
   const [state, setState] = useState<DataState | null>(null);
 
+  const location = useLocation();
+  const citySlug = new URLSearchParams(location.search).get("city") ?? "pune";
+
   useEffect(() => {
     let alive = true;
+    setState(null);
+    setSlow(false);
     (async () => {
       try {
         const meta = await getJson<Meta>("/api/meta", { onSlow: () => alive && setSlow(true) });
+        setFormatContext(meta.city?.currency, meta.city?.locale);
         if (!meta.built) { alive && setState({ status: "not_built", meta }); return; }
         const [summary, cellsPayload] = await Promise.all([
           getJson<Summary>("/api/summary").catch((e: unknown) => (e instanceof ApiError && e.code === "baseline_not_built" ? null : Promise.reject(e))),
@@ -45,8 +53,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { alive = false; };
-  }, []);
+  }, [citySlug]);
 
-  const value = useMemo<DataState>(() => state ?? { status: "loading", slow }, [state, slow]);
+  const value = useMemo<DataState>(() => {
+    if (!state) return { status: "loading", slow };
+    const stateCity = state.status === "ready" ? state.meta.city?.slug
+      : state.status === "not_built" ? state.meta?.city?.slug : citySlug;
+    return stateCity && stateCity !== citySlug ? { status: "loading", slow } : state;
+  }, [state, slow, citySlug]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

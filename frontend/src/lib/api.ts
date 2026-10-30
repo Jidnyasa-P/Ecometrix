@@ -1,5 +1,15 @@
 const BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
+function withCity(path: string): string {
+  if (!path.startsWith("/api/")) return path;
+  const city = new URLSearchParams(window.location.search).get("city");
+  if (!city) return path;
+  const [pathname, query = ""] = path.split("?", 2);
+  const params = new URLSearchParams(query);
+  if (!params.has("city")) params.set("city", city);
+  return `${pathname}?${params.toString()}`;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }
@@ -16,7 +26,7 @@ export async function getJson<T>(path: string, opts: Opts = {}): Promise<T> {
   try {
     for (let attempt = 0; ; attempt++) {
       try {
-        const r = await fetch(`${BASE}${path}`, { headers: { Accept: "application/json" } });
+        const r = await fetch(`${BASE}${withCity(path)}`, { headers: { Accept: "application/json" } });
         if (r.ok) return (await r.json()) as T;
         const retryable = r.status === 502 || r.status === 503 && !(await isNotBuilt(r)) || r.status === 504;
         if (!retryable || attempt >= retries) {
@@ -44,7 +54,7 @@ export const apiBase = BASE || "(same origin, proxied)";
 export async function postJson<T>(path: string, body: unknown): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(`${BASE}${path}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(body) });
+    r = await fetch(`${BASE}${withCity(path)}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(body) });
   } catch {
     throw new ApiError(0, "network", "Cannot reach the EcoMetrix API.");
   }

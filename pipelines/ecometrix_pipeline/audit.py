@@ -13,7 +13,7 @@ def build_audit(cfg: dict, ctx: dict) -> dict:
     if b:
         ok = not b["fallback"]
         checks.append(_check("boundary", "City boundary", "pass" if ok else "warn",
-                             "The 2025 PMC electoral-ward boundary or an OSM administrative boundary is obtained and passes area/geometry sanity checks.",
+                             "An administrative boundary is obtained and passes geometry, centre-point and city-specific area sanity checks.",
                              {"source": b["source"], "area_km2": b["area_km2"], "osm_ref": b.get("osm_ref"),
                               "boundary_dataset": b.get("boundary_dataset"),
                               "boundary_dataset_url": b.get("boundary_dataset_url"),
@@ -30,13 +30,18 @@ def build_audit(cfg: dict, ctx: dict) -> dict:
         valid = t["rows_valid_coords"] / t["rows_total"] if t["rows_total"] else 0
         recon = {"rows_loaded": t["rows_total"], "valid_coordinates_pct": round(100 * valid, 2),
                  "rows_inside_study_area": t["rows_inside_study_area"], "parts_read": t["n_parts_read"],
-                 "published_claim": tc_cfg["published_total_claim"], "listed_parts_total": tc_cfg["listed_parts_total"],
                  "coordinate_detection": t["coordinate_detection"]}
+        if tc_cfg.get("published_total_claim") is not None:
+            recon["published_claim"] = tc_cfg["published_total_claim"]
+            recon["listed_parts_total"] = tc_cfg.get("listed_parts_total")
         status = "pass" if valid >= 0.90 else "fail"
-        checks.append(_check("trees", "Tree census loads and is clean", status,
-                             "At least 90% of rows have valid coordinates; the loaded count is reconciled with published figures.",
-                             recon, "The explainer quotes 4.09 million trees, but the listed parts add up to about 4.009 million. "
-                                    "The loaded row count above is what the pipeline actually read."))
+        checks.append(_check("trees", "City tree inventory loads and is clean", status,
+                             "At least 90% of inventory rows have valid coordinates.", recon,
+                             "The loaded row count is what the pipeline actually read."))
+    elif not tc_cfg.get("enabled", True):
+        checks.append(_check("trees", "Optional city tree inventory", "warn",
+                             "A city-specific open tree inventory is optional; no tree counts are inferred when one is absent.", {},
+                             tc_cfg.get("reason", "No city-specific open tree inventory is configured. Global land-cover canopy remains a separate layer.")))
     # Recent satellite acquisitions are separate from the stable pre-monsoon model inputs.
     latest = ctx.get("latest_satellite") or {}
     latest_max_age = int(cfg.get("satellite", {}).get("latest_max_age_days", 45))

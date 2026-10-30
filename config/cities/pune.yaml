@@ -1,0 +1,173 @@
+city: Pune
+country: India
+center:
+- 18.5204
+- 73.8567
+h3_resolution: 9
+utm_epsg: 32643
+pixel_m: 30
+fallback_bbox:
+- 73.72
+- 18.4
+- 74.02
+- 18.66
+boundary:
+  opencity_ckan_base: https://data.opencity.in
+  opencity_package_id: pune-wards-info
+  opencity_resource_name: PMC Electoral Wards 2025
+  opencity_resource_format: KML
+  min_ward_features: 35
+  nominatim_url: https://nominatim.openstreetmap.org/search
+  query: Pune Municipal Corporation, Maharashtra, India
+  nominatim_queries:
+  - Pune Municipal Corporation, Maharashtra, India
+  - Pune, Maharashtra, India
+  area_sanity_km2:
+  - 450
+  - 600
+tree_census:
+  ckan_base: https://data.opencity.in
+  package_id: pune-tree-census-2019
+  published_total_claim: 4090000
+  listed_parts_total: 4009000
+  enabled: true
+osm:
+  overpass_url: https://overpass-api.de/api/interpreter
+  timeout_s: 240
+satellite:
+  stac_url: https://planetarycomputer.microsoft.com/api/stac/v1
+  season_months:
+  - 3
+  - 4
+  - 5
+  years:
+  - 2024
+  - 2025
+  - 2026
+  audit_years:
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+  - 2026
+  cloud_cover_max: 20
+  min_clear_obs: 2
+  latest_window_days: 180
+  latest_cloud_cover_max: 70
+  latest_min_clear_obs: 1
+  latest_max_age_days: 45
+  latest_min_valid_cells_pct: 50
+population:
+  url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/IND/ind_ppp_2020_constrained.tif
+  year: 2020
+access:
+  distance_m: 300
+  min_area_ha: 0.5
+  standard: WHO Regional Office for Europe green-space benchmark
+  method: straight_line
+  source: https://www.who.int/europe/publications/i/item/9789289052498
+  note: A 300 m / 0.5 ha benchmark, not an Indian statutory requirement.
+population_series:
+  url_template: https://data.worldpop.org/GIS/Population/Global_2000_2020/{year}/IND/ind_ppp_{year}.tif
+  arcgis_export_url: https://worldpop.arcgis.com/arcgis/rest/services/WorldPop_Total_Population_100m/ImageServer/exportImage
+  pixel_size_deg: 0.0008333333333333334
+  years:
+  - 2000
+  - 2001
+  - 2002
+  - 2003
+  - 2004
+  - 2005
+  - 2006
+  - 2007
+  - 2008
+  - 2009
+  - 2010
+  - 2011
+  - 2012
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+candidates:
+  pocket_park:
+    min_site_ha: 0.5
+    max_site_ha: 2.0
+  mini_forest:
+    min_site_ha: 0.1
+    max_site_ha: 1.0
+forecast:
+  train_until: 2014
+  horizons:
+  - 2025
+  - 2030
+  - 2035
+need:
+  presets:
+    balanced:
+      heat: 0.25
+      people: 0.25
+      gap: 0.25
+      growth: 0.25
+    heat_first:
+      heat: 0.55
+      people: 0.2
+      gap: 0.15
+      growth: 0.1
+    access_first:
+      heat: 0.15
+      people: 0.25
+      gap: 0.5
+      growth: 0.1
+    growth_aware:
+      heat: 0.15
+      people: 0.2
+      gap: 0.2
+      growth: 0.45
+portfolio:
+  presets:
+    balanced:
+      cooling: 0.34
+      people: 0.33
+      carbon: 0.33
+    heat_first:
+      cooling: 0.6
+      people: 0.2
+      carbon: 0.2
+    access_first:
+      cooling: 0.2
+      people: 0.6
+      carbon: 0.2
+    carbon_first:
+      cooling: 0.2
+      people: 0.2
+      carbon: 0.6
+  budget_multiples_of_median_site_cost:
+  - 5
+  - 10
+  - 20
+  - 40
+  - 80
+  - 160
+  equity_shares_pct:
+  - 0
+  - 50
+  no_regret_min_share: 0.75
+  min_separation_rings: 0
+  solver_time_limit_s: 90
+city_slug: pune
+country_code: IN
+country_iso3: IND
+currency: INR
+locale: en-IN
+language: en
+unit_system: metric
+assumptions_path: config/assumptions/pune.yaml
+data_output: data/cities/pune/outputs

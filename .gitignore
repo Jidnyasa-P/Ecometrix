@@ -9,3 +9,5 @@ venv/
 .env.local
 data/raw/
 .DS_Store
+
+data/cities/*/raw/

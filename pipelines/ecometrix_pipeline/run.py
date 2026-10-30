@@ -24,7 +24,7 @@ from .grid import build_grid
 from . import tree_census, osm_green, population, satellite, metrics, audit
 
 LAYER_META = {
-    "trees": {"title": "Pune Tree Census 2019", "evidence": "MEASURED", "license": "Public domain (PMC open data via OpenCity)",
+    "trees": {"title": "Pune tree census (2019)", "evidence": "MEASURED", "license": "Public domain (PMC open data via OpenCity)",
               "source": "https://data.opencity.in/dataset/pune-tree-census-2019"},
     "osm": {"title": "Mapped green space (OpenStreetMap)", "evidence": "MEASURED", "license": "ODbL, © OpenStreetMap contributors",
             "source": "https://www.openstreetmap.org (Overpass API)"},
@@ -39,7 +39,7 @@ LAYER_META = {
     "sentinel_latest": {"title": "Latest greenness NDVI (Sentinel-2)", "evidence": "MEASURED", "license": "Copernicus Sentinel data, free and open",
                         "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a"},
     "popseries": {"title": "Population history 2000-2020 (WorldPop yearly)", "evidence": "MODELLED", "license": "CC BY 4.0, WorldPop",
-                  "source": "https://data.worldpop.org/GIS/Population/Global_2000_2020/2020/IND"},
+                  "source": "https://hub.worldpop.org/Global1_2000-2020"},
     "population": {"title": "Population (WorldPop 2020, constrained)", "evidence": "MODELLED", "license": "CC BY 4.0, WorldPop",
                    "source": "https://hub.worldpop.org/geodata/summary?id=49804"},
 }
@@ -47,14 +47,17 @@ LAYER_META = {
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default=None)
-    ap.add_argument("--out", default=str(REPO_ROOT / "data" / "outputs"))
+    ap.add_argument("--city", default=None, help="City slug from config/registry.yaml (pune, london, new-york, athens)")
+    ap.add_argument("--config", default=None, help="Explicit YAML config path; overrides --city")
+    ap.add_argument("--out", default=None, help="Optional output directory; defaults to that city's data_output folder")
     ap.add_argument("--only", default="")
     ap.add_argument("--skip", default="")
-    ap.add_argument("--workdir", default=str(REPO_ROOT / "data" / "raw"))
+    ap.add_argument("--workdir", default=None, help="Optional raw-download directory; defaults to a city-isolated folder")
     args = ap.parse_args(argv)
-    cfg = load_config(args.config)
-    out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    cfg = load_config(args.config, city=args.city)
+    out = Path(args.out or cfg["data_output"]); out.mkdir(parents=True, exist_ok=True)
+    workdir = Path(args.workdir) if args.workdir else REPO_ROOT / "data" / "cities" / cfg["city_slug"] / "raw"
+    workdir.mkdir(parents=True, exist_ok=True)
     only = {x for x in args.only.split(",") if x}
     skip = {x for x in args.skip.split(",") if x}
     want = lambda n: (not only or n in only) and n not in skip
@@ -90,14 +93,18 @@ def main(argv=None):
 
     print("2/7 tree census")
     def _trees():
-        t = tree_census.count_trees(cfg, grid, sess, Path(args.workdir) / "trees")
+        t = tree_census.count_trees(cfg, grid, sess, workdir / "trees")
         ctx["trees"] = t
         cols["tree_count"] = t["per_cell"]
         summary_extra["trees_rows_loaded"] = t["rows_total"]
         summary_extra["trees_species_top"] = t["species_top"]
         summary_extra["trees_species_distinct"] = t["species_distinct"]
         vintages["trees"] = {"vintage": "August 2019", "rows": t["rows_total"], "coordinates": t["coordinate_detection"]}
-    run_step("trees", _trees)
+    if cfg.get("tree_census", {}).get("enabled", True):
+        run_step("trees", _trees)
+    else:
+        layers_status["trees"] = {"title": "City tree inventory (optional)", "evidence": "MEASURED",
+                                   "status": "skipped", "reason": cfg.get("tree_census", {}).get("reason", "No city-specific open tree inventory configured.")}
 
     print("3/7 OpenStreetMap green space")
     polys = {}
@@ -179,8 +186,11 @@ def main(argv=None):
             lat, lng = grid.centroids()
             cx, cy = grid.to_utm.transform(lng, lat)
             cxy = np.column_stack([cx, cy])
-            cols["pop_unserved_300m"] = metrics.unserved_within(p["xy"], p["people"], acc["pixel_distance_m"],
-                                                                cfg["access"]["distance_m"], cxy, cfg["access"]["distance_m"])
+            unserved = metrics.unserved_within(p["xy"], p["people"], acc["pixel_distance_m"],
+                                                 cfg["access"]["distance_m"], cxy, cfg["access"]["distance_m"])
+            # Keep the legacy Pune-era column for older UI/data consumers; the new name is city-neutral.
+            cols["pop_unserved_access"] = unserved
+            cols["pop_unserved_300m"] = unserved
             ci, pi = metrics.unserved_pairs(p["xy"], p["people"], acc["pixel_distance_m"], cfg["access"]["distance_m"], cxy,
                                             cfg["access"]["distance_m"])
             hexes = np.array(grid.hex_ids())
@@ -203,14 +213,18 @@ def main(argv=None):
     df = metrics.cell_table(grid, cols)
     df.to_parquet(out / "cells.parquet", index=False)
     summary = metrics.city_summary(df, summary_extra)
-    summary.update({"city": cfg["city"], "h3_resolution": cfg["h3_resolution"],
-                    "access_rule": f">= {cfg['access']['min_area_ha']} ha public green within {cfg['access']['distance_m']} m (WHO)"})
+    summary.update({"city": cfg["city"], "country": cfg.get("country"), "h3_resolution": cfg["h3_resolution"],
+                    "currency": cfg.get("currency", "INR"), "locale": cfg.get("locale", "en-IN"),
+                    "access_rule": f">= {cfg['access']['min_area_ha']} ha public green within {cfg['access']['distance_m']} m ({cfg['access'].get('standard', 'configured benchmark')}; {cfg['access'].get('method', 'straight_line')})"})
     dump_json(out / "summary.json", summary)
     dump_json(out / "audit.json", audit.build_audit(cfg, ctx))
     for k, v in vintages.items():
         layers_status.setdefault(k, {})["detail"] = v
     manifest = {"pipeline_version": __version__, "generated_at": now, "git_sha": os.environ.get("GITHUB_SHA"),
-                "city": cfg["city"], "h3_resolution": cfg["h3_resolution"], "pixel_m": cfg["pixel_m"],
+                "city": cfg["city"], "city_slug": cfg.get("city_slug", "pune"), "country": cfg.get("country"),
+                "currency": cfg.get("currency", "INR"), "locale": cfg.get("locale", "en-IN"),
+                "unit_system": cfg.get("unit_system", "metric"),
+                "access": cfg.get("access", {}), "h3_resolution": cfg["h3_resolution"], "pixel_m": cfg["pixel_m"],
                 "boundary": ctx["boundary"], "n_cells": grid.n_cells, "columns": list(df.columns),
                 "layers": layers_status}
     dump_json(out / "manifest.json", manifest)

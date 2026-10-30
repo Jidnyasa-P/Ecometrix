@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { EvidenceBadge, Notice, PageHead, Section } from "../components/Bits";
 import { getJson } from "../lib/api";
 import { flattenAssumptions, type AssumptionRow } from "../lib/assumptions";
@@ -9,30 +10,36 @@ const LIMITS = [
   ["Population is modelled.", "WorldPop distributes census totals over the map using land features. The current baseline is the 2020 constrained product, while the yearly history ends in 2020. It is a guide to where people are, not a current head-count."],
   ["WorldCover is a historical reference.", "The ESA WorldCover product used here has 2020 and 2021 editions. It is a static land-cover classification, not a live or annual current-year layer. The loaded edition is recorded in the data audit."],
   ["Parks come from OpenStreetMap.", "Volunteers map parks. Some may be missing or mis-tagged, which can overstate the gap in access. Private and gated spaces tagged as such are excluded."],
-  ["Access uses straight-line distance.", "The WHO recommendation is stated as linear distance. Walking routes (barriers, roads, rivers) will change the answer and are planned for later."],
+  ["Park access is a configured distance proxy.", "The benchmark, distance and minimum park area are city-specific and shown above. This release uses straight-line distance (or an explicitly labelled radius proxy), not pedestrian street-network travel time; barriers, crossings and rivers can change real access."],
   ["No land ownership data.", "A hexagon with little green is not proof that land is available to plant. Every site needs field verification."],
-  ["The census is a 2019 snapshot.", "Trees have grown and been felled since. Ward boundaries in the census are the pre-2017 ones, so EcoMetrix counts on a regular hexagon grid instead."],
+  ["Tree inventory coverage varies by city.", "Pune has a historical point inventory. Other city profiles currently use global land-cover canopy indicators and do not invent individual tree counts. Inventory age and provenance are shown in the data audit."],
   ["Candidate sites are estimates, not parcels.", "A site is the open land (bare, grass and shrub cover, minus mapped parks and forest) inside one hexagon. Ownership, legality, soil and access are unknown, so every site needs field verification."],
   ["The forecast projects a modelled series.", "WorldPop's yearly history is itself a model, and the uncertainty band is the range of errors seen when testing on past years, not a statistical interval. Policy changes are not modelled."],
-  ["Costs and carbon are sourced ranges, not Pune rate schedules.", "Mini-forest costs come from Delhi-region quotes and press estimates; park costs from PMC's average garden spending. Carbon comes from three measured South Indian forests; no pocket-park carbon is estimated. Every value and its source is on this page below."],
-  ["Heat response is an association.", "The heat model learns how surface temperature varies with greenness across Pune today. It does not prove that planting a given site will cool it by that amount, and cooling appears as the planting matures."],
+  ["Costs and carbon assumptions are city specific.", "The Pune pilot retains its India-specific assumptions. London, New York City and Athens do not inherit those figures: their cost scenarios and budget optimiser remain disabled until local capital, maintenance and carbon data are validated."],
+  ["Heat response is an association.", "The heat model learns how surface temperature varies with greenness within the selected city's current baseline. It does not prove that planting a given site will cool it by that amount, and models are trained separately for each city."],
   ["Dry-season greenness.", "Pre-monsoon NDVI is low for grass and crops by design. It is chosen so that greenness and heat are measured in the same season. The separate latest NDVI layer is not used to retrain the heat model."],
   ["Latest satellite layers are near-real-time, not live.", "Landsat surface temperature and Sentinel-2 NDVI are queried from the public satellite catalogue over a rolling 180-day window during each daily data build. In Explore, select the 'Latest observations' group to view these separate rolling composites. The audit shows the newest acquisition date, age and percentage of study-area cells with valid pixels. Cloud cover, revisit schedules and catalogue publication delays can leave gaps. Historical tree census, population and WorldCover layers retain their original vintage and are not presented as live data."]
 ];
 
 const NEXT = [
-  ["Human checks", "Five-person usability test, independent spreadsheet recomputation of one site, 30-site satellite spot-check, expert review of 20 sites, fluent-speaker review of the Marathi text, and a comparison of OpenStreetMap parks with the municipality's own list. Protocols are in docs/evaluation."],
-  ["Data to add", "A Pune rate schedule for new parks and plantations, a census anchor for population, a vulnerability layer (age, income, health), walking-network distance for access."],
+  ["Human checks", "Five-person usability test, independent spreadsheet recomputation of one site, 30-site satellite spot-check, expert review of 20 sites, fluent-speaker review of the Marathi and Greek text, and a comparison of OpenStreetMap parks with the municipality's own list. Protocols are in docs/evaluation."],
+  ["Data to add", "A current population census anchor, locally validated capital and maintenance rates, vulnerability layers where ethically and legally appropriate, and walking-network distance for park access."],
   ["More interventions", "Street-tree corridors (need road-side tree counts) and green or cool roofs (need rooftop areas and a cost source)."],
   ["Real-world evidence", "Before and after satellite greenness and surface temperature for anything that gets built, tree-survival surveys and resident feedback."]
 ];
 
 export default function Method() {
   const [assump, setAssump] = useState<AssumptionRow[] | null>(null);
-  useEffect(() => { getJson<Record<string, unknown>>("/api/assumptions").then(a => setAssump(flattenAssumptions(a))).catch(() => setAssump(null)); }, []);
   const d = useData();
+  const location = useLocation();
+  useEffect(() => {
+    if (d.status !== "ready" && d.status !== "not_built") return;
+    setAssump(null);
+    getJson<Record<string, unknown>>("/api/assumptions").then(a => setAssump(flattenAssumptions(a))).catch(() => setAssump(null));
+  }, [d.status, location.search]);
   const meta = d.status === "ready" ? d.meta : d.status === "not_built" ? d.meta : null;
   const fields = meta?.fields ?? [];
+  const financeAvailable = meta?.city.finance_enabled ?? false;
   return (
     <>
       <PageHead kicker="Method and limits" title="How the baseline is made, and what it cannot tell you.">
@@ -57,7 +64,7 @@ export default function Method() {
 
       <Section>
         <h2 className="display display--sm">The access rule</h2>
-        <p className="lede">Park access follows the WHO Regional Office for Europe&rsquo;s recommendation: a green space of at least 0.5 hectares within 300 metres (straight line) of every home. It comes from a European evidence review, so treat it as a transparent yardstick rather than an Indian statutory standard. The two numbers are set in <code>config/pilot_pune.yaml</code> and can be changed.</p>
+        <p className="lede">The selected city uses this configured benchmark: <strong>{meta?.city.access?.standard ?? "not specified"}</strong>. The app measures {meta?.city.access?.min_area_ha === 0 ? "any mapped area" : `${meta?.city.access?.min_area_ha ?? "n/a"} hectares`} within {meta?.city.access?.distance_m ?? "n/a"} metres using {meta?.city.access?.method ?? "the configured method"}. This is an explicit benchmark, not necessarily a local statutory requirement. The source and caveats are recorded in the city profile.</p>
       </Section>
 
       <Section>
@@ -67,7 +74,8 @@ export default function Method() {
 
       <Section>
         <h2 className="display display--sm">Assumptions register</h2>
-        <p className="lede">Every number that is not measured, with a range and a source. These feed the cost and carbon in the scenario runner. Values with no direct source are marked as judgement in their note.</p>
+        <p className="lede">Every configured assumption, with its source and caveats. Local cost scenarios are {financeAvailable ? "enabled for this city" : "disabled for this city because no validated local cost pack is available"}. Values with no direct source are marked as judgement in their note.</p>
+        {!financeAvailable && <Notice tone="warn" title="Local financial model not enabled">{meta?.city.finance_reason ?? "A city-specific cost and carbon schedule has not been validated. No foreign-currency costs are inferred from the Pune model."}</Notice>}
         {assump ? (
           <div className="tablewrap"><table className="table">
             <thead><tr><th>Parameter</th><th>Low / base / high</th><th>Label</th><th>Source and note</th></tr></thead>

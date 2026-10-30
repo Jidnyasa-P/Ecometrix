@@ -28,7 +28,7 @@ export default function ForecastPage() {
   }, [d.status]);
 
   const mapFields = useMemo(() => (d.status === "ready" ? (["pop_growth_2035", "pop_2035", "pop_unserved_2035"].map(k => d.fields[k]).filter(Boolean) as FieldDef[]) : []), [d]);
-  const camera: Camera = { pitch: 40, bearing: -15, padding: { top: 30, right: 30, bottom: 30, left: 30 }, duration: 1200 };
+  const camera: Camera = { pitch: 0, bearing: 0, padding: { top: 30, right: 30, bottom: 30, left: 30 }, duration: 1200 };
 
   if (d.status === "loading") return <div className="fullstate"><Notice title={d.slow ? "Waking the server…" : "Loading…"} /></div>;
   if (d.status !== "ready") return <div className="fullstate"><Notice tone="warn" title="The baseline is not available.">Build the data first (README), then reload.</Notice></div>;
@@ -83,7 +83,7 @@ export default function ForecastPage() {
                 {mapFields.map(f => <button key={f.key} role="tab" aria-selected={f.key === field.key} className={`tab ${f.key === field.key ? "is-on" : ""}`} onClick={() => setKey(f.key)}>{f.label}</button>)}
               </div>
               <p className="layer__about">{field.about}</p>
-              <div className="mapbox"><MapStage cells={d.cells} field={field} theme={theme} camera={camera} extrude interactive label={`Map of ${field.label}`} /></div>
+              <div className="mapbox"><MapStage cells={d.cells} field={field} theme={theme} camera={camera} extrude={false} interactive label={`Map of ${field.label}`} /></div>
               <div className="mapbox__legend"><Legend field={field} theme={theme} /></div>
             </Section>
           )}

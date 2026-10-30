@@ -3,8 +3,8 @@
 every site is flagged "needs field verification", and ownership, legality and soil are unknown.
 
 Two intervention types, because each has a local, sourced basis:
-  pocket_park   greenness target = typical NDVI of Pune's own mapped parks (data-derived)
-  mini_forest   greenness target = typical NDVI of Pune's own mapped forest (data-derived); dense Miyawaki-style planting
+  pocket_park   greenness target = typical NDVI of the selected city's mapped public parks (data-derived)
+  mini_forest   greenness target = typical NDVI of the selected city's mapped forest (data-derived); dense native planting
 Street-tree corridors and green roofs are not included yet: they need road-side tree counts and rooftop data that are not built.
 """
 from __future__ import annotations
@@ -58,7 +58,7 @@ def build(cells: pd.DataFrame, need_df: pd.DataFrame, heat: dict | None, targets
     out = pd.concat(frames, ignore_index=True)
     out["site_id"] = out["h3"] + ":" + out["type"]
     out["verification"] = "candidate: needs field verification"
-    keep = ["site_id", "h3", "type", "lat", "lng", "area_ha", "open_land_ha", "cell_area_ha", "pop", "pop_unserved_300m",
+    keep = ["site_id", "h3", "type", "lat", "lng", "area_ha", "open_land_ha", "cell_area_ha", "pop", "pop_unserved_access", "pop_unserved_300m",
             "ndvi_before", "ndvi_after", "dlst_p10", "dlst_p50", "dlst_p90", "verification"]
     keep += [c for c in out.columns if c.startswith("need_")]
     return out[[c for c in keep if c in out.columns]].reset_index(drop=True)

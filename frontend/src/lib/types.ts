@@ -16,7 +16,14 @@ export interface Manifest {
     boundary_ward_features?: number };
   n_cells: number; columns: string[]; layers: Record<string, LayerStatus>;
 }
+export interface CityMeta {
+  slug: string; name: string; country?: string; country_code?: string; currency: string; locale: string; unit_system: string;
+  access?: { distance_m?: number; min_area_ha?: number; standard?: string; method?: string };
+  finance_enabled?: boolean; finance_reason?: string;
+}
 export interface Meta {
+  city: CityMeta;
+  cities?: { slug: string; name: string; country?: string; currency?: string; status?: string }[];
   built: boolean; manifest: Manifest | null; fields: FieldDef[]; evidence_labels: Record<Evidence, string>;
   sources: { name: string; publisher: string; license: string; url: string }[];
 }

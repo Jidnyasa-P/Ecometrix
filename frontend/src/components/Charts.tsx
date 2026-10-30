@@ -16,8 +16,8 @@ export function FrontierChart({ results, budgets, current }: { results: Portfoli
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Benefit against budget for the optimised portfolio and the simple top-need list">
         {[0, 0.5, 1].map(k => <g key={k}><line x1={M.l} x2={W - M.r} y1={y(ymax * k / 1.08)} y2={y(ymax * k / 1.08)} className="chart__grid" />
           <text x={M.l - 10} y={y(ymax * k / 1.08) + 5} textAnchor="end" className="chart__tick">{fmtNum(ymax * k / 1.08, 2)}</text></g>)}
-        {budgets.map((b, i) => <text key={b} x={x(i)} y={H - M.b + 26} textAnchor="middle" className="chart__tick">{fmtInr(b).replace("₹ ", "")}</text>)}
-        <text x={(M.l + W - M.r) / 2} y={H - 8} textAnchor="middle" className="chart__note">Budget (₹, present value)</text>
+        {budgets.map((b, i) => <text key={b} x={x(i)} y={H - M.b + 26} textAnchor="middle" className="chart__tick">{fmtInr(b)}</text>)}
+        <text x={(M.l + W - M.r) / 2} y={H - 8} textAnchor="middle" className="chart__note">Budget (selected city currency, present value)</text>
         <path d={line(r => r.baseline_top_need.objective_norm)} className="chart__fut" />
         <path d={line(r => r.objective_norm)} className="chart__hist" />
         {results.map(r => { const i = budgets.indexOf(r.budget_inr); return <circle key={r.budget_inr} cx={x(i)} cy={y(r.objective_norm)} r={r.budget_inr === current ? 8 : 5} className={r.budget_inr === current ? "chart__dot" : "chart__pt"} />; })}

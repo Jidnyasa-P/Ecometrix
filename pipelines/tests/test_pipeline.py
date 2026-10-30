@@ -260,8 +260,9 @@ def test_stac_search_deduplicates_without_datetime_timezone_comparison():
 
 def test_release_quality_gate_requires_verified_boundary_and_recent_coverage():
     manifest = {
+        "city_slug": CFG["city_slug"], "currency": CFG["currency"],
         "boundary": {"fallback": False, "boundary_resource_id": "pmc-admin-wards-2025", "source": "PMC wards", "area_km2": 540.0},
-        "layers": {name: {"status": "ok"} for name in quality_gate.REQUIRED_DATA_LAYERS},
+        "layers": {name: {"status": "ok"} for name in (*quality_gate.REQUIRED_DATA_LAYERS, "trees")},
     }
     manifest["layers"]["landsat_latest"]["detail"] = {"last_observation": "2026-10-20", "age_days": 10, "valid_cells_pct": 86.5}
     manifest["layers"]["sentinel_latest"]["detail"] = {"last_observation": "2026-10-25", "age_days": 5, "valid_cells_pct": 93.2}
@@ -286,12 +287,14 @@ def test_release_quality_gate_requires_verified_boundary_and_recent_coverage():
 
 def test_release_quality_gate_checks_every_layer_model_and_core_audit():
     manifest = {
+        "city_slug": CFG["city_slug"], "currency": CFG["currency"],
         "boundary": {"fallback": False, "boundary_resource_id": "pmc-admin-wards-2025", "source": "PMC wards", "area_km2": 540.0},
         "layers": {name: {"status": "ok", "detail": {"last_observation": "2026-10-25", "age_days": 5, "valid_cells_pct": 90}}
-                   for name in quality_gate.REQUIRED_DATA_LAYERS},
+                   for name in (*quality_gate.REQUIRED_DATA_LAYERS, "trees")},
     }
-    models = {"modules": {name: {"status": "ok"} for name in quality_gate.REQUIRED_MODEL_MODULES}}
-    audit_doc = {"checks": [{"id": name, "status": "pass"} for name in quality_gate.REQUIRED_AUDIT_CHECKS]}
+    models = {"city_slug": CFG["city_slug"], "currency": CFG["currency"],
+              "modules": {name: {"status": "ok"} for name in (*quality_gate.REQUIRED_MODEL_MODULES, "sensitivity", "portfolio")}}
+    audit_doc = {"checks": [{"id": name, "status": "pass"} for name in (*quality_gate.REQUIRED_AUDIT_CHECKS, "trees")]}
     assert quality_gate.validate_outputs(manifest, models, audit_doc, CFG) == []
     models["modules"]["portfolio"]["status"] = "failed"
     audit_doc["checks"][0]["status"] = "warn"

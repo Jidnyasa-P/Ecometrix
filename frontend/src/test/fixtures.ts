@@ -5,7 +5,7 @@ const F = (key: string, label: string, group: string, extra = {}) => ({ key, lab
 export const fields = [F("pop", "People", "People"), F("tree_density_ha", "Trees per hectare", "Green", { evidence: "MEASURED", decimals: 1 }),
   F("lst_c", "Surface temperature", "Heat", { evidence: "MEASURED" }), F("access_share", "Park access", "Access"), F("dist_park_m", "Distance to nearest park", "Access", { evidence: "MEASURED" }),
   F("need_balanced", "Need score (balanced weights)", "Need"), F("need_heat", "Need: heat", "Need"), F("need_people", "Need: residents", "Need"), F("need_gap", "Need: park-access gap", "Need"), F("need_growth", "Need: growth", "Need")];
-export const meta = { built: true, manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
+export const meta = { built: true, city: { slug: "pune", name: "Pune", country: "India", currency: "INR", locale: "en-IN", unit_system: "metric", finance_enabled: true }, cities: [{ slug: "pune", name: "Pune", currency: "INR", status: "built" }], manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
   boundary: { source: "OSM", area_km2: 400, fallback: false }, n_cells: 3, columns: [], layers: {} }, fields, evidence_labels: { MEASURED: "m", MODELLED: "mo", ASSUMED: "a", SIMULATED: "s" }, sources: [] };
 export const cells = { n: 3, h3: ["a", "b", "c"], lat: [18.5, 18.51, 18.52], lng: [73.8, 73.81, 73.82], area_km2: [0.1, 0.1, 0.1], values: {
   pop: [100, 200, 300], tree_density_ha: [4, 10, 20], lst_c: [44, 40, 36], access_share: [10, 60, 90], dist_park_m: [900, 200, 50], need_balanced: [70, 50, 20],

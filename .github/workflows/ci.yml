@@ -8,15 +8,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v7
-        with: { python-version: "3.12", cache: pip, cache-dependency-path: "pipelines/requirements.txt\nbackend/requirements-dev.txt\nmodel/requirements.txt" }
-      - run: pip install -r pipelines/requirements.txt -r model/requirements.txt -r backend/requirements-dev.txt
-      - run: PYTHONPATH=pipelines python -m pytest pipelines/tests -q
-      - run: python -m pytest model/tests -q
-      - run: cd backend && python -m pytest -q
+        with:
+          python-version: "3.13.17"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install the complete pinned Python environment
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+      - name: Check dependency consistency
+        run: python -m pip check
+      - name: Compile Python source
+        run: python -m compileall -q backend model pipelines
+      - name: Run pipeline tests
+        run: PYTHONPATH=pipelines python -m pytest pipelines/tests -q
+      - name: Run model tests
+        run: python -m pytest model/tests -q
+      - name: Run backend tests
+        run: cd backend && python -m pytest -q
   frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v7
-        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
-      - run: cd frontend && npm ci && npm run typecheck && npm test && npx vite build
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked frontend dependencies and run checks
+        run: cd frontend && npm ci && npm run typecheck && npm test && npm run build

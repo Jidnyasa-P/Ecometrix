@@ -1,0 +1,34 @@
+default_city: pune
+cities:
+- slug: pune
+  name: Pune
+  country: India
+  currency: INR
+  locale: en-IN
+  config: config/cities/pune.yaml
+  assumptions: config/assumptions/pune.yaml
+  status: existing_pilot
+- slug: london
+  name: London
+  country: United Kingdom
+  currency: GBP
+  locale: en-GB
+  config: config/cities/london.yaml
+  assumptions: config/assumptions/london.yaml
+  status: configuration_only
+- slug: new-york
+  name: New York City
+  country: United States
+  currency: USD
+  locale: en-US
+  config: config/cities/new-york.yaml
+  assumptions: config/assumptions/new-york.yaml
+  status: configuration_only
+- slug: athens
+  name: Athens
+  country: Greece
+  currency: EUR
+  locale: el-GR
+  config: config/cities/athens.yaml
+  assumptions: config/assumptions/athens.yaml
+  status: configuration_only

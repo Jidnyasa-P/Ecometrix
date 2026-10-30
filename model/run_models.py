@@ -14,8 +14,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "pipelines"))
+from ecometrix_pipeline.config import load_config
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 import heat_model, forecast, need_score, sites, portfolio, sensitivity  # noqa: E402
@@ -35,10 +38,18 @@ def _dump(path: Path, obj):
 
 
 def main(argv=None) -> int:
-    argv = argv or sys.argv[1:]
-    out = Path(argv[0]) if argv else ROOT / "data" / "outputs"
-    cfg = yaml.safe_load(Path(os.environ.get("ECOMETRIX_CONFIG") or ROOT / "config" / "pilot_pune.yaml").read_text(encoding="utf-8"))
-    cells = pd.read_parquet(out / "cells.parquet")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", nargs="?", help="Optional output directory (defaults to selected city's data folder)")
+    parser.add_argument("--city", default=None, help="City slug from config/registry.yaml")
+    parser.add_argument("--config", default=None, help="Explicit city configuration YAML")
+    args = parser.parse_args(argv)
+    cfg = load_config(args.config, city=args.city)
+    out = Path(args.output or cfg["data_output"])
+    out.mkdir(parents=True, exist_ok=True)
+    cells_path = out / "cells.parquet"
+    if not cells_path.exists():
+        raise FileNotFoundError(f"Pipeline output not found: {cells_path}. Run the data pipeline for {cfg['city']} first.")
+    cells = pd.read_parquet(cells_path)
     status: dict[str, dict] = {}
 
     def step(name, fn):
@@ -85,7 +96,7 @@ def main(argv=None) -> int:
         if fc_cells is not None:
             big = max(cfg["forecast"]["horizons"])
             a = fc_cells.drop(columns=[c for c in fc_cells.columns if c.startswith("pop_") and c.endswith("_series")] + [], errors="ignore")
-            analysis = analysis.merge(fc_cells, on="h3", how="left")
+            analysis = analysis.merge(a, on="h3", how="left")
             if "access_share" in cells:
                 acc = cells[["h3", "access_share"]]
                 analysis = analysis.merge(acc, on="h3", how="left")
@@ -93,36 +104,49 @@ def main(argv=None) -> int:
                 analysis = analysis.drop(columns=["access_share"])
         analysis.to_parquet(out / "analysis.parquet", index=False)
 
+    sdf = None
     if analysis is not None:
-        s = step("sites", lambda: sites.build(cells, analysis, heat, targets, cfg["candidates"]))
-        if s is not None:
-            if s.empty:
+        sdf = step("sites", lambda: sites.build(cells, analysis, heat, targets, cfg["candidates"]))
+        if sdf is not None:
+            if sdf.empty:
                 status["sites"] = {"status": "failed", "reason": "no hexagon met the candidate rules (open land and residents)"}
             else:
-                s.to_parquet(out / "sites.parquet", index=False)
-                status["sites"]["count"] = int(len(s))
-                status["sites"]["by_type"] = s["type"].value_counts().to_dict()
-    sp = out / "sites.parquet"
-    if sp.exists():
-        from app.engine import params as eparams
-        A = eparams.load(ROOT / "config" / "assumptions.yaml")
-        sdf = pd.read_parquet(sp)
-        step("sensitivity", lambda: _dump(out / "sensitivity.json", sensitivity.run(sdf, A)))
-        pix = out / "site_pixels.parquet"
-        if not pix.exists():
-            status["portfolio"] = {"status": "failed", "reason": "site_pixels.parquet not found: exact catchments need the population layer; portfolios are not computed without them (no double-counting shortcuts)"}
+                sdf.to_parquet(out / "sites.parquet", index=False)
+                status["sites"]["count"] = int(len(sdf))
+                status["sites"]["by_type"] = sdf["type"].value_counts().to_dict()
+
+    assumptions_path = Path(cfg["assumptions_path"])
+    A = yaml.safe_load(assumptions_path.read_text(encoding="utf-8")) or {}
+    if A.get("finance", {}).get("enabled", True):
+        sp = out / "sites.parquet"
+        if sp.exists():
+            sdf = pd.read_parquet(sp)
+            step("sensitivity", lambda: _dump(out / "sensitivity.json", sensitivity.run(sdf, A)))
+            pix = out / "site_pixels.parquet"
+            if not pix.exists():
+                status["portfolio"] = {"status": "failed", "reason": "site_pixels.parquet not found: exact catchments need the population layer; no double-counting shortcut is used"}
+            else:
+                def _port():
+                    inst = portfolio.build_instance(sdf, pd.read_parquet(pix), A, rings=cfg["portfolio"].get("min_separation_rings", 0))
+                    g = portfolio.run_grid(inst, sdf, A, cfg, time_limit=cfg["portfolio"].get("solver_time_limit_s", 90))
+                    _dump(out / "portfolios.json", g)
+                    return g
+                g = step("portfolio", _port)
+                if g is not None:
+                    status["portfolio"]["solutions"] = len(g["results"])
         else:
-            def _port():
-                inst = portfolio.build_instance(sdf, pd.read_parquet(pix), A, rings=cfg["portfolio"].get("min_separation_rings", 0))
-                g = portfolio.run_grid(inst, sdf, A, cfg, time_limit=cfg["portfolio"].get("solver_time_limit_s", 90))
-                _dump(out / "portfolios.json", g)
-                return g
-            g = step("portfolio", _port)
-            if g is not None:
-                status["portfolio"]["solutions"] = len(g["results"])
-    _dump(out / "models_manifest.json", {"modules": status})
+            status["sensitivity"] = {"status": "failed", "reason": "sites.parquet not found"}
+            status["portfolio"] = {"status": "failed", "reason": "sites.parquet not found"}
+    else:
+        reason = A.get("finance", {}).get("reason", "Local cost evidence is not configured.")
+        status["sensitivity"] = {"status": "skipped", "reason": reason}
+        status["portfolio"] = {"status": "skipped", "reason": reason}
+        _dump(out / "financial_status.json", {"available": False, "currency": cfg.get("currency"), "reason": reason})
+
+    _dump(out / "models_manifest.json", {"city": cfg["city"], "city_slug": cfg.get("city_slug"),
+                                         "currency": cfg.get("currency"), "modules": status})
     print({k: v["status"] for k, v in status.items()})
-    return 0
+    return 0 if all(v["status"] in ("ok", "skipped") for k, v in status.items() if k in ("heat_model", "greenness_targets", "forecast", "need_score", "sites")) else 1
 
 
 if __name__ == "__main__":

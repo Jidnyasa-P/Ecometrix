@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { Evidence } from "../lib/types";
+import { translatePageText, useLanguage } from "../lib/i18n";
 
 export function EvidenceBadge({ kind, title }: { kind: Evidence; title?: string }) {
   return <span className={`badge badge--${kind.toLowerCase()}`} title={title}>{kind}</span>;
@@ -21,11 +22,12 @@ export function Section({ id, className = "", children }: { id?: string; classNa
 }
 
 export function PageHead({ kicker, title, children }: { kicker: string; title: string; children?: ReactNode }) {
+  const [lang] = useLanguage();
   return (
     <header className="pagehead">
       <div className="wrap">
-        <p className="kicker">{kicker}</p>
-        <h1 className="display">{title}</h1>
+        <p className="kicker">{translatePageText(lang, kicker)}</p>
+        <h1 className="display">{translatePageText(lang, title)}</h1>
         {children && <div className="lede">{children}</div>}
       </div>
     </header>

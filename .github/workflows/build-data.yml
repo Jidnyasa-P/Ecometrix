@@ -1,37 +1,69 @@
 name: Build data
-# Builds the real baseline from open sources and commits data/outputs, which Render then serves.
-# Run it from the Actions tab ("Run workflow"). The public-data catalogue is checked daily.
+# Builds one city at a time. New cities remain unpublished until their own quality gate passes.
 on:
   workflow_dispatch:
+    inputs:
+      city:
+        description: City to build
+        required: true
+        type: choice
+        default: pune
+        options:
+          - pune
+          - london
+          - new-york
+          - athens
   schedule:
-    - cron: "0 3 * * *"            # daily at 03:00 UTC (08:30 India time)
+    - cron: "0 3 * * *"
 permissions:
   contents: write
+concurrency:
+  group: ecometrix-city-data
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 330
     env:
-      ECOMETRIX_ALLOW_PARTIAL: "1"          # collect diagnostics; the release gate below decides whether outputs may be published
+      ECOMETRIX_ALLOW_PARTIAL: "1"
       ECOMETRIX_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+      CITY: ${{ github.event_name == 'workflow_dispatch' && inputs.city || 'pune' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v7
-        with: { python-version: "3.12", cache: pip, cache-dependency-path: pipelines/requirements.txt }
-      - run: pip install -r pipelines/requirements.txt -r model/requirements.txt
-      - name: Run pipeline
-        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.run
-      - name: Baseline relationship (model/)
-        run: python model/baseline_relationship.py
-      - name: Models (heat model, forecast, need score, candidate sites)
-        run: python model/run_models.py
-      - name: Summarise layer status
+        with:
+          python-version: "3.13.17"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install the pinned project environment
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt && python -m pip check
+      - name: Resolve city output folder
+        id: city
+        run: |
+          OUT=$(PYTHONPATH=pipelines python -c "from ecometrix_pipeline.config import load_config; print(load_config(city='${CITY}')['data_output'])")
+          echo "output=$OUT" >> "$GITHUB_OUTPUT"
+          echo "Building $CITY into $OUT"
+      - name: Invalidate the previous release marker
+        env:
+          DATA_OUT: ${{ steps.city.outputs.output }}
+        run: mkdir -p "$DATA_OUT" && rm -f "$DATA_OUT/release_check.json"
+      - name: Run city data pipeline
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.run --city "$CITY"
+      - name: Baseline relationship
+        run: python model/baseline_relationship.py --city "$CITY"
+      - name: Run city models
+        run: python model/run_models.py --city "$CITY"
+      - name: Summarise build
+        env:
+          DATA_OUT: ${{ steps.city.outputs.output }}
         run: |
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json
-          m = json.load(open("data/outputs/manifest.json"))
+          import json, os
+          out = os.environ["DATA_OUT"]
+          m = json.load(open(os.path.join(out, "manifest.json"), encoding="utf-8"))
           b = m["boundary"]
-          print(f"Boundary: {b['source']} · {b['area_km2']} km² · fallback={b['fallback']}")
+          print(f"## {m.get('city')} · {m.get('country')}\n")
+          print(f"Boundary: {b['source']} · {b['area_km2']} km² · fallback={b['fallback']}\n")
           print("| Layer | Status | Detail |\n|---|---|---|")
           for k, v in m["layers"].items():
               detail = v.get('reason') or v.get('detail', {}).get('vintage', '')
@@ -39,18 +71,26 @@ jobs:
                   d = v['detail']
                   detail = f"{d.get('last_observation')} · {d.get('age_days')} days old · {d.get('valid_cells_pct')}% cell coverage"
               print(f"| {k} | {v['status']} | {detail} |")
-          import os
-          if os.path.exists("data/outputs/models_manifest.json"):
-              mm = json.load(open("data/outputs/models_manifest.json"))["modules"]
+          mm_path = os.path.join(out, "models_manifest.json")
+          if os.path.exists(mm_path):
+              mm = json.load(open(mm_path, encoding="utf-8"))["modules"]
               print("\n| Model module | Status | Detail |\n|---|---|---|")
-              for k, v in mm.items():
-                  print(f"| {k} | {v['status']} | {v.get('reason', v.get('count', ''))} |")
+              for k, v in mm.items(): print(f"| {k} | {v['status']} | {v.get('reason', v.get('count', ''))} |")
           PY
-      - name: Validate judge-facing data freshness and boundary
-        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.quality_gate
-      - name: Commit outputs
+      - name: Validate city data and model quality
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.quality_gate --city "$CITY"
+      - name: Commit city outputs and release-marker state
+        if: ${{ always() && steps.city.outputs.output != '' }}
+        env:
+          DATA_OUT: ${{ steps.city.outputs.output }}
         run: |
           git config user.name "ecometrix-bot"
           git config user.email "ecometrix-bot@users.noreply.github.com"
-          git add -f data/outputs
-          git diff --cached --quiet && echo "No changes" || (git commit -m "data: rebuild baseline" && git push)
+          mkdir -p "$DATA_OUT"
+          git add -f "$DATA_OUT"
+          if git diff --cached --quiet; then
+            echo "No output changes to commit."
+          else
+            git commit -m "data: update $CITY build outputs and release status"
+            git push
+          fi

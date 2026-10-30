@@ -4,7 +4,7 @@ Three classes, deliberately kept apart:
   public_green    parks, gardens, playgrounds, recreation grounds, village greens (not tagged private/no access)
   forest_reserve  forest, woodland and nature reserves (often hill reserves, access can be limited)
   open_green      grass, meadow, scrub (not counted as access to green space)
-Only public_green polygons of at least min_area_ha count toward the WHO-style access measure.
+Only public_green polygons of at least the city-configured min_area_ha count toward its park-access measure.
 """
 from __future__ import annotations
 import numpy as np

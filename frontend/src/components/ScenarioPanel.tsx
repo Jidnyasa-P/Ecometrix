@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, postJson } from "../lib/api";
 import { fmtInr, fmtInt, fmtNum, fmtPct } from "../lib/format";
 import type { Range, ScenarioResult, Site } from "../lib/types";
-import { EvidenceBadge } from "./Bits";
+import { EvidenceBadge, Notice } from "./Bits";
+import { useData } from "../lib/data";
 
 const TYPE_NAME = { pocket_park: "Pocket park", mini_forest: "Dense mini-forest" } as const;
 
@@ -13,18 +14,23 @@ function R({ r, f, suffix = "" }: { r: Range | null | undefined; f: (n: number) 
 
 export default function ScenarioPanel({ site, onClose, embedded = false }: { site: Site; onClose: () => void; embedded?: boolean }) {
   const [area, setArea] = useState(site.area_ha);
-  const [budgetLakh, setBudgetLakh] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState("");
+  const data = useData();
+  const city = data.status === "ready" ? data.meta.city : undefined;
+  const financeEnabled = city?.finance_enabled !== false;
   const [horizon, setHorizon] = useState(10);
+  const accessDistance = city?.access?.distance_m ?? 300;
   const [res, setRes] = useState<ScenarioResult | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const seq = useRef(0);
 
   const run = (a = area) => {
+    if (!financeEnabled) return;
     const id = ++seq.current;
     setBusy(true); setErr(null);
-    const b = budgetLakh.trim() === "" ? null : Number(budgetLakh) * 1e5;
-    postJson<ScenarioResult>("/api/scenarios/run", { site_id: site.id, area_ha: a, horizon_years: horizon, budget_inr: b })
+    const b = budgetAmount.trim() === "" ? null : Number(budgetAmount);
+    postJson<ScenarioResult>("/api/scenarios/run", { site_id: site.id, area_ha: a, horizon_years: horizon, budget_amount: b })
       .then(r => { if (id === seq.current) setRes(r); })
       .catch((e: unknown) => { if (id === seq.current) { setRes(null); setErr(e instanceof ApiError ? e.message : "Scenario failed"); } })
       .finally(() => { if (id === seq.current) setBusy(false); });
@@ -45,15 +51,17 @@ export default function ScenarioPanel({ site, onClose, embedded = false }: { sit
         <button className="iconbtn" onClick={onClose} aria-label="Close scenario">✕</button>
       </div>
 
-      <div className="scenario__form">
+      {!financeEnabled && <Notice tone="warn" title="Local cost model is not available">{city?.finance_reason ?? "This city's local project cost and carbon assumptions have not been validated. Cost scenarios are disabled rather than converted from another country's prices."}</Notice>}
+
+      {financeEnabled && <div className="scenario__form">
         <label className="slider">Area to develop: <strong>{fmtNum(area, 1)} ha</strong> <span className="muted">(up to {fmtNum(site.area_ha, 1)})</span>
           <input type="range" min={min} max={site.area_ha} step={step} value={area} onChange={e => setArea(Number(e.target.value))} /></label>
-        <label className="field">Fixed budget (₹ lakh, optional)
-          <input type="number" min="0" inputMode="decimal" value={budgetLakh} onChange={e => setBudgetLakh(e.target.value)} placeholder="for example 150" /></label>
+        <label className="field">Fixed budget in {city?.currency ?? "local currency"} (optional)
+          <input type="number" min="0" inputMode="decimal" value={budgetAmount} onChange={e => setBudgetAmount(e.target.value)} placeholder="Enter the full amount" /></label>
         <label className="field">Horizon
           <select value={horizon} onChange={e => setHorizon(Number(e.target.value))}>{[5, 10, 15].map(y => <option key={y} value={y}>{y} years</option>)}</select></label>
         <button className="btn btn--solid" onClick={() => run()} disabled={busy}>{busy ? "Running…" : "Run scenario"}</button>
-      </div>
+      </div>}
 
       {err && <p className="notice notice--error" role="alert"><strong>{err}</strong></p>}
 
@@ -83,7 +91,7 @@ export default function ScenarioPanel({ site, onClose, embedded = false }: { sit
           </section>
 
           <section>
-            <h3>People newly within 300 m of a park <EvidenceBadge kind={res.benefits.people_newly_served.evidence} /></h3>
+            <h3>People newly within {fmtNum(accessDistance, 0)} m of a park <EvidenceBadge kind={res.benefits.people_newly_served.evidence} /></h3>
             <p><strong>{fmtInt(res.benefits.people_newly_served.value)}</strong></p>
             <p className="muted">{res.benefits.people_newly_served.note}</p>
           </section>

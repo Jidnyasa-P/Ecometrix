@@ -1,4 +1,4 @@
-"""M3 baseline analysis: how strongly does surface temperature track greenness across Pune's hexagons?
+"""M3 baseline analysis: how strongly does surface temperature track greenness across the selected city's hexagons?
 
 This is DESCRIPTIVE statistics on real data, not the heat-greenery model (that is Milestone M4). It also
 sets the simple baseline that the M4 machine-learning model must beat:
@@ -12,12 +12,16 @@ Run:  python model/baseline_relationship.py            (reads data/outputs/cells
 from __future__ import annotations
 import json
 import sys
+import argparse
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import h3
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "pipelines"))
+from ecometrix_pipeline.config import load_config
+
 BLOCK_RES = 6          # H3 resolution used to define spatial blocks (about 36 km2 each)
 
 
@@ -73,7 +77,15 @@ def compute_relationship(df: pd.DataFrame, block_res: int = BLOCK_RES, min_cells
 
 
 def main(argv=None) -> int:
-    data = Path(argv[0]) if argv else ROOT / "data" / "outputs"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", nargs="?", help="Optional data directory (legacy positional form)")
+    parser.add_argument("--city", default=None, help="City slug from config/registry.yaml")
+    parser.add_argument("--config", default=None, help="Explicit city configuration YAML")
+    args = parser.parse_args(argv)
+    cfg = load_config(args.config, city=args.city)
+    data = Path(args.output or cfg["data_output"])
+    if not (data / "cells.parquet").exists():
+        raise FileNotFoundError(f"Pipeline output not found: {data / 'cells.parquet'}. Run the data pipeline for {cfg['city']} first.")
     df = pd.read_parquet(data / "cells.parquet")
     res = compute_relationship(df)
     (data / "relationship.json").write_text(json.dumps(res, indent=2), encoding="utf-8")

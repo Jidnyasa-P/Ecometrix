@@ -9,24 +9,28 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import yaml
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .config import load_config
 
 REQUIRED_DATA_LAYERS = (
-    "trees", "osm", "worldcover", "landsat", "sentinel",
+    "osm", "worldcover", "landsat", "sentinel",
     "landsat_latest", "sentinel_latest", "population", "popseries",
 )
-REQUIRED_MODEL_MODULES = (
-    "heat_model", "greenness_targets", "forecast", "need_score",
-    "sites", "sensitivity", "portfolio",
-)
-REQUIRED_AUDIT_CHECKS = ("boundary", "trees", "satellite", "latest_satellite")
+REQUIRED_MODEL_MODULES = ("heat_model", "greenness_targets", "forecast", "need_score", "sites")
+REQUIRED_AUDIT_CHECKS = ("boundary", "satellite", "latest_satellite")
 
 
 def validate_manifest(manifest: dict, cfg: dict) -> list[str]:
     issues: list[str] = []
+    expected_city = str(cfg.get("city_slug", ""))
+    if manifest.get("city_slug") != expected_city:
+        issues.append(f"Manifest city_slug {manifest.get('city_slug')!r} does not match selected city {expected_city!r}.")
+    expected_currency = cfg.get("currency")
+    if expected_currency and manifest.get("currency") != expected_currency:
+        issues.append(f"Manifest currency {manifest.get('currency')!r} does not match selected city currency {expected_currency!r}.")
     boundary = manifest.get("boundary") or {}
     if boundary.get("fallback"):
         notes = "; ".join(boundary.get("notes") or [])
@@ -43,7 +47,10 @@ def validate_manifest(manifest: dict, cfg: dict) -> list[str]:
             issues.append("Boundary source provenance is missing.")
 
     layers = manifest.get("layers") or {}
-    for layer_name in REQUIRED_DATA_LAYERS:
+    required_layers = list(REQUIRED_DATA_LAYERS)
+    if cfg.get("tree_census", {}).get("enabled", True):
+        required_layers.append("trees")
+    for layer_name in required_layers:
         status = (layers.get(layer_name) or {}).get("status", "missing")
         if status != "ok":
             issues.append(f"Required data layer {layer_name} status is {status!r}, not 'ok'.")
@@ -84,14 +91,28 @@ def validate_manifest(manifest: dict, cfg: dict) -> list[str]:
 def validate_outputs(manifest: dict, models: dict, audit: dict, cfg: dict) -> list[str]:
     """Check all required data and model outputs plus the key evidence checks."""
     issues = validate_manifest(manifest, cfg)
+    expected_city = str(cfg.get("city_slug", ""))
+    if models.get("city_slug") != expected_city:
+        issues.append(f"Models manifest city_slug {models.get('city_slug')!r} does not match selected city {expected_city!r}.")
+    if models.get("currency") != cfg.get("currency"):
+        issues.append(f"Models manifest currency {models.get('currency')!r} does not match selected city currency {cfg.get('currency')!r}.")
     modules = models.get("modules") or {}
-    for module_name in REQUIRED_MODEL_MODULES:
+    required_modules = list(REQUIRED_MODEL_MODULES)
+    if (Path(cfg.get("assumptions_path", "")).exists()):
+        import yaml
+        pack = yaml.safe_load(Path(cfg["assumptions_path"]).read_text(encoding="utf-8")) or {}
+        if pack.get("finance", {}).get("enabled", True):
+            required_modules.extend(("sensitivity", "portfolio"))
+    for module_name in required_modules:
         status = (modules.get(module_name) or {}).get("status", "missing")
         if status != "ok":
             issues.append(f"Required model module {module_name} status is {status!r}, not 'ok'.")
 
     checks = {check.get("id"): check for check in audit.get("checks", [])}
-    for check_id in REQUIRED_AUDIT_CHECKS:
+    required_checks = list(REQUIRED_AUDIT_CHECKS)
+    if cfg.get("tree_census", {}).get("enabled", True):
+        required_checks.append("trees")
+    for check_id in required_checks:
         check = checks.get(check_id)
         status = check.get("status") if check else "missing"
         if status != "pass":
@@ -101,12 +122,20 @@ def validate_outputs(manifest: dict, models: dict, audit: dict, cfg: dict) -> li
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", default="data/outputs/manifest.json")
-    parser.add_argument("--models-manifest", default="data/outputs/models_manifest.json")
-    parser.add_argument("--audit", default="data/outputs/audit.json")
+    parser.add_argument("--city", default=None)
+    parser.add_argument("--manifest", default=None)
+    parser.add_argument("--models-manifest", default=None)
+    parser.add_argument("--audit", default=None)
     parser.add_argument("--config", default=None)
     args = parser.parse_args(argv)
-    paths = {"manifest": Path(args.manifest), "models manifest": Path(args.models_manifest), "audit": Path(args.audit)}
+    cfg = load_config(args.config, city=args.city)
+    out = Path(cfg["data_output"])
+    paths = {"manifest": Path(args.manifest) if args.manifest else out / "manifest.json",
+             "models manifest": Path(args.models_manifest) if args.models_manifest else out / "models_manifest.json",
+             "audit": Path(args.audit) if args.audit else out / "audit.json"}
+    release_marker = out / "release_check.json"
+    # Never leave a stale passing marker after a newer build fails validation.
+    release_marker.unlink(missing_ok=True)
     missing = [f"{label}: {path}" for label, path in paths.items() if not path.exists()]
     if missing:
         print("DATA QUALITY GATE FAILED: required file(s) not found: " + "; ".join(missing))
@@ -114,13 +143,32 @@ def main(argv: list[str] | None = None) -> int:
     manifest = json.loads(paths["manifest"].read_text(encoding="utf-8"))
     models = json.loads(paths["models manifest"].read_text(encoding="utf-8"))
     audit = json.loads(paths["audit"].read_text(encoding="utf-8"))
-    issues = validate_outputs(manifest, models, audit, load_config(args.config))
+    issues = validate_outputs(manifest, models, audit, cfg)
     if issues:
         print("DATA QUALITY GATE FAILED:")
         for issue in issues:
             print(f"- {issue}")
         return 1
     boundary = manifest["boundary"]
+    marker = {
+        "status": "passed",
+        "city": cfg["city_slug"],
+        "city_slug": cfg["city_slug"],
+        "currency": cfg.get("currency"),
+        "pipeline_version": manifest.get("pipeline_version"),
+        "checked_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "boundary_source": boundary["source"],
+        "boundary_area_km2": boundary["area_km2"],
+        "required_layers": list(REQUIRED_DATA_LAYERS) + (["trees"] if cfg.get("tree_census", {}).get("enabled", True) else []),
+        "required_models": list(REQUIRED_MODEL_MODULES) + (
+            ["sensitivity", "portfolio"]
+            if (yaml.safe_load(Path(cfg["assumptions_path"]).read_text(encoding="utf-8")) or {}).get("finance", {}).get("enabled", True)
+            else []
+        ),
+        "required_audit_checks": list(REQUIRED_AUDIT_CHECKS) + (["trees"] if cfg.get("tree_census", {}).get("enabled", True) else []),
+    }
+    release_marker.parent.mkdir(parents=True, exist_ok=True)
+    release_marker.write_text(json.dumps(marker, indent=2), encoding="utf-8")
     print(f"DATA QUALITY GATE PASSED: {boundary['source']}; boundary area {boundary['area_km2']} km2")
     for name in ("landsat_latest", "sentinel_latest"):
         detail = manifest["layers"][name]["detail"]

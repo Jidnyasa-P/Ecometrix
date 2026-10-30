@@ -13,7 +13,7 @@ vi.mock("../components/MapStage", () => ({
 const F = (key: string, label: string, group: string, extra = {}) => ({ key, label, unit: "u", evidence: "MODELLED", group, decimals: 0, source: "s", ramp: "need", about: "a", domain: [0, 100], min: 0, max: 100, n: 3, ...extra });
 const fields = [F("pop", "People", "People"), F("need_heat", "Need: heat", "Need"), F("need_people", "Need: residents", "Need"), F("need_gap", "Need: park-access gap", "Need"),
   F("need_growth", "Need: growth", "Need"), F("pop_growth_2035", "Projected growth 2020 to 2035", "Future"), F("pop_2035", "Projected people (2035)", "Future")];
-const meta = { built: true, manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
+const meta = { built: true, city: { slug: "pune", name: "Pune", country: "India", currency: "INR", locale: "en-IN", unit_system: "metric", finance_enabled: true }, cities: [{ slug: "pune", name: "Pune", currency: "INR", status: "built" }], manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
   boundary: { source: "OSM", area_km2: 400, fallback: false }, n_cells: 3, columns: [], layers: {} }, fields,
   evidence_labels: { MEASURED: "m", MODELLED: "mo", ASSUMED: "a", SIMULATED: "s" }, sources: [] };
 const cells = { n: 3, h3: ["a", "b", "c"], lat: [18.5, 18.51, 18.52], lng: [73.8, 73.81, 73.82], area_km2: [0.1, 0.1, 0.1], values: {

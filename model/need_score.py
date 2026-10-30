@@ -2,7 +2,7 @@
 
   heat    surface temperature (hotter = higher)
   people  residents today (more = higher)
-  gap     share of residents NOT within 300 m of a qualifying park (less access = higher)
+  gap     share of residents NOT within the selected city profile’s qualifying access distance (less access = higher)
   growth  forecast population growth to 2035 (more people added = higher)
 
 The weights are POLICY CHOICES, not facts, so they are presets the user can see and change. Hexagons with no modelled residents get no score.

@@ -34,54 +34,31 @@ export interface MapStageProps {
 
 const DIM: RGBA = [120, 128, 124, 38];
 
-const PUNE_BOUNDS: [[number, number], [number, number]] = [
-  [73.72, 18.40],
-  [74.02, 18.66]
-];
-
-export function boundsOf(
-  cells: Cell[]
-): [[number, number], [number, number]] {
-  const valid = cells.filter(
-    c =>
-      Number.isFinite(c.lng) &&
-      Number.isFinite(c.lat) &&
-      c.lng >= -180 &&
-      c.lng <= 180 &&
-      c.lat >= -90 &&
-      c.lat <= 90
-  );
-
-  if (!valid.length) {
-    return PUNE_BOUNDS;
-  }
-
-  let w = 180;
-  let s = 90;
-  let e = -180;
-  let n = -90;
-
+export function boundsOf(cells: Cell[]): [[number, number], [number, number]] {
+  const valid = cells.filter(c => Number.isFinite(c.lng) && Number.isFinite(c.lat)
+    && c.lng >= -180 && c.lng <= 180 && c.lat >= -90 && c.lat <= 90);
+  if (!valid.length) return [[-0.01, -0.01], [0.01, 0.01]];
+  let w = 180, south = 90, e = -180, north = -90;
   for (const c of valid) {
-    w = Math.min(w, c.lng);
-    e = Math.max(e, c.lng);
-    s = Math.min(s, c.lat);
-    n = Math.max(n, c.lat);
+    w = Math.min(w, c.lng); e = Math.max(e, c.lng);
+    south = Math.min(south, c.lat); north = Math.max(north, c.lat);
   }
-
-  // Prevent zero-width or zero-height bounds.
   const epsilon = 0.001;
+  if (e - w < epsilon) { w -= epsilon; e += epsilon; }
+  if (north - south < epsilon) { south -= epsilon; north += epsilon; }
+  return [[w, south], [e, north]];
+}
 
-  if (e - w < epsilon) {
-    w -= epsilon;
-    e += epsilon;
-  }
-
-  if (n - s < epsilon) {
-    s -= epsilon;
-    n += epsilon;
-  }
-
-  return [[w, s], [e, n]];
+function safePadding(map: maplibregl.Map, requested: Camera["padding"]) {
+  const { clientWidth: width, clientHeight: height } = map.getContainer();
+  const maxX = Math.max(0, width * 0.28);
+  const maxY = Math.max(0, height * 0.28);
+  return {
+    top: Math.min(Math.max(0, requested.top), maxY),
+    bottom: Math.min(Math.max(0, requested.bottom), maxY),
+    left: Math.min(Math.max(0, requested.left), maxX),
+    right: Math.min(Math.max(0, requested.right), maxX)
+  };
 }
 
 export default function MapStage(p: MapStageProps) {
@@ -93,18 +70,19 @@ export default function MapStage(p: MapStageProps) {
   const bounds = useMemo(() => boundsOf(p.cells), [p.cells]);
   const cb = useRef({ onHover: p.onHover, onSelect: p.onSelect });
   cb.current = { onHover: p.onHover, onSelect: p.onSelect };
-  const drift = useRef(!!p.drift);
-  drift.current = !!p.drift;
 
   // create the map once
   useEffect(() => {
     if (!host.current) return;
     let map: maplibregl.Map;
     try {
+      const [[west, south], [east, north]] = bounds;
       map = new maplibregl.Map({
-        container: host.current, style: MAP_STYLE[p.theme], bounds, fitBoundsOptions: { padding: p.camera.padding },
-        pitch: p.camera.pitch, bearing: p.camera.bearing, interactive: !!p.interactive, attributionControl: { compact: true },
-        maxPitch: 70, cooperativeGestures: false
+        container: host.current, style: MAP_STYLE[p.theme],
+        center: [(west + east) / 2, (south + north) / 2], zoom: 9,
+        pitch: p.camera.pitch, bearing: p.camera.bearing, interactive: !!p.interactive,
+        attributionControl: { compact: true }, maxPitch: 55, cooperativeGestures: false,
+        fadeDuration: 0, refreshExpiredTiles: false
       });
     } catch (e) {
       setFailed(e instanceof Error ? e.message : "WebGL unavailable");
@@ -114,19 +92,39 @@ export default function MapStage(p: MapStageProps) {
     map.addControl(overlay as unknown as maplibregl.IControl);
     if (p.interactive) map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
     mapRef.current = map; overlayRef.current = overlay;
-    map.on("load", () => setReady(true));
+    map.on("load", () => {
+      requestAnimationFrame(() => {
+        if (mapRef.current !== map) return;
+        map.resize();
+        const { clientWidth, clientHeight } = map.getContainer();
+        if (clientWidth > 0 && clientHeight > 0) {
+          map.fitBounds(bounds, { padding: safePadding(map, p.camera.padding), pitch: p.camera.pitch,
+            bearing: p.camera.bearing, duration: 0, maxZoom: 14, essential: false });
+        }
+        setReady(true);
+      });
+    });
     map.on("error", ev => { const err = (ev as unknown as { error?: Error }).error; if (!map.loaded() && /style|WebGL/i.test(String(err?.message))) setFailed(String(err?.message)); });
-    let raf = 0, last = performance.now();
-    const tick = (t: number) => {
-      raf = requestAnimationFrame(tick);
-      if (!drift.current || document.hidden || prefersReducedMotion() || !map.loaded()) { last = t; return; }
-      map.setBearing(map.getBearing() + ((t - last) / 1000) * 1.6);   // 1.6 degrees per second
-      last = t;
-    };
-    raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); overlay.finalize(); map.remove(); mapRef.current = null; overlayRef.current = null; };
+    return () => { overlay.finalize(); map.remove(); mapRef.current = null; overlayRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
+  // No animation loop runs unless a caller explicitly enables slow camera drift.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !p.drift || !ready || prefersReducedMotion()) return;
+    let raf = 0;
+    let last = performance.now();
+    const tick = (time: number) => {
+      if (document.hidden || !map.loaded()) { last = time; raf = requestAnimationFrame(tick); return; }
+      map.setBearing(map.getBearing() + ((time - last) / 1000) * 0.5);
+      last = time;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [p.drift, ready]);
 
   // theme -> basemap style
   const firstTheme = useRef(true);
@@ -141,8 +139,11 @@ export default function MapStage(p: MapStageProps) {
     const map = mapRef.current;
     if (!map) return;
     if (firstCam.current) { firstCam.current = false; return; }
-    const duration = prefersReducedMotion() ? 0 : (p.camera.duration ?? 2400);
-    map.fitBounds(bounds, { padding: p.camera.padding, pitch: p.camera.pitch, bearing: p.camera.bearing, duration, maxZoom: 14, essential: false });
+    if (!map.loaded()) return;
+    const duration = prefersReducedMotion() ? 0 : (p.camera.duration ?? 900);
+    map.resize();
+    map.fitBounds(bounds, { padding: safePadding(map, p.camera.padding), pitch: p.camera.pitch,
+      bearing: p.camera.bearing, duration, maxZoom: 14, essential: false });
   }, [p.camera.pitch, p.camera.bearing, p.camera.padding.top, p.camera.padding.right, p.camera.padding.bottom, p.camera.padding.left, p.camera.duration, bounds]);
 
   // data layers
@@ -156,15 +157,13 @@ export default function MapStage(p: MapStageProps) {
     const hl = p.highlight ?? null;
     const layers: unknown[] = [
       new H3HexagonLayer<Cell>({
-        id: "cells", data: p.cells, getHexagon: d => d.h3, extruded: !!p.extrude, coverage: 0.95, pickable: true,
+        id: "cells", data: p.cells, getHexagon: d => d.h3, extruded: !!p.extrude, coverage: 0.9, pickable: !!p.interactive,
         autoHighlight: !!p.interactive, highlightColor: [255, 255, 255, 90], elevationScale: 900,
         getElevation: d => (hl && !hl(d) ? 0 : norm(d.v[key] ?? null)),
         getFillColor: d => (hl && !hl(d) ? DIM : scale(d.v[key] ?? null)),
-        material: { ambient: 0.55, diffuse: 0.6, shininess: 24, specularColor: [255, 255, 255] },
-        transitions: { getFillColor: 700, getElevation: 900 },
         updateTriggers: { getFillColor: [key, p.theme, hl], getElevation: [key, hl, p.extrude] },
-        onHover: info => cb.current.onHover?.((info.object as Cell) ?? null, info.x, info.y),
-        onClick: info => cb.current.onSelect?.((info.object as Cell) ?? null)
+        onHover: p.interactive ? info => cb.current.onHover?.((info.object as Cell) ?? null, info.x, info.y) : undefined,
+        onClick: p.interactive ? info => cb.current.onSelect?.((info.object as Cell) ?? null) : undefined
       })
     ];
     if (p.marked && p.marked.length) {

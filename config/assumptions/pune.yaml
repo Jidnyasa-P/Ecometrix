@@ -1,0 +1,113 @@
+# EcoMetrix assumptions register: the single file the impact and cost engine reads.
+# Every number that is not measured is here, with a range (low / base / high), a source and an honest note.
+# Label ASSUMED = taken from literature or judgement. Values marked "judgement" have no direct source and are flagged as such.
+# Compared with the roadmap's Appendix A: street-tree and green-roof parameters are not included because those interventions are not built yet.
+version: 1
+currency: INR
+
+common:
+  discount_rate:
+    low: 0.0372
+    base: 0.06
+    high: 0.08
+    unit: fraction per year
+    label: ASSUMED
+    source: "NABARD assessment of an ideal social discount rate for Indian public projects (3.72%); Institute of Economic Growth WP 388 (social time preference 6% generalised Ramsey, 8% original Ramsey), the study behind the Government of India national-parameters review"
+    note: "These are social discount rates for economic appraisal. Applied here to costs only, so results are present-value cost, not a cost-benefit ratio."
+  horizon_years:
+    value: 10
+    label: ASSUMED
+    source: "Project choice. The only Indian carbon measurements found cover the first five years of a forest."
+    note: "User-adjustable per scenario."
+  co2_per_c:
+    value: 3.6667
+    label: CONSTANT
+    source: "Molecular mass ratio CO2 : C = 44 : 12"
+
+mini_forest:                         # dense Miyawaki-style native planting
+  counts_for_access:
+    value: false
+    label: ASSUMED
+    source: "Policy choice. Such plantations are dense and usually fenced, so they are NOT counted as park access unless you change this."
+  saplings_per_m2:
+    low: 3
+    base: 3
+    high: 3
+    unit: saplings per m2
+    label: ASSUMED
+    source: "Citizen Matters (Miyawaki afforestation in Indian cities): minimum of three saplings per square metre; Mongabay-India 2026: around three per square metre"
+  capex_inr_per_m2:
+    low: 300
+    base: 550
+    high: 800
+    unit: INR per m2
+    label: ASSUMED
+    source: "Base: Afforestt quote of Rs 50,000 to 60,000 for a 100 m2 forest (Rs 500 to 600 per m2), as reported by Citizen Matters. Low: roughly three saplings at about Rs 100 each is already Rs 300 per m2 (same article); Mongabay-India 2026 cites about US$32,000 per hectare. High (800): judgement, because the same article warns soil and land preparation in degraded urban land can be costly."
+    note: "Costs are Delhi-region quotes and press estimates, not a Pune rate schedule. Replace with PMC rates when available."
+  sapling_cost_inr:
+    low: 80
+    base: 100
+    high: 140
+    unit: INR per sapling
+    label: ASSUMED
+    source: "Citizen Matters: cost per sapling 'over Rs 100' after demand rose. Low and high: judgement around that figure."
+  sapling_survival:
+    low: 0.50
+    base: 0.79
+    high: 0.92
+    unit: fraction
+    label: ASSUMED
+    source: "Base: 79% survival for Miyawaki-method urban plots in a UK Tree Council trial (not India). High: 92% self-reported by Afforestt (Ashoka profile). Low: judgement; the same trial's standard planting survived at 47%."
+    note: "Used only to price replacing failed saplings in year 1. Carbon data already reflect real survival, so survival is not applied to carbon again."
+  establishment_years:
+    value: 3
+    label: ASSUMED
+    source: "Afforestt describes growing a forest 'in just three years' (Civil Society). Maintenance is charged for these years only."
+  maintenance_inr_per_m2_yr:
+    low: 44.2
+    base: 88.4
+    high: 132.6
+    unit: INR per m2 per year
+    label: ASSUMED
+    source: "Proxy. PMC reported spending about Rs 108.46 crore over five years on maintenance and development of 215 gardens covering about 24.53 lakh m2 (Bridge Chronicle, 21 Aug 2026): 108.46 crore / 5 / 24.53 lakh = Rs 88.4 per m2 per year. Low and high are plus or minus 50% (judgement)."
+    note: "That figure mixes new development and upkeep across all PMC gardens, so it is a crude proxy for intensive establishment care."
+  carbon_age_curve_mg_c_per_ha_yr:
+    points: {2: 5.284, 4: 20.042, 5: 33.084}
+    label: ASSUMED
+    source: "Measured carbon sequestration in three Miyawaki forests aged 2, 4 and 5 years in Bengaluru and Palakkad (Roy et al., 2025, reported by Science Chronicle). Years between points are linearly interpolated and year 0 is taken as zero (interpolation, not measured)."
+    note: "Three plots in South India. Transferability to Pune is unknown."
+  carbon_scale:
+    low: 0.5
+    base: 0.8
+    high: 1.0
+    unit: multiplier on the measured curve
+    label: ASSUMED
+    source: "Judgement: only three plots were measured, and the study authors note dense planting can raise competition for nutrients and water early on."
+  carbon_after_year5_factor:
+    low: 0.5
+    base: 0.75
+    high: 1.0
+    unit: multiplier on the year-5 rate
+    label: ASSUMED
+    source: "Judgement. No Indian measurements beyond year 5 were found; growth is expected to level off."
+
+pocket_park:
+  counts_for_access:
+    value: true
+    label: ASSUMED
+    source: "A public park counts toward access if its area is at least the WHO minimum below."
+  min_area_ha_for_access:
+    value: 0.5
+    label: ASSUMED
+    source: "WHO Regional Office for Europe, Urban green spaces and health (2016): at least 0.5 ha within 300 m of homes."
+  annual_all_in_cost_inr_per_m2:
+    low: 44.2
+    base: 88.4
+    high: 132.6
+    unit: INR per m2 per year
+    label: ASSUMED
+    source: "PMC garden spending (Rs 108.46 crore over five years for about 24.53 lakh m2), reported by Bridge Chronicle, 21 Aug 2026: Rs 88.4 per m2 per year, all-in (development, plantation and maintenance). Low and high are plus or minus 50% (judgement)."
+    note: "The cheapest defensible proxy until a PMC rate schedule for new parks is obtained. It averages old and new gardens, so a brand-new park may cost more up front."
+  carbon:
+    estimated: false
+    source: "No Indian measurement of yearly carbon uptake in park plantings was found. The only figure found (0.28 kg C per m2 of tree cover per year, Nowak et al. 2013) is from United States cities. EcoMetrix therefore does not estimate carbon for pocket parks."

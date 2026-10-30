@@ -1,0 +1,54 @@
+version: 1
+city: London
+country: United Kingdom
+currency: GBP
+finance:
+  enabled: false
+  reason: No sufficiently comparable, city-specific capital and maintenance cost schedule
+    has been validated yet. Cost scenarios and budget optimisation are disabled rather
+    than populated with invented currency values.
+common:
+  discount_rate:
+    low: 0.035
+    base: 0.035
+    high: 0.035
+    label: ASSUMED
+    source: HM Treasury, The Green Book (2026), Social Time Preference Rate; current
+      published rate 3.5% in real terms for the first 30 years. https://www.gov.uk/government/publications/the-green-book--2
+    note: UK appraisal reference rate; confirm any London borough-specific requirements
+      before public appraisal.
+  horizon_years:
+    value: 10
+    label: ASSUMED
+    source: Project configuration; editable after local appraisal review.
+  co2_per_c:
+    value: 3.6667
+    label: CONSTANT
+    source: Molecular mass ratio CO2:C = 44:12
+mini_forest:
+  counts_for_access:
+    value: false
+    label: ASSUMED
+    source: 'Policy setting: dense plantation is not counted as publicly accessible
+      park unless verified as open.'
+  carbon_enabled: false
+  carbon:
+    estimated: false
+    source: No city-specific planting survival and sequestration series has been validated
+      for this city.
+pocket_park:
+  counts_for_access:
+    value: true
+    label: ASSUMED
+    source: A pocket park only counts if it meets the city access-area threshold.
+  min_area_ha_for_access:
+    value: 2.0
+    label: ASSUMED
+    source: https://designatedsites.naturalengland.org.uk/GreenInfrastructure/AccessibleGreenspaceStandard.aspx
+  carbon:
+    estimated: false
+    source: No city-specific park-tree carbon estimate has been validated for this
+      city.
+provenance_note: This country pack contains a cited appraisal discount-rate reference
+  and access benchmark only. Financial cost and carbon assumptions are deliberately
+  disabled until locally sourced.

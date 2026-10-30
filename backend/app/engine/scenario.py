@@ -1,11 +1,11 @@
 """Impact and cost engine for ONE site (Milestone M4/M5). Plain arithmetic, no black box.
 
-Costs are present values (PV) in rupees. Benefits are kept as separate indicators and never merged into one money figure.
+Costs are present values (PV) in the selected city profile’s currency. Benefits are kept as separate indicators and never merged into one money figure.
 Every result is compared with doing nothing, and every number carries an evidence label.
 
 What this deliberately does not do:
   * no ROI or payback (green space earns no revenue in this model)
-  * no carbon for pocket parks (no Indian measurement was found)
+  * no carbon for pocket parks unless the selected city assumptions pack provides a validated estimate
   * no cooling spill-over to neighbouring hexagons (conservative; footprint hexagon only)
   * people served is NOT summed across sites: overlapping catchments are handled when a portfolio is optimised (Milestone M6)
 """
@@ -85,10 +85,17 @@ def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_yea
     if t == "pocket_park":
         min_ha = float(P.value(a["pocket_park"]["min_area_ha_for_access"]))
         if area >= min_ha:
-            served = float(site.get("pop_unserved_300m") or 0.0)
-            served_note = "Residents within 300 m of the site who are not already within 300 m of a mapped park of at least 0.5 ha."
+            served = float(site.get("pop_unserved_access", site.get("pop_unserved_300m")) or 0.0)
+            access_cfg = a.get("access", {})
+            distance_m = float(access_cfg.get("distance_m", 300.0))
+            qualifying_ha = float(access_cfg.get("min_area_ha", min_ha))
+            method = str(access_cfg.get("method", "configured distance method")).replace("_", " ")
+            qualifying_text = ("any mapped public green space" if qualifying_ha <= 0
+                               else f"mapped public green space of at least {qualifying_ha:g} ha")
+            served_note = (f"Residents within {distance_m:g} m ({method}) of the site who are not already within "
+                           f"{distance_m:g} m of {qualifying_text}.")
         else:
-            served_note = f"A park smaller than {min_ha} ha does not count toward the WHO access measure."
+            served_note = f"A park smaller than {min_ha:g} ha does not qualify under this city profile’s configured park-access rule."
     else:
         served_note = "Not counted: dense plantations are not assumed to be open to the public." if not counts else ""
 
@@ -100,7 +107,7 @@ def run(site: dict, assumptions: dict, area_ha: float | None = None, horizon_yea
                                P.draw(mf["carbon_after_year5_factor"], rng, n, mode), P.draw(mf["carbon_scale"], rng, n, mode))
         co2 = rates.sum(axis=1) * area * float(P.value(a["common"]["co2_per_c"]))
         carbon = {"t_co2e": _q(co2)}
-        carbon_note = "Carbon stored by new trees over the horizon, scaled from three measured Indian plots; ASSUMED ranges. Existing trees are the baseline, not a benefit."
+        carbon_note = "Carbon stored by new trees over the horizon using the selected city assumptions pack; ASSUMED ranges. Existing trees are the baseline, not a benefit."
     else:
         co2 = None
         carbon_note = a["pocket_park"]["carbon"]["source"]

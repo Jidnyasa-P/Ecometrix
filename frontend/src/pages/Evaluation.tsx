@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { cityPath } from "../lib/city";
 import { Link } from "react-router-dom";
 import { METRIC_LABEL, Tornado } from "../components/Charts";
 import { EvidenceBadge, Notice, PageHead, Section } from "../components/Bits";
@@ -8,23 +9,23 @@ import { usePortfolios } from "../lib/portfolio";
 import { fmtNum } from "../lib/format";
 import type { Forecast, ModelReport, Sensitivity } from "../lib/types";
 
-const CAN = [
-  "There are N trees in the 2019 Pune census (MEASURED).",
-  "In Pune, greener hexagons have lower modelled surface temperature, by about X °C per unit of greenness in our model, with a stated range (MODELLED).",
-  "Under these stated assumptions, option A costs ₹ N per tonne of CO₂e, with a P10 to P90 range (ASSUMED, SIMULATED).",
-  "On our own held-out tests, the optimiser's portfolio is at least as good as funding the highest-need sites first (tested)."
+const CAN = (cityName: string, financeEnabled: boolean) => [
+  `A city tree count is available only where a sourced local inventory was loaded; ${cityName} must be described using its actual inventory coverage (MEASURED).`,
+  `Within ${cityName}, the heat model estimates an association between greenness and satellite surface temperature, with a stated validation range (MODELLED).`,
+  ...(financeEnabled ? ["Under the selected city's cited assumptions, a simulated option has a cost range (ASSUMED, SIMULATED)."] : ["No local cost or carbon estimate is published for this city until its assumptions are validated."]),
+  "On held-out tests, the model and optimiser can only be described using the results recorded for this specific city build."
 ];
 const CANNOT = [
   "\"EcoMetrix reduces emissions by X%\": nothing has been built.",
   "\"Our forecast is X% accurate\" without quoting the backtest it came from.",
-  "\"This lowers air temperature\": we only see surface temperature from a satellite.",
+  "\"This lowers air temperature\": satellite data here measures surface temperature.",
   "\"This pays back in N years\": green space earns no revenue in this model.",
-  "Any figure copied from another city and presented as Pune's."
+  "Any figure copied from another city and presented as this city's result."
 ];
 
 export default function Evaluation() {
   const d = useData();
-  const pf = usePortfolios(d.status === "ready");
+  const pf = usePortfolios(d.status === "ready" && d.meta.city.finance_enabled);
   const [mr, setMr] = useState<ModelReport | null>(null);
   const [fc, setFc] = useState<Forecast | null>(null);
   const [sv, setSv] = useState<Sensitivity | null>(null);
@@ -53,7 +54,7 @@ export default function Evaluation() {
       <Section>
         <h2 className="display display--sm">Model quality</h2>
         {d.status !== "ready" && <Notice title="Loading…" />}
-        {mr?.heat_model?.status === "ok" && mr.heat_model.cv && <p className="lede">Heat model: <strong>{mr.heat_model.chosen?.replace(/_/g, " ")}</strong> chosen on spatial cross-validation across {mr.heat_model.cv.blocks} held-out blocks, with a simple-baseline comparison on the <Link to="/audit">Data audit</Link> page.</p>}
+        {mr?.heat_model?.status === "ok" && mr.heat_model.cv && <p className="lede">Heat model: <strong>{mr.heat_model.chosen?.replace(/_/g, " ")}</strong> chosen on spatial cross-validation across {mr.heat_model.cv.blocks} held-out blocks, with a simple-baseline comparison on the <Link to={cityPath("/audit")}>Data audit</Link> page.</p>}
         {fc && <p className="lede">Forecast: <strong>{fc.method.replace(/_/g, " ")}</strong>, tested by training on {fc.backtest.train_years[0]} to {fc.backtest.train_years[1]} and predicting {fc.backtest.test_years[0]} to {fc.backtest.test_years[fc.backtest.test_years.length - 1]}; its error across hexagons was {fmtNum(fc.backtest.methods[fc.method].wape_pct, 1)}% against {fmtNum(fc.backtest.methods.naive.wape_pct, 1)}% for &ldquo;no change&rdquo;.</p>}
         {pf.status === "ready" && gains.length > 0 && <p className="lede">Optimiser: {optimal} of {pf.data.results.length} solutions were proven optimal; with no equity rule it delivered {fmtNum(Math.min(...gains), 0)}% to {fmtNum(Math.max(...gains), 0)}% more weighted benefit than funding the highest-need sites first (median {fmtNum([...gains].sort((a, b) => a - b)[Math.floor(gains.length / 2)], 0)}%). Exactness is proven against brute force on small cases in the test suite.</p>}
         {!mr && !fc && pf.status !== "ready" && <Notice tone="warn" title="No model results yet">Run the model step after the data build.</Notice>}
@@ -79,7 +80,7 @@ export default function Evaluation() {
       <Section>
         <h2 className="display display--sm">What we can say, and what we must not.</h2>
         <div className="claims">
-          <div className="claims__col claims__col--can"><h3>We can say</h3><ul>{CAN.map(c => <li key={c}>{c}</li>)}</ul></div>
+          <div className="claims__col claims__col--can"><h3>We can say</h3><ul>{(d.status === "ready" ? CAN(d.meta.city.name, !!d.meta.city.finance_enabled) : []).map(c => <li key={c}>{c}</li>)}</ul></div>
           <div className="claims__col claims__col--cannot"><h3>We must not say</h3><ul>{CANNOT.map(c => <li key={c}>{c}</li>)}</ul></div>
         </div>
         <p className="muted">Real-world evidence would come later: satellite greenness and surface temperature before and after planting, field surveys of tree survival and resident feedback. Only then could a label move from SIMULATED to MEASURED.</p>
@@ -87,7 +88,7 @@ export default function Evaluation() {
 
       <Section>
         <h2 className="display display--sm">Human checks still to do.</h2>
-        <p className="lede">These cannot be automated and have <strong>not been done yet</strong>: the five-person usability test, the independent spreadsheet recomputation of one site, the 30-site satellite spot-check, expert review of 20 sites, a fluent-speaker review of the Marathi text, and comparing OpenStreetMap parks with the municipality&rsquo;s own list. Protocols and templates are in <code>docs/evaluation/</code>.</p>
+        <p className="lede">These cannot be automated and have <strong>not been done yet</strong>: the five-person usability test, the independent spreadsheet recomputation of one site, the 30-site satellite spot-check, expert review of 20 sites, a fluent-speaker review of the Marathi and Greek text, and comparing OpenStreetMap parks with the municipality&rsquo;s own list. Protocols and templates are in <code>docs/evaluation/</code>.</p>
       </Section>
     </>
   );

@@ -8,13 +8,15 @@ import { useTheme } from "../lib/theme";
 import { useViewport } from "../lib/hooks";
 import { fmtInt, fmtNum } from "../lib/format";
 import type { Cell, FieldDef } from "../lib/types";
+import { translatePageText, useLanguage } from "../lib/i18n";
 
 export default function Explore() {
   const d = useData();
+  const [lang] = useLanguage();
   const [theme] = useTheme();
   const vp = useViewport();
   const [key, setKey] = useState<string | null>(null);
-  const [extrude, setExtrude] = useState(true);
+  const [extrude, setExtrude] = useState(false);
   const [sel, setSel] = useState<Cell | null>(null);
   const [hover, setHover] = useState<{ c: Cell; x: number; y: number } | null>(null);
   const [filterOn, setFilterOn] = useState(false);
@@ -58,7 +60,7 @@ export default function Explore() {
       <div className="explore__map">
         <MapStage cells={d.cells} field={field} theme={theme} camera={camera} extrude={extrude} interactive highlight={test}
           selectedHex={sel?.h3 ?? null} onHover={(c, x, y) => setHover(c ? { c, x, y } : null)} onSelect={c => setSel(c)}
-          label={`Interactive 3D map of Pune hexagons coloured by ${field.label}`} />
+          label={`Interactive map of ${d.meta.city.name} hexagons coloured by ${field.label}`} />
         {hover && !vp.mobile && (
           <div className="tip" style={{ left: hover.x + 14, top: hover.y + 14 }}>
             <strong>{hover.c.v[field.key] == null ? "no data" : `${fmtNum(hover.c.v[field.key], field.decimals > 1 ? 2 : field.decimals)} ${field.unit}`}</strong>
@@ -70,7 +72,7 @@ export default function Explore() {
       <aside className={`panel ${drawer ? "is-open" : ""}`} aria-label="Map controls">
         <button className="panel__toggle" onClick={() => setDrawer(o => !o)} aria-expanded={drawer}>{drawer ? "Hide controls" : "Layers and filters"}</button>
         <div className="panel__body">
-          <p className="kicker">Layer</p>
+          <p className="kicker">{translatePageText(lang, "Layer")}</p>
           {groups.map(g => (
             <fieldset key={g} className="layers">
               <legend>{g}</legend>

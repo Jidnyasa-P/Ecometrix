@@ -61,3 +61,16 @@ def test_reload_when_files_change(data_dir):
     time.sleep(0.01); m.write_text(json.dumps({"city": "T2", "layers": {}, "n_cells": 1}))
     os.utime(m, (time.time() + 5, time.time() + 5))
     assert c.get("/api/meta").json()["manifest"]["city"] == "T2"
+
+
+def test_city_registry_and_meta_never_promote_configuration_to_built():
+    c = TestClient(create_app())
+    payload = c.get("/api/cities").json()
+    cities = {item["slug"]: item for item in payload["cities"]}
+    assert set(cities) == {"pune", "london", "new-york", "athens"}
+    expected = {"pune": "INR", "london": "GBP", "new-york": "USD", "athens": "EUR"}
+    for slug, currency in expected.items():
+        meta = c.get(f"/api/meta?city={slug}").json()
+        assert meta["city"]["currency"] == currency
+        assert meta["built"] is False
+        assert cities[slug]["status"] in {"pilot_not_built", "configuration_only"}

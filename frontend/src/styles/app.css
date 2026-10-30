@@ -225,6 +225,8 @@ h1, h2, h3, p { margin: 0; }
   .nav { padding-left: 16px; }
   .nav__links { display: none; }
   .pill--menu { display: inline-flex; }
+  .language-picker { display: none; }
+  .pill--tool { min-width: 44px; width: 44px; padding: 0 10px; justify-content: center; font-size: 0; }
   .nav__sheet { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--surface); border: 1.5px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); padding: 8px; flex-direction: column; }
   .nav[data-open="true"] .nav__sheet { display: flex; }
   .sheetlink { padding: 14px 16px; border-radius: 16px; text-decoration: none; font-weight: 600; font-size: 1.1rem; color: var(--ink); }
@@ -358,3 +360,17 @@ h1, h2, h3, p { margin: 0; }
   .report table, .report tr { break-inside: avoid; }
   .badge { border: 1px solid #000; background: #fff !important; color: #000 !important; }
 }
+
+/* Multi-city selector */
+.city-picker { display: inline-flex; align-items: center; min-width: 0; }
+.city-picker__select { max-width: 148px; min-width: 112px; padding-right: 26px; color: var(--ink); background: var(--surface); cursor: pointer; }
+.city-picker__select option { color: #17211d; background: #fff; }
+@media (max-width: 899px) { .city-picker__select { max-width: 128px; min-width: 104px; } }
+
+/* Global draft-translation selector and disclosure. */
+.language-picker { display: inline-flex; align-items: center; min-width: 0; }
+.language-picker__select { min-width: 88px; max-width: 96px; padding-left: 12px; padding-right: 22px; }
+.translation-banner { position: fixed; z-index: 49; top: calc(14px + var(--nav-h) + 8px); left: 50%; transform: translateX(-50%); width: min(1180px, 100% - 24px); padding: 9px 16px; border: 1px solid var(--warn); border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); font-size: 0.875rem; line-height: 1.4; }
+@media (max-width: 899px) { .language-picker__select { min-width: 84px; max-width: 92px; } .translation-banner { top: calc(14px + var(--nav-h) + 6px); font-size: 0.78rem; padding: 7px 10px; } }
+
+@media (max-width: 899px) { .sheet-languages { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); margin-top: 4px; } .sheet-languages .chip { min-height: 38px; padding: 0 14px; } }

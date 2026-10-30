@@ -1,6 +1,6 @@
 """M4: the heat-greenery model.
 
-Question: across Pune's hexagons, how does pre-monsoon surface temperature (LST) change with vegetation (NDVI),
+Question: across the selected city's hexagons, how does pre-monsoon surface temperature (LST) change with vegetation (NDVI),
 holding built-up share and water share fixed, and what would LST be if a site became greener?
 
 Rules from the roadmap, enforced in code:

@@ -1,0 +1,130 @@
+name: Build all configured city pilots
+
+# This is an expensive, network-dependent workflow. It runs only when a maintainer
+# explicitly checks the confirmation box in Actions > Build all configured city pilots.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_all:
+        description: I understand this downloads global datasets and can take several hours per city
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: ecometrix-city-data
+  cancel-in-progress: false
+jobs:
+  build:
+    if: ${{ inputs.confirm_all == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        city: [pune, london, new-york, athens]
+    env:
+      CITY: ${{ matrix.city }}
+      ECOMETRIX_ALLOW_PARTIAL: "1"
+      ECOMETRIX_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13.17"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install the pinned build environment
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt && python -m pip check
+      - name: Resolve city output folder
+        id: city
+        run: |
+          OUT=$(PYTHONPATH=pipelines python -c "from ecometrix_pipeline.config import load_config; print(load_config(city='${CITY}')['data_output'])")
+          REL="data/cities/${CITY}/outputs"
+          echo "output=$OUT" >> "$GITHUB_OUTPUT"
+          echo "relative_output=$REL" >> "$GITHUB_OUTPUT"
+          echo "Building $CITY into $OUT"
+      - name: Invalidate the previous release marker
+        env:
+          DATA_OUT: ${{ steps.city.outputs.output }}
+        run: rm -f "$DATA_OUT/release_check.json"
+      - name: Run city data pipeline
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.run --city "$CITY"
+      - name: Build baseline relationship
+        run: python model/baseline_relationship.py --city "$CITY"
+      - name: Build city models
+        run: python model/run_models.py --city "$CITY"
+      - name: Validate the city release
+        run: PYTHONPATH=pipelines python -m ecometrix_pipeline.quality_gate --city "$CITY"
+      - name: Write city build summary
+        env:
+          DATA_OUT: ${{ steps.city.outputs.output }}
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          out = os.environ["DATA_OUT"]
+          manifest = json.load(open(os.path.join(out, "manifest.json"), encoding="utf-8"))
+          release = json.load(open(os.path.join(out, "release_check.json"), encoding="utf-8"))
+          print(f"## {manifest['city']} · {manifest.get('country')} — RELEASE PASSED\n")
+          print(f"Currency: {manifest.get('currency')} · CRS: EPSG:{manifest.get('utm_epsg', 'see city config')}\n")
+          print(f"Boundary: {release['boundary_source']} · {release['boundary_area_km2']} km²\n")
+          print("| Layer | Status |\n|---|---|")
+          for name, layer in manifest.get("layers", {}).items():
+              print(f"| {name} | {layer.get('status')} |")
+          models = json.load(open(os.path.join(out, "models_manifest.json"), encoding="utf-8"))
+          print("\n| Model | Status |\n|---|---|")
+          for name, module in models.get("modules", {}).items():
+              print(f"| {name} | {module.get('status')} |")
+          PY
+      - name: Package validated city outputs
+        run: tar -czf "city-output-${CITY}.tar.gz" -C "data/cities/${CITY}" outputs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: city-output-${{ matrix.city }}
+          path: city-output-${{ matrix.city }}.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish only cities whose release gate passed
+    if: ${{ always() && inputs.confirm_all == true }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: city-output-*
+          path: city-artifacts
+          merge-multiple: true
+      - name: Restore successful city outputs
+        run: |
+          set -e
+          for CITY in pune london new-york athens; do
+            ARCHIVE="city-artifacts/city-output-${CITY}.tar.gz"
+            if [ -f "$ARCHIVE" ]; then
+              mkdir -p "data/cities/${CITY}"
+              tar -xzf "$ARCHIVE" -C "data/cities/${CITY}"
+              echo "Restored quality-gated outputs for $CITY"
+            else
+              # A prior passing marker must not survive a failed/absent rebuild.
+              rm -f "data/cities/${CITY}/outputs/release_check.json"
+              echo "No passing build artifact for $CITY; removed any stale passing marker."
+            fi
+          done
+      - name: Commit all passing city builds in one commit
+        run: |
+          git config user.name "ecometrix-bot"
+          git config user.email "ecometrix-bot@users.noreply.github.com"
+          for CITY in pune london new-york athens; do
+            [ ! -d "data/cities/${CITY}/outputs" ] || git add -f "data/cities/${CITY}/outputs"
+          done
+          if git diff --cached --quiet; then
+            echo "No quality-gated city outputs were produced."
+          else
+            git commit -m "data: publish passing city baselines"
+            git push
+          fi

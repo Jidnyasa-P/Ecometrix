@@ -1,11 +1,17 @@
 .PHONY: install data model api web test
+CITY ?= pune
 install:
-	pip install -r pipelines/requirements.txt -r model/requirements.txt -r backend/requirements-dev.txt
+	python -m pip install -r requirements.txt
+	python -m pip check
 	cd frontend && npm ci
-data:            ## build the real baseline (needs internet; takes a while)
-	PYTHONPATH=pipelines python -m ecometrix_pipeline.run
-	python model/baseline_relationship.py
-	python model/run_models.py
+# The selected city is built into its own data/cities/<slug>/ folder.
+data:            ## build a city baseline (requires internet; set CITY=london, new-york or athens)
+	PYTHONPATH=pipelines python -m ecometrix_pipeline.run --city $(CITY)
+	python model/baseline_relationship.py --city $(CITY)
+	python model/run_models.py --city $(CITY)
+	PYTHONPATH=pipelines python -m ecometrix_pipeline.quality_gate --city $(CITY)
+model:
+	python model/run_models.py --city $(CITY)
 api:
 	python -m uvicorn app.main:app --app-dir backend --reload --port 8000
 web:

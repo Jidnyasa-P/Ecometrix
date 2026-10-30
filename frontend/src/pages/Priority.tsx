@@ -10,6 +10,7 @@ import { useViewport } from "../lib/hooks";
 import { fmtInt, fmtNum } from "../lib/format";
 import { availableComps, COMP_LABEL, COMPONENTS, normalise, toSites, withScores, type Weights } from "../lib/need";
 import type { Cell, FieldDef, ModelReport, Site, SitesPayload } from "../lib/types";
+import { translatePageText, useLanguage } from "../lib/i18n";
 
 const TYPE_NAME = { pocket_park: "Pocket park", mini_forest: "Mini-forest" } as const;
 const PRESET_NAME: Record<string, string> = { balanced: "Balanced", heat_first: "Heat first", access_first: "Access first", growth_aware: "Growth aware" };
@@ -17,6 +18,7 @@ const EQUAL: Weights = { heat: 25, people: 25, gap: 25, growth: 25 };
 
 export default function Priority() {
   const d = useData();
+  const [lang] = useLanguage();
   const [theme] = useTheme();
   const vp = useViewport();
   const [sites, setSites] = useState<Site[] | null>(null);
@@ -64,7 +66,7 @@ export default function Priority() {
     ramp: "need", about: "Weighted average of percentile ranks.", domain: scored.domain, min: scored.domain[0], max: scored.domain[1], n: cells?.length ?? 0 };
   const selected = sites?.find(s => s.id === selId) ?? null;
   const pad = vp.mobile ? { top: 80, right: 12, bottom: Math.round(vp.h * 0.45), left: 12 } : { top: 92, right: selected ? 440 : 40, bottom: 40, left: 440 };
-  const camera: Camera = { pitch: 38, bearing: -12, padding: pad, duration: 1400 };
+  const camera: Camera = { pitch: 0, bearing: 0, padding: pad, duration: 1400 };
   const presets = rep?.need?.presets ?? {};
   const stab = rep?.need?.stability;
   const pickPreset = (k: string) => { const p = presets[k]; if (!p) return; setPreset(k); setW(Object.fromEntries(COMPONENTS.map(c => [c, Math.round((p[c] ?? 0) * 100)])) as Weights); };
@@ -72,15 +74,15 @@ export default function Priority() {
   return (
     <div className="explore">
       <div className="explore__map">
-        <MapStage cells={scored.cells} field={needField} theme={theme} camera={camera} extrude interactive highlight={highlight}
-          selectedHex={selected?.h3 ?? null} label="Map of need score across Pune hexagons"
+        <MapStage cells={scored.cells} field={needField} theme={theme} camera={camera} extrude={false} interactive highlight={highlight}
+          selectedHex={selected?.h3 ?? null} label={`Map of need score across ${d.meta.city.name} hexagons`}
           onSelect={c => { if (!c || !sites) return; const here = sites.filter(s => s.h3 === c.h3 && (type === "all" || s.type === type)); if (here.length) setSelId(here[0].id); }} />
       </div>
 
       <aside className={`panel ${drawer ? "is-open" : ""}`} aria-label="Priority controls">
         <button className="panel__toggle" onClick={() => setDrawer(o => !o)} aria-expanded={drawer}>{drawer ? "Hide controls" : "Weights and sites"}</button>
         <div className="panel__body">
-          <p className="kicker">Where is the need? <EvidenceBadge kind="MODELLED" /></p>
+          <p className="kicker">{translatePageText(lang, "Where is the need?")} <EvidenceBadge kind="MODELLED" /></p>
           <p className="layer__about">Each hexagon&rsquo;s score is the weighted average of four percentile ranks. The weights are <strong>policy choices, not facts</strong>: pick a preset or set your own.</p>
 
           {Object.keys(presets).length > 0 && (
@@ -98,7 +100,7 @@ export default function Priority() {
           {rep?.need?.excluded && <p className="muted">{rep.need.excluded}</p>}
 
           <div className="filter">
-            <p className="kicker">Candidate sites</p>
+            <p className="kicker">{translatePageText(lang, "Candidate sites")}</p>
             {err && <Notice tone="warn" title="No candidate sites">{err === "not_built" ? "The model step has not produced sites yet." : "Sites could not be loaded."}</Notice>}
             <div className="presets" role="group" aria-label="Intervention type">
               {(["all", "pocket_park", "mini_forest"] as const).map(k => <button key={k} className={`chip ${type === k ? "is-on" : ""}`} onClick={() => setType(k)}>{k === "all" ? "All" : TYPE_NAME[k]}</button>)}

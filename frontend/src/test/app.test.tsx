@@ -18,7 +18,7 @@ const fields = [
   { key: "pop", label: "People", unit: "people", evidence: "MODELLED", group: "People", decimals: 0, source: "WorldPop", ramp: "people", about: "People.", domain: [0, 900], min: 0, max: 1000, n: 3 },
   { key: "access_share", label: "Park access", unit: "% of people", evidence: "MODELLED", group: "Access", decimals: 3, source: "OSM", ramp: "access", about: "Access.", domain: [0, 100], min: 0, max: 100, n: 3 }
 ];
-const meta = { built: true, manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
+const meta = { built: true, city: { slug: "pune", name: "Pune", country: "India", currency: "INR", locale: "en-IN", unit_system: "metric", finance_enabled: true }, cities: [{ slug: "pune", name: "Pune", currency: "INR", status: "built" }], manifest: { pipeline_version: "x", generated_at: "2026-10-01T00:00:00+00:00", git_sha: null, city: "Pune", h3_resolution: 9, pixel_m: 30,
   boundary: { source: "OSM", area_km2: 400, fallback: false }, n_cells: 3, columns: [],
   layers: { trees: { title: "Tree census", evidence: "MEASURED", license: "PD", status: "ok", detail: { vintage: "2019" } },
             landsat: { title: "LST", status: "failed", reason: "RuntimeError: stac down" } } },

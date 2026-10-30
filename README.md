@@ -1,103 +1,166 @@
-# EcoMetrix: Green Investment Planner (Pune pilot)
+# EcoMetrix — multi-city urban greening evidence platform
 
-Evidence base for deciding where a city's next rupee of greening should go. **This release covers all ten weeks of the roadmap (M0 to M9):** pilot-city audit, baseline layers, heat model, cost and impact engine, demand forecast, need score, candidate sites, an **exact portfolio optimiser**, plan comparison, evidence cards, a printable report, an English and Marathi citizen view, and an evaluation page with sensitivity analysis.
+EcoMetrix is a decision-support prototype for understanding urban heat, mapped green space, population exposure and park-access gaps. It currently contains four city profiles:
 
-Everything on screen comes from open data or from a sourced assumption. There is no demo data, no placeholder numbers and no sign-in. If a source cannot be reached, that layer is marked *failed* with the reason; if a number has no defensible source (for example carbon for pocket parks), the app says "not estimated". All plans are **simulations** compared with doing nothing: nothing has been built.
+| City | Country | Currency | State in this archive | Tree inventory | Local finance / carbon model |
+|---|---|---:|---|---|---|
+| Pune | India | INR | Original pilot configuration; data must pass the release gate | Pune open tree census configured | Enabled using the Pune assumptions pack |
+| London | United Kingdom | GBP | Configuration only — not built or validated | Optional; canopy proxy only | Disabled pending local cost and carbon evidence |
+| New York City | United States | USD | Configuration only — not built or validated | Optional; canopy proxy only | Disabled pending local cost and carbon evidence |
+| Athens | Greece | EUR | Configuration only — not built or validated | Optional; canopy proxy only | Disabled pending local cost and carbon evidence |
 
-```
+**Important:** the presence of a city in the selector does not mean its data has been built. A city is marked *built* only after its own data pipeline, models and release quality gate complete successfully. In this source archive, no fresh live data build for London, New York or Athens has been completed. Do not present those cities' outputs as validated results until their workflows pass.
+
+The global foundation uses open data sources with international coverage where available: OpenStreetMap, ESA WorldCover, Landsat, Sentinel-2 and WorldPop. Tree inventories remain city-specific. When a city has no configured open tree inventory, EcoMetrix does not invent tree counts; it uses land-cover canopy proxies and reports the missing inventory. City outputs and raw downloads are stored separately under `data/cities/<slug>/`.
+
+## What the application contains
+
+- **Atlas:** city overview and story map.
+- **Forecast:** population trend and backtest-based projections.
+- **Priority:** heat, population, access and growth need score.
+- **Plan / Compare:** Pune's cost-aware scenario and portfolio tools. These are disabled outside Pune until a locally sourced and validated finance pack exists.
+- **Language:** English, Marathi and Greek can be selected throughout the app. Navigation, footer, key story and page headings, and the Citizen view are localized. Some analytical explanations, chart labels and source text remain English. Marathi and Greek are draft translations and need fluent-speaker review before public use.
+- **Explore:** data layers and optional 3D hexagon rendering.
+- **Data audit / Evaluation / Method:** layer status, model checks, evidence labels, assumptions and limitations.
+
+All plans are simulations, not built interventions. Candidate sites are analytical areas, not verified parcels. Heat outputs use satellite land-surface temperature, not human-experienced air temperature.
+
+## City-specific design decisions and limitations
+
+- **Projection:** the local UTM EPSG code is calculated from each city's configured centre. The code no longer assumes UTM zone 43N for every place.
+- **Boundary:** each city uses Nominatim place queries first, with area sanity checks. A configured bounding-box fallback is explicitly marked and fails the release gate; it is never accepted as a validated city boundary.
+- **Population:** WorldPop country codes and per-city URLs are selected from the city profile. Historical population layers remain limited to the available 2000–2020 series.
+- **Park access:** London uses the Natural England 2 ha / 300 m local benchmark, but this implementation currently measures straight-line distance, not the separate network-based 15-minute standard. New York uses a 0.5-mile radius as a transparent straight-line proxy only; it is **not** the Trust for Public Land walk-network service-area method. Athens uses a WHO Europe 0.5 ha / 300 m evidence benchmark, not a verified municipal legal standard. Pune's configured threshold is 0.5 ha / 300 m. Every result must display its method and caveat.
+- **Costs and carbon:** foreign city packs disable financial optimisation and carbon estimation until comparable local capital, maintenance, planting survival and sequestration sources have been validated. Currency symbols and locale metadata are configured, but that is not a substitute for a local economic model. Pune's assumptions remain INR-specific.
+- **Language:** the language selector is global and persists across routes. A persistent notice explains that Marathi and Greek are unreviewed drafts and that some technical/analytical text remains English. Do not publish translated content without fluent-speaker review.
+- **Model transfer:** heat/need models must be built and evaluated for each city. Pune model weights or metrics must not be represented as transferable to another city.
+
+## Repository layout
+
+```text
 ecometrix/
-├── frontend/      React 19 + Vite 8 + MapLibre 6 + deck.gl 9 (deploy to Vercel)
-├── backend/       FastAPI + the cost and impact engine (deploy to Render, native Python, no Docker)
-├── pipelines/     data pipeline: tree census, OSM, Landsat, Sentinel-2, WorldCover, WorldPop → H3 grid
-├── model/         heat model, forecast, need score, candidate sites, portfolio optimiser, sensitivity
-├── config/        pilot_pune.yaml (the only city-specific file) and assumptions.yaml (every assumed number, with its source)
-├── data/outputs/  built data served by the API (committed; empty until you run "Build data")
-├── docs/          roadmap, model cards, evaluation protocols, demo script and Q&A, release checklist, decision log
-├── .github/       CI and the "Build data" workflow
-└── render.yaml    Render Blueprint
+├── frontend/                  React + TypeScript + Vite + MapLibre + deck.gl
+├── backend/                   FastAPI API and Pune-only finance/scenario engine
+├── pipelines/                 city-aware boundary, OSM, satellite and population pipeline
+├── model/                     heat, forecast, need score, candidate sites and optimiser
+├── config/
+│   ├── registry.yaml           city selector and default city
+│   ├── cities/                 one city configuration per profile
+│   └── assumptions/            one sourced assumptions pack per city
+├── data/cities/<slug>/         isolated raw downloads and outputs per city
+├── docs/                       model cards, decision log and evaluation protocols
+├── .github/workflows/          CI, single-city and opt-in four-city build workflows
+└── render.yaml                 Render backend blueprint
 ```
 
-## What the app does
+## Requirements
 
-| Screen | Milestone | What it shows |
-|---|---|---|
-| **Atlas** | M3 | Scroll-driven 3D story of Pune's trees, heat and park access with live numbers |
-| **Forecast** | M5 | City population to 2035 with a backtest-error envelope; the backtest table; where growth lands |
-| **Priority** | M5 | Need score map with four visible components and weight presets; ranked candidate sites; single-site scenario runner |
-| **Plan** | M6 | Best portfolio under a budget from an exact optimiser: presets, budget, equity rule; people counted once; cost, cooling and carbon ranges; do-nothing baseline; comparison with "fund highest need first"; evidence card per site |
-| **Compare** | M7 | Up to three plans side by side with doing nothing, and what differs |
-| **Report** | M7 | Printable plan summary with assumptions, limits and sources (print to PDF) |
-| **Citizen view** | M7 | Plain-language "what is planned near me" in English and Marathi (Marathi is flagged as not yet reviewed) |
-| **Explore** | M3 | Every layer, click a hexagon, exploratory filter |
-| **Data audit** | M0 to M8 | Pilot-city checks, per-layer status, model cross-validation |
-| **Evaluation** | M8 | Model results, sensitivity (tornado), what we can and must not claim, human checks still open |
-| **Method** | all | Evidence labels, layer definitions, limits, assumptions register with sources |
+- **Python:** use Python **3.13.17** for this Windows setup. Python 3.13.18 (released October 25, 2026) is a source-only security release; 3.13.17 is the final 3.13 release with a standard Windows installer. The project stays on 3.13.17 because its pinned geospatial/scientific stack is configured for this installable runtime, rather than assuming every wheel is ready on a newer feature branch. Render and CI use the same version. Update pip inside the virtual environment after installation.
+- **Node.js:** use Node **22.23.4** or later in the Node 22 line. `.node-version` contains the tested target. This is important: newer transitive frontend packages reject older Node 22 maintenance releases.
+- Git and a network connection are required to install packages and retrieve open geospatial data.
 
-## What is real, and what I could not verify
+The package files are pinned. Use the root `requirements.txt` as the single install entry point; it includes the backend, model, pipeline and test dependencies. CI runs `pip check`, Python tests, TypeScript checks, frontend tests and the production build on the pinned runtimes. This editing environment could not reach package indexes, so a clean install could not be independently completed here; the CI workflow is the first networked clean-install verification.
 
-Verified while building (documentation, package registries, tests):
+## Run on Windows 11 (PowerShell)
 
-* Current stable package versions; the new majors needed code changes and the project builds and type-checks on them.
-* Render free tier (512 MB, sleeps after 15 min idle), Blueprint format, Python version setting.
-* OpenFreeMap basemap (no key), Planetary Computer (free anonymous STAC), WorldPop yearly rasters 2000 to 2020 exist (listing seen for 2019 and 2020).
-* Tree census: 17 CSV parts on OpenCity. The explainer says 4.09 million trees but the parts add up to about 4.009 million; the audit shows the count actually loaded.
-* WHO access rule: at least 0.5 ha within 300 m.
-* **Cost and carbon sources** (see `config/assumptions.yaml`): mini-forest cost and density from Afforestt quotes and Mongabay-India (via press), carbon from a 2025 study of three South Indian Miyawaki forests, PMC garden spending from a news report of PMC's own figures, discount rate from NABARD and Institute of Economic Growth. **No Pune rate schedule was found**, so costs are ranges, several of them with a stated "judgement" bound. **No Indian measurement of park carbon was found**, so it is not estimated.
+From the repository root:
 
-Tested at release: **18 pipeline, 47 model (including exact optimiser proofs), 27 backend and 83 frontend tests**, plus type-check, production build and automated accessibility checks (contrast of every text pair in both themes, lightness of map ramps, minimum font size). The optimiser is proven equal to brute force on 16 random instances (with equity and separation rules). The engine's arithmetic is checked against hand-worked examples. A whole-chain test runs pipeline-shaped data through the model step, the API, a scenario and portfolios.
+```powershell
+# Python environment
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip check
 
-**Not verified: the pipeline and model steps have never run on the live sources, and the interface has never been seen in a browser by the author.** The build environment could not reach the data servers, so all tests use small stand-in data created inside the tests. The first real run is where surprises will appear, most likely: tree-census CSV column names (auto-detected and reported), Overpass timeouts, Planetary Computer scene counts, the 21 yearly WorldPop reads (a year that cannot be read is skipped and reported; fewer than 5 readable years fails the forecast layer), and whether enough hexagons are mostly park or mostly forest to derive the greenness targets (otherwise cooling shows "not available", never a guess). Layers are independent, so one failure does not stop the others. The portfolio step needs `site_pixels.parquet` (the exact catchments); without it the Plan screen says so and shows nothing in its place.
-
-**Human checks not done at release** (protocols in `docs/evaluation/`): five-person usability test, independent spreadsheet recomputation, 30-site satellite spot-check and 20-site expert review, fluent-speaker review of the Marathi text, OSM versus municipal park list, and the labels audit.
-
-## Run it
-
-Requires Python 3.12+ and Node 22.12+.
-
-### 1. Build the data (once, then monthly)
-
-Push the repo to GitHub, then **Actions → Build data → Run workflow**. It runs the pipeline, `baseline_relationship.py` and `run_models.py` (which also solves the portfolio grid; allow up to a few hours), writes a per-layer and per-model status table to the job summary, and commits `data/outputs/`. Read that table first.
-
-Or locally:
-
-```bash
-pip install -r pipelines/requirements.txt -r model/requirements.txt
-make data         # pipeline, then model/baseline_relationship.py, then model/run_models.py
+# Frontend dependencies
+cd frontend
+npm ci
+cd ..
 ```
 
-Layers can be run separately: `PYTHONPATH=pipelines python -m ecometrix_pipeline.run --only osm,trees`. Optional `VITE_FEEDBACK_URL` (Vercel) gives the citizen view a feedback button. Set `ECOMETRIX_CONTACT` to your repo URL or email (Nominatim and Overpass expect an identifying User-Agent).
+If PowerShell blocks environment activation, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in that terminal and activate again.
 
-### 2. Run locally
+### Build all four city pilots on GitHub Actions
 
-```bash
-pip install -r backend/requirements-dev.txt
-make api                                   # http://localhost:8000/docs
-cd frontend && npm ci && npm run dev       # http://localhost:5173 (proxies /api to port 8000)
+The repository includes an opt-in matrix workflow at **Actions → Build all configured city pilots**. Check the confirmation box to run Pune, London, New York and Athens in parallel. Each city is built in its own job; only cities whose data, model and audit quality gate passes are uploaded and committed. Failed cities are not marked as built. This requires the project to be pushed to GitHub with Actions write permission enabled. The four-city run downloads global datasets and can use substantial runner time and artifact storage.
+
+A successful workflow run is the required evidence that a city build passed. A city profile alone is not evidence of a build. Review the workflow summary and each city's `release_check.json` before claiming that city is validated.
+
+### Build one city
+
+The build requires internet access to Nominatim, Overpass, WorldPop and Microsoft Planetary Computer. Run the stages in order. The output and raw downloads are isolated by city.
+
+```powershell
+# Pune (default pilot)
+$env:PYTHONPATH = "pipelines"
+python -m ecometrix_pipeline.run --city pune
+python model/baseline_relationship.py --city pune
+python model/run_models.py --city pune
+python -m ecometrix_pipeline.quality_gate --city pune
+
+# To build a different configured city, replace 'pune' consistently:
+# london | new-york | athens
 ```
 
-### 3. Deploy
+Equivalent Make target: `make data CITY=london` (or `CITY=new-york`, `CITY=athens`, `CITY=pune`). The target runs all four stages including the release gate. `release_check.json` is only written after the required data, model and audit checks pass. A failed build removes any older passing marker so stale success cannot be shown.
 
-**Backend on Render (free, no Docker):** commit `data/outputs/` (step 1) → Render dashboard → New → **Blueprint** → select the repo (`render.yaml`). Set `ALLOWED_ORIGINS` to your Vercel URL (comma-separate several; for preview URLs also set `ALLOWED_ORIGIN_REGEX`, e.g. `https://ecometrix-.*\.vercel\.app`). The service reads `config/assumptions.yaml` from the repo, so editing an assumption and pushing changes the scenario results after redeploy.
+Read the layer and model manifests, the audit and the `release_check.json` before using a city. The current quality gate rejects a configured bounding-box fallback, missing required satellite/population layers, stale/poorly covered latest imagery, incomplete core models and failed audit checks. First builds can take a long time and may need source-specific troubleshooting.
 
-**Frontend on Vercel (free Hobby plan; check Vercel's terms for your use):** import the repo, **Root Directory** `frontend`, environment variable `VITE_API_URL` = your Render URL (no trailing slash). The first visit after a quiet period shows "Waking the server" for up to about a minute: that is the free Render tier.
+### Run the API and website locally
 
-### Tests
+Open two terminals from the repository root, with the virtual environment active in each.
 
-```bash
-make test
+Terminal 1 — API:
+
+```powershell
+python -m uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
 
-## Method notes
+Terminal 2 — frontend:
 
-* Grid: H3 resolution 9 (about 0.1 km² per hexagon) over a 30 m metric pixel grid (UTM 43N).
-* Heat: Landsat 8/9 surface temperature, cloud-masked median of March to May 2024 to 2026. Mid-morning **surface** temperature, not air temperature.
-* Heat model: compared with simple baselines under spatial block cross-validation; the ML model is used only if it wins by at least 1%; NDVI is constrained so more vegetation never predicts hotter.
-* Cooling per site: the model's predicted change when the hexagon's NDVI moves toward the typical NDVI of Pune's own mapped parks or forests, in proportion to the site's share of the hexagon. No spill-over to neighbours is credited.
-* Forecast: simple trend methods chosen by a backtest (train 2000 to 2014, test 2015 to 2020); "no change" is the bar. The band is a backtest error envelope, not a statistical interval.
-* Need score: weighted percentile ranks of heat, residents, park-access gap and growth. Weights are policy choices, shown as presets. Resident vulnerability is not included (no open data built).
-* Candidate sites: estimated open land per hexagon (bare + grass + shrub cover minus mapped parks and forest). **Not parcels; every site needs field verification.** Two types only (pocket park, mini-forest); street trees and green roofs need data that is not built.
-* Portfolios: exact integer programming (OR-Tools CP-SAT); benefits are cooling person-degrees, people newly within 300 m of a park (pixel-exact, counted once) and carbon, normalised and weighted by policy presets; budget and an optional equity rule are constraints; solved on a grid of budgets in the model step.
-* Cost: present value of capital and upkeep in rupees with Monte Carlo ranges (2,000 draws, fixed seed). Costs are compared with doing nothing. There is no ROI or payback figure: green space earns no revenue in this model.
-* Differences from the roadmap, on purpose: straight-line access distance (walking network later); hexagon grid instead of wards (the census uses pre-2017 ward numbers); two intervention types instead of four; the optimiser's results are pre-solved on a grid of budgets rather than solved per request.
+```powershell
+cd frontend
+npm run dev
+```
 
-See `docs/` for the roadmap, model cards, data inventory and assumptions register.
+Open `http://localhost:5173`. The city selector changes the `?city=` query parameter and all API requests follow the selected city. A configured but unbuilt city is clearly shown as not built; it is not filled with Pune's data.
+
+### Run checks
+
+```powershell
+python -m compileall -q pipelines model backend
+$env:PYTHONPATH = "pipelines"
+python -m pytest pipelines/tests -q
+python -m pytest model/tests -q
+python -m pytest backend/tests -q
+cd frontend
+npm run typecheck
+npm test
+npm run build
+```
+
+A full end-to-end release test must be done after each city has real pipeline outputs. Unit tests and static checks cannot establish that remote city data sources are reachable or that the resulting study boundary is correct.
+
+## Data build automation
+
+Push the repository to GitHub. Choose **Actions → Build data → Run workflow**, then select one city. The scheduled workflow rebuilds Pune by default; other cities are built on demand until their independent pipelines are proven stable. The workflow commits only that city's output directory and stops before committing if the quality gate fails.
+
+## Deploy
+
+- **Backend:** use the Render Blueprint in `render.yaml`. Set `ALLOWED_ORIGINS` to the deployed Vercel URL(s). The backend reads each city's own assumptions pack and output directory.
+- **Frontend:** deploy `frontend/` to Vercel, set `VITE_API_URL` to the Render service URL (no trailing slash), and ensure the API has the correct allowed origin.
+- Do not deploy a city as a public validated pilot until its own output has `release_check.json` with `status: passed` and a human has checked the boundary, source provenance, maps and representative locations.
+
+## Performance choices
+
+- The site uses **2D maps by default**. Only the Explore page offers optional 3D extrusion.
+- MapLibre's worker URL is explicitly registered for Vite builds.
+- Initial camera fitting occurs after the map is loaded and resized; requested padding is clamped to canvas size to avoid impossible `fitBounds` geometry.
+- Deck.gl layers do not enable picking unless the map is interactive. Extrusion, animation and high-cost visual effects are not enabled on the story pages.
+
+These changes reduce unnecessary GPU work, but performance still depends on browser, integrated graphics, data size and viewport. Validate on a modest Windows laptop as well as a desktop browser.
+
+## Evidence and responsible use
+
+Every city must be checked independently. Global satellite and population products do not guarantee equal quality, temporal coverage, resolution, or local representativeness. OSM coverage varies by place. Population is a gridded estimate. Tree canopy from land cover is not a tree count. Straight-line park distance is not walkability. Candidate land is not a confirmed available parcel. The models are planning aids, not medical, legal or engineering advice, and must not be used as a substitute for field surveys or local stakeholder review.
