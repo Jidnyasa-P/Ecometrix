@@ -1,0 +1,135 @@
+{
+  "pipeline_version": "0.4.0",
+  "generated_at": "2026-10-31T00:45:27+00:00",
+  "git_sha": "ef42f6f5e600645e3528f839c50dd517bf97c115",
+  "city": "New York City",
+  "city_slug": "new-york",
+  "country": "United States",
+  "currency": "USD",
+  "locale": "en-US",
+  "unit_system": "metric",
+  "access": {
+    "distance_m": 804.672,
+    "min_area_ha": 0.0,
+    "standard": "Trust for Public Land 10-Minute Walk benchmark (half-mile service area)",
+    "method": "straight_line_proxy",
+    "source": "https://www.tpl.org/parkserve/about",
+    "note": "0.5 miles is used as a transparent radius proxy only. TPL calculates walkable street-network service areas that account for barriers; this build does not. Do not compare this proxy directly with TPL ParkScore results."
+  },
+  "h3_resolution": 8,
+  "pixel_m": 30,
+  "boundary": {
+    "source": "Configured bounding box (FALLBACK, not an official boundary)",
+    "osm_ref": null,
+    "name": "New York City",
+    "area_km2": 2258.4,
+    "fallback": true,
+    "notes": [
+      "Nominatim boundary rejected for 'New York, United States': area 1218.2 km2 outside sanity range 650-1000.",
+      "Nominatim boundary rejected for 'New York, United States': area 1218.2 km2 outside sanity range 650-1000."
+    ]
+  },
+  "n_cells": 3048,
+  "columns": [
+    "h3",
+    "lat",
+    "lng",
+    "area_km2",
+    "dist_park_m",
+    "park_ha",
+    "forest_ha",
+    "pop",
+    "pop_access",
+    "pop_unserved_access",
+    "pop_unserved_300m",
+    "access_share"
+  ],
+  "layers": {
+    "trees": {
+      "title": "City tree inventory (optional)",
+      "evidence": "MEASURED",
+      "status": "skipped",
+      "reason": "No city-specific open tree inventory has been configured. Canopy is derived from global land-cover products instead; tree counts are intentionally not imputed."
+    },
+    "osm": {
+      "title": "Mapped green space (OpenStreetMap)",
+      "evidence": "MEASURED",
+      "license": "ODbL, \u00a9 OpenStreetMap contributors",
+      "source": "https://www.openstreetmap.org (Overpass API)",
+      "status": "ok",
+      "detail": {
+        "vintage": "queried 2026-10-31",
+        "public_green_polygons": 15150,
+        "public_green_qualifying_polygons": 15150,
+        "public_green_total_ha": 14500.3,
+        "public_green_qualifying_ha": 14500.3,
+        "forest_reserve_polygons": 5223,
+        "open_green_polygons": 22712
+      }
+    },
+    "worldcover": {
+      "title": "Land cover (ESA WorldCover)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, ESA WorldCover",
+      "source": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover",
+      "status": "failed",
+      "reason": "STAC catalog unavailable: APIError('Request rate limited or blocked. Slow down, or contact planetarycomputer@microsoft.com with reference 20261031T004637Z-17875568855qgmg5hC1DM1tzzg000000071g00000000589b.')"
+    },
+    "landsat": {
+      "title": "Land-surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "failed",
+      "reason": "STAC catalog unavailable: APIError('Request rate limited or blocked. Slow down, or contact planetarycomputer@microsoft.com with reference 20261031T004637Z-17875568855qgmg5hC1DM1tzzg000000071g00000000589b.')"
+    },
+    "sentinel": {
+      "title": "Vegetation index NDVI (Sentinel-2 pre-monsoon baseline)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "failed",
+      "reason": "STAC catalog unavailable: APIError('Request rate limited or blocked. Slow down, or contact planetarycomputer@microsoft.com with reference 20261031T004637Z-17875568855qgmg5hC1DM1tzzg000000071g00000000589b.')"
+    },
+    "landsat_latest": {
+      "title": "Latest surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "failed",
+      "reason": "STAC catalog unavailable: APIError('Request rate limited or blocked. Slow down, or contact planetarycomputer@microsoft.com with reference 20261031T004637Z-17875568855qgmg5hC1DM1tzzg000000071g00000000589b.')"
+    },
+    "sentinel_latest": {
+      "title": "Latest greenness NDVI (Sentinel-2)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "failed",
+      "reason": "STAC catalog unavailable: APIError('Request rate limited or blocked. Slow down, or contact planetarycomputer@microsoft.com with reference 20261031T004637Z-17875568855qgmg5hC1DM1tzzg000000071g00000000589b.')"
+    },
+    "population": {
+      "title": "Population (WorldPop 2020, constrained)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/geodata/summary?id=49804",
+      "status": "ok",
+      "detail": {
+        "vintage": "2020",
+        "read": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "pixels": 164627
+      }
+    },
+    "popseries": {
+      "title": "Population history 2000-2020 (WorldPop yearly)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/Global1_2000-2020",
+      "status": "ok",
+      "detail": {
+        "vintage": "2000 to 2020",
+        "years_read": 21,
+        "years_missing": 0
+      }
+    }
+  }
+}

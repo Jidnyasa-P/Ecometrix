@@ -1,0 +1,32 @@
+{
+  "city": "New York City",
+  "city_slug": "new-york",
+  "currency": "USD",
+  "modules": {
+    "heat_model": {
+      "status": "failed",
+      "reason": "ValueError: heat model needs columns ['ndvi', 'builtup_pct', 'water_pct', 'lst_c']; build those layers first"
+    },
+    "greenness_targets": {
+      "status": "ok"
+    },
+    "forecast": {
+      "status": "ok"
+    },
+    "need_score": {
+      "status": "ok"
+    },
+    "sites": {
+      "status": "failed",
+      "reason": "ValueError: cannot generate sites without ['ndvi', 'open_land_ha']"
+    },
+    "sensitivity": {
+      "status": "skipped",
+      "reason": "No sufficiently comparable, city-specific capital and maintenance cost schedule has been validated yet. Cost scenarios and budget optimisation are disabled rather than populated with invented currency values."
+    },
+    "portfolio": {
+      "status": "skipped",
+      "reason": "No sufficiently comparable, city-specific capital and maintenance cost schedule has been validated yet. Cost scenarios and budget optimisation are disabled rather than populated with invented currency values."
+    }
+  }
+}

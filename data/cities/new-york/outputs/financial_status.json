@@ -1,0 +1,5 @@
+{
+  "available": false,
+  "currency": "USD",
+  "reason": "No sufficiently comparable, city-specific capital and maintenance cost schedule has been validated yet. Cost scenarios and budget optimisation are disabled rather than populated with invented currency values."
+}

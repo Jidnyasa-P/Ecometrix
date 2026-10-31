@@ -1,0 +1,16 @@
+{
+  "n_cells": 3048,
+  "area_km2": 2257.3,
+  "pop_total": 11042072,
+  "pop_with_park_access": 10986031,
+  "pop_without_park_access": 56042,
+  "pop_without_park_access_pct": 0.5,
+  "public_green_mapped_ha_in_study_area": 13637.4,
+  "forest_reserve_mapped_ha_in_study_area": 16310.7,
+  "city": "New York City",
+  "country": "United States",
+  "h3_resolution": 8,
+  "currency": "USD",
+  "locale": "en-US",
+  "access_rule": ">= 0.0 ha public green within 804.672 m (Trust for Public Land 10-Minute Walk benchmark (half-mile service area); straight_line_proxy)"
+}

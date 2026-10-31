@@ -1,0 +1,349 @@
+{
+  "status": "ok",
+  "method": "naive",
+  "last_observed_year": 2020,
+  "backtest": {
+    "train_years": [
+      2000,
+      2014
+    ],
+    "test_years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020
+    ],
+    "methods": {
+      "naive": {
+        "wape_pct": 0.0,
+        "city_mape_pct": 0.0,
+        "city_bias_pct": 0.0,
+        "wape_by_horizon_pct": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "linear_recent10": {
+        "wape_pct": 0.0,
+        "city_mape_pct": 0.0,
+        "city_bias_pct": 0.0,
+        "wape_by_horizon_pct": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "linear_all": {
+        "wape_pct": 4.957,
+        "city_mape_pct": 4.957,
+        "city_bias_pct": -4.957,
+        "wape_by_horizon_pct": [
+          3.663,
+          4.218,
+          4.737,
+          5.235,
+          5.716,
+          6.176
+        ]
+      },
+      "exponential_all": {
+        "wape_pct": 2.452,
+        "city_mape_pct": 2.452,
+        "city_bias_pct": -2.452,
+        "wape_by_horizon_pct": [
+          1.683,
+          2.001,
+          2.311,
+          2.613,
+          2.907,
+          3.195
+        ]
+      }
+    }
+  },
+  "selection_rule": "lowest backtest WAPE; a method must beat the simpler ones by at least 1% to replace them",
+  "envelope": {
+    "observed_relative_error_by_horizon": {
+      "1": [
+        0.0,
+        0.0
+      ],
+      "2": [
+        0.0,
+        0.0
+      ],
+      "3": [
+        0.0,
+        0.0
+      ],
+      "4": [
+        0.0,
+        0.0
+      ],
+      "5": [
+        0.0,
+        0.0
+      ],
+      "6": [
+        0.0,
+        0.0
+      ],
+      "7": [
+        0.0,
+        0.0
+      ],
+      "8": [
+        0.0,
+        0.0
+      ],
+      "9": [
+        0.0,
+        0.0
+      ],
+      "10": [
+        0.0,
+        0.0
+      ],
+      "11": [
+        0.0,
+        0.0
+      ],
+      "12": [
+        0.0,
+        0.0
+      ]
+    },
+    "growth_beyond_tested_per_year": 8.333333333333334e-11
+  },
+  "city_series": [
+    {
+      "year": 2000,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2001,
+      "kind": "history",
+      "total": 1.0345995854378172e+44
+    },
+    {
+      "year": 2002,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2003,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2004,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2005,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2006,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2007,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2008,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2009,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2010,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2011,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2012,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2013,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2014,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2015,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2016,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2017,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2018,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2019,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2020,
+      "kind": "history",
+      "total": 3.3045279534881505e+43
+    },
+    {
+      "year": 2021,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2022,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2023,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2024,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2025,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2026,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2027,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2028,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2029,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2030,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2031,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2032,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279534848457e+43,
+      "high": 3.304527953491455e+43
+    },
+    {
+      "year": 2033,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.304527949908245e+43,
+      "high": 3.3045279570680557e+43
+    },
+    {
+      "year": 2034,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.3045279496328675e+43,
+      "high": 3.304527957343433e+43
+    },
+    {
+      "year": 2035,
+      "kind": "forecast",
+      "total": 3.3045279534881505e+43,
+      "low": 3.30452794935749e+43,
+      "high": 3.3045279576188103e+43
+    }
+  ],
+  "horizons": [
+    2025,
+    2030,
+    2035
+  ],
+  "caveats": [
+    "History is WorldPop's modelled yearly series, not census counts.",
+    "Band = backtest error envelope across forecast origins, not a statistical interval; beyond the tested horizon it is extended linearly.",
+    "Policy shocks (new transit, master-plan changes) are not modelled."
+  ]
+}

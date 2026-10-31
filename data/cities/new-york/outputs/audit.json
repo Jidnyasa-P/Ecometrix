@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-10-31T00:45:27+00:00",
+  "checks": [
+    {
+      "id": "boundary",
+      "title": "City boundary",
+      "status": "warn",
+      "rule": "An administrative boundary is obtained and passes geometry, centre-point and city-specific area sanity checks.",
+      "evidence": {
+        "source": "Configured bounding box (FALLBACK, not an official boundary)",
+        "area_km2": 2258.4,
+        "osm_ref": null,
+        "boundary_dataset": null,
+        "boundary_dataset_url": null,
+        "boundary_resource_name": null,
+        "boundary_resource_credit": null,
+        "boundary_metadata_modified": null,
+        "boundary_resource_modified": null,
+        "boundary_ward_features": null,
+        "h3_cells": 3048
+      },
+      "note": "Nominatim boundary rejected for 'New York, United States': area 1218.2 km2 outside sanity range 650-1000.; Nominatim boundary rejected for 'New York, United States': area 1218.2 km2 outside sanity range 650-1000."
+    },
+    {
+      "id": "trees",
+      "title": "Optional city tree inventory",
+      "status": "warn",
+      "rule": "A city-specific open tree inventory is optional; no tree counts are inferred when one is absent.",
+      "evidence": {},
+      "note": "No city-specific open tree inventory has been configured. Canopy is derived from global land-cover products instead; tree counts are intentionally not imputed."
+    },
+    {
+      "id": "latest_satellite",
+      "title": "Latest satellite observations",
+      "status": "warn",
+      "rule": "Both rolling-window composites must be no older than 60 days and cover at least 50.0% of study-area cells.",
+      "evidence": {
+        "landsat": {
+          "title": "Landsat 8/9 LST",
+          "available": false
+        },
+        "sentinel2": {
+          "title": "Sentinel-2 NDVI",
+          "available": false
+        }
+      },
+      "note": "These are the newest cloud-filtered acquisitions available in the provider catalogue, composited over a rolling window; this is near-real-time monitoring, not a live sensor feed. Cloud masking can leave some cells without a value. Pre-monsoon baseline composites remain separate for seasonal consistency."
+    },
+    {
+      "id": "population",
+      "title": "Gridded population over time",
+      "status": "pass",
+      "rule": "A yearly series over about two decades plus an official census anchor.",
+      "evidence": {
+        "baseline_dataset": "WorldPop constrained 2020 (100 m)",
+        "people_in_study_area": 11042072,
+        "pixels": 164627,
+        "read_method": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "yearly_series_years_read": 21
+      },
+      "note": "The yearly series is WorldPop's modelled product, not a census count. An official census anchor is still to be added; until then the forecast is labelled MODELLED."
+    },
+    {
+      "id": "parks",
+      "title": "Existing parks and open space",
+      "status": "pass",
+      "rule": "Enough mapped public green space to compute who already has access.",
+      "evidence": {
+        "public_green_polygons": 15150,
+        "public_green_qualifying_polygons": 15150,
+        "public_green_total_ha": 14500.3,
+        "public_green_qualifying_ha": 14500.3,
+        "forest_reserve_polygons": 5223,
+        "open_green_polygons": 22712
+      },
+      "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
+    },
+    {
+      "id": "costs",
+      "title": "Cost benchmarks",
+      "status": "manual",
+      "rule": "At least 3 usable cost sources for parks or tree planting.",
+      "evidence": {},
+      "note": "Cannot be automated. Person B collects these from municipal budgets, state rate schedules and published studies (Appendix A of the roadmap)."
+    }
+  ]
+}
