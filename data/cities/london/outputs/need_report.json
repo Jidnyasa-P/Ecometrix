@@ -1,0 +1,86 @@
+{
+  "presets": {
+    "balanced": {
+      "heat": 0.25,
+      "people": 0.25,
+      "gap": 0.25,
+      "growth": 0.25
+    },
+    "heat_first": {
+      "heat": 0.55,
+      "people": 0.2,
+      "gap": 0.15,
+      "growth": 0.1
+    },
+    "access_first": {
+      "heat": 0.15,
+      "people": 0.25,
+      "gap": 0.5,
+      "growth": 0.1
+    },
+    "growth_aware": {
+      "heat": 0.15,
+      "people": 0.2,
+      "gap": 0.2,
+      "growth": 0.45
+    }
+  },
+  "components_used": [
+    "heat",
+    "people",
+    "gap",
+    "growth"
+  ],
+  "stability": {
+    "status": "ok",
+    "scored_cells": 2395,
+    "top_fraction": 0.1,
+    "pairs": [
+      {
+        "a": "balanced",
+        "b": "heat_first",
+        "spearman": 0.938,
+        "top_decile_overlap_pct": 78.7
+      },
+      {
+        "a": "balanced",
+        "b": "access_first",
+        "spearman": 0.874,
+        "top_decile_overlap_pct": 77.0
+      },
+      {
+        "a": "balanced",
+        "b": "growth_aware",
+        "spearman": 0.996,
+        "top_decile_overlap_pct": 93.3
+      },
+      {
+        "a": "heat_first",
+        "b": "access_first",
+        "spearman": 0.684,
+        "top_decile_overlap_pct": 58.2
+      },
+      {
+        "a": "heat_first",
+        "b": "growth_aware",
+        "spearman": 0.905,
+        "top_decile_overlap_pct": 72.0
+      },
+      {
+        "a": "access_first",
+        "b": "growth_aware",
+        "spearman": 0.904,
+        "top_decile_overlap_pct": 81.2
+      }
+    ],
+    "no_regret_cells": 135,
+    "no_regret_share_of_top_pct": 56.5,
+    "components_used": [
+      "heat",
+      "people",
+      "gap",
+      "growth"
+    ]
+  },
+  "excluded": "Residents' vulnerability (age, income, health) is not included: no open data was built for it."
+}

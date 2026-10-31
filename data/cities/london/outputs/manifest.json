@@ -1,0 +1,178 @@
+{
+  "pipeline_version": "0.4.0",
+  "generated_at": "2026-10-31T01:31:55+00:00",
+  "git_sha": "cc4ec6875548cad550e007abdf30eb4e490a60c6",
+  "city": "London",
+  "city_slug": "london",
+  "country": "United Kingdom",
+  "currency": "GBP",
+  "locale": "en-GB",
+  "unit_system": "metric",
+  "access": {
+    "distance_m": 300,
+    "min_area_ha": 2.0,
+    "standard": "Natural England Accessible Greenspace Standards \u2014 Local Standard",
+    "method": "straight_line",
+    "source": "https://designatedsites.naturalengland.org.uk/GreenInfrastructure/AccessibleGreenspaceStandard.aspx",
+    "note": "The Local Standard specifies at least 2 ha within 300 m. Current implementation measures straight-line distance; it does not yet implement the separate 15-minute walk area-wide standard."
+  },
+  "h3_resolution": 8,
+  "pixel_m": 30,
+  "boundary": {
+    "source": "OpenStreetMap administrative boundary via Nominatim",
+    "osm_ref": "relation/175342",
+    "name": "Greater London, England, United Kingdom",
+    "area_km2": 1595.5,
+    "fallback": false,
+    "notes": []
+  },
+  "n_cells": 2411,
+  "columns": [
+    "h3",
+    "lat",
+    "lng",
+    "area_km2",
+    "dist_park_m",
+    "park_ha",
+    "forest_ha",
+    "treecover_pct",
+    "shrub_pct",
+    "grass_pct",
+    "crop_pct",
+    "builtup_pct",
+    "bare_pct",
+    "water_pct",
+    "lst_c",
+    "lst_nobs",
+    "ndvi",
+    "lst_latest_c",
+    "lst_latest_nobs",
+    "ndvi_latest",
+    "ndvi_latest_nobs",
+    "pop",
+    "pop_access",
+    "pop_unserved_access",
+    "pop_unserved_300m",
+    "open_land_ha",
+    "access_share"
+  ],
+  "layers": {
+    "trees": {
+      "title": "City tree inventory (optional)",
+      "evidence": "MEASURED",
+      "status": "skipped",
+      "reason": "No city-specific open tree inventory has been configured. Canopy is derived from global land-cover products instead; tree counts are intentionally not imputed."
+    },
+    "osm": {
+      "title": "Mapped green space (OpenStreetMap)",
+      "evidence": "MEASURED",
+      "license": "ODbL, \u00a9 OpenStreetMap contributors",
+      "source": "https://www.openstreetmap.org (Overpass API)",
+      "status": "ok",
+      "detail": {
+        "vintage": "queried 2026-10-31",
+        "public_green_polygons": 26391,
+        "public_green_qualifying_polygons": 1953,
+        "public_green_total_ha": 25501.5,
+        "public_green_qualifying_ha": 22296.2,
+        "forest_reserve_polygons": 20442,
+        "open_green_polygons": 47723
+      }
+    },
+    "worldcover": {
+      "title": "Land cover (ESA WorldCover)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, ESA WorldCover",
+      "source": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover",
+      "status": "ok",
+      "detail": {
+        "vintage": "? (2020, 2021)",
+        "tiles": 4
+      }
+    },
+    "landsat": {
+      "title": "Land-surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-05-11 to 2026-07-29",
+        "scenes": 19,
+        "clear_days": 19
+      }
+    },
+    "sentinel": {
+      "title": "Vegetation index NDVI (Sentinel-2 pre-monsoon baseline)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-05-07 to 2026-07-31",
+        "scenes": 177,
+        "clear_days": 47
+      }
+    },
+    "landsat_latest": {
+      "title": "Latest surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-05/2026-10-31",
+        "first_observation": "2026-05-09",
+        "last_observation": "2026-10-17",
+        "age_days": 14,
+        "scenes": 29,
+        "clear_days": 29,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 17.181,
+        "window_days": 180
+      }
+    },
+    "sentinel_latest": {
+      "title": "Latest greenness NDVI (Sentinel-2)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-05/2026-10-31",
+        "first_observation": "2026-05-07",
+        "last_observation": "2026-10-29",
+        "age_days": 2,
+        "scenes": 368,
+        "clear_days": 65,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 28.28,
+        "window_days": 180
+      }
+    },
+    "population": {
+      "title": "Population (WorldPop 2020, constrained)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/geodata/summary?id=49804",
+      "status": "ok",
+      "detail": {
+        "vintage": "2020",
+        "read": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "pixels": 225249
+      }
+    },
+    "popseries": {
+      "title": "Population history 2000-2020 (WorldPop yearly)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/Global1_2000-2020",
+      "status": "ok",
+      "detail": {
+        "vintage": "2000 to 2020",
+        "years_read": 21,
+        "years_missing": 0
+      }
+    }
+  }
+}

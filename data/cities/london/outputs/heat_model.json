@@ -1,0 +1,65 @@
+{
+  "status": "ok",
+  "chosen": "hgb_monotone",
+  "features": [
+    "ndvi",
+    "builtup_pct",
+    "water_pct"
+  ],
+  "cv": {
+    "status": "ok",
+    "blocks": 66,
+    "folds": 5,
+    "cells": 2411,
+    "models": {
+      "mean_only": {
+        "rmse_c": 2.8446,
+        "mae_c": 2.2815,
+        "r2": -0.0141
+      },
+      "linear_ndvi": {
+        "rmse_c": 2.5702,
+        "mae_c": 1.7917,
+        "r2": 0.1721
+      },
+      "linear_multi": {
+        "rmse_c": 1.5739,
+        "mae_c": 1.2482,
+        "r2": 0.6896
+      },
+      "hgb_monotone": {
+        "rmse_c": 1.488,
+        "mae_c": 1.1875,
+        "r2": 0.7225
+      }
+    }
+  },
+  "monotonic": {
+    "ok": true,
+    "max_rise_c": 0.0,
+    "sweep_change_c": -2.836
+  },
+  "importance_heldout_rmse_increase_c": {
+    "ndvi": 0.5619,
+    "builtup_pct": 0.8447,
+    "water_pct": 0.6267
+  },
+  "gain_vs_linear_ndvi_pct": 42.11,
+  "note": "Association learned from satellite data. LST is a mid-morning SURFACE temperature, not air temperature.",
+  "greenness_targets": {
+    "pocket_park": {
+      "available": true,
+      "ndvi_target": 0.6766,
+      "cells": 111,
+      "ndvi_p25": 0.6107,
+      "ndvi_p75": 0.7416
+    },
+    "mini_forest": {
+      "available": true,
+      "ndvi_target": 0.7594,
+      "cells": 45,
+      "ndvi_p25": 0.7074,
+      "ndvi_p75": 0.7903
+    }
+  }
+}

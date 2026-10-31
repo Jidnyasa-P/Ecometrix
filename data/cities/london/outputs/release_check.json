@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "city": "london",
+  "city_slug": "london",
+  "currency": "GBP",
+  "pipeline_version": "0.4.0",
+  "checked_at": "2026-10-31T01:48:55+00:00",
+  "boundary_source": "OpenStreetMap administrative boundary via Nominatim",
+  "boundary_area_km2": 1595.5,
+  "required_layers": [
+    "osm",
+    "worldcover",
+    "landsat",
+    "sentinel",
+    "landsat_latest",
+    "sentinel_latest",
+    "population",
+    "popseries"
+  ],
+  "required_models": [
+    "heat_model",
+    "greenness_targets",
+    "forecast",
+    "need_score",
+    "sites"
+  ],
+  "required_audit_checks": [
+    "boundary",
+    "satellite",
+    "latest_satellite"
+  ]
+}

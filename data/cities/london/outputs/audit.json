@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-10-31T01:31:55+00:00",
+  "checks": [
+    {
+      "id": "boundary",
+      "title": "City boundary",
+      "status": "pass",
+      "rule": "An administrative boundary is obtained and passes geometry, centre-point and city-specific area sanity checks.",
+      "evidence": {
+        "source": "OpenStreetMap administrative boundary via Nominatim",
+        "area_km2": 1595.5,
+        "osm_ref": "relation/175342",
+        "boundary_dataset": null,
+        "boundary_dataset_url": null,
+        "boundary_resource_name": null,
+        "boundary_resource_credit": null,
+        "boundary_metadata_modified": null,
+        "boundary_resource_modified": null,
+        "boundary_ward_features": null,
+        "h3_cells": 2411
+      },
+      "note": "Boundary polygon accepted."
+    },
+    {
+      "id": "trees",
+      "title": "Optional city tree inventory",
+      "status": "warn",
+      "rule": "A city-specific open tree inventory is optional; no tree counts are inferred when one is absent.",
+      "evidence": {},
+      "note": "No city-specific open tree inventory has been configured. Canopy is derived from global land-cover products instead; tree counts are intentionally not imputed."
+    },
+    {
+      "id": "latest_satellite",
+      "title": "Latest satellite observations",
+      "status": "pass",
+      "rule": "Both rolling-window composites must be no older than 60 days and cover at least 50.0% of study-area cells.",
+      "evidence": {
+        "landsat": {
+          "title": "Landsat 8/9 LST",
+          "first_observation": "2026-05-09",
+          "last_observation": "2026-10-17",
+          "age_days": 14,
+          "scenes": 29,
+          "clear_days": 29,
+          "valid_cells_pct": 100.0,
+          "mean_clear_observations_per_cell": 17.181,
+          "window_days": 180
+        },
+        "sentinel2": {
+          "title": "Sentinel-2 NDVI",
+          "first_observation": "2026-05-07",
+          "last_observation": "2026-10-29",
+          "age_days": 2,
+          "scenes": 368,
+          "clear_days": 65,
+          "valid_cells_pct": 100.0,
+          "mean_clear_observations_per_cell": 28.28,
+          "window_days": 180
+        }
+      },
+      "note": "These are the newest cloud-filtered acquisitions available in the provider catalogue, composited over a rolling window; this is near-real-time monitoring, not a live sensor feed. Cloud masking can leave some cells without a value. Pre-monsoon baseline composites remain separate for seasonal consistency."
+    },
+    {
+      "id": "satellite",
+      "title": "Satellite coverage (pre-monsoon)",
+      "status": "pass",
+      "rule": "At least 3 cloud-filtered scenes per year for 5 or more years, for Landsat 8/9 and Sentinel-2.",
+      "evidence": {
+        "landsat_scenes_per_year": {
+          "2019": 2,
+          "2020": 2,
+          "2021": 0,
+          "2022": 4,
+          "2023": 3,
+          "2024": 6,
+          "2025": 3,
+          "2026": 10
+        },
+        "sentinel2_scenes_per_year": {
+          "2019": 39,
+          "2020": 58,
+          "2021": 30,
+          "2022": 57,
+          "2023": 50,
+          "2024": 37,
+          "2025": 64,
+          "2026": 76
+        },
+        "years_ok_landsat": 5,
+        "years_ok_sentinel2": 8
+      },
+      "note": ""
+    },
+    {
+      "id": "population",
+      "title": "Gridded population over time",
+      "status": "pass",
+      "rule": "A yearly series over about two decades plus an official census anchor.",
+      "evidence": {
+        "baseline_dataset": "WorldPop constrained 2020 (100 m)",
+        "people_in_study_area": 9212601,
+        "pixels": 225249,
+        "read_method": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "yearly_series_years_read": 21
+      },
+      "note": "The yearly series is WorldPop's modelled product, not a census count. An official census anchor is still to be added; until then the forecast is labelled MODELLED."
+    },
+    {
+      "id": "parks",
+      "title": "Existing parks and open space",
+      "status": "pass",
+      "rule": "Enough mapped public green space to compute who already has access.",
+      "evidence": {
+        "public_green_polygons": 26391,
+        "public_green_qualifying_polygons": 1953,
+        "public_green_total_ha": 25501.5,
+        "public_green_qualifying_ha": 22296.2,
+        "forest_reserve_polygons": 20442,
+        "open_green_polygons": 47723
+      },
+      "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
+    },
+    {
+      "id": "costs",
+      "title": "Cost benchmarks",
+      "status": "manual",
+      "rule": "At least 3 usable cost sources for parks or tree planting.",
+      "evidence": {},
+      "note": "Cannot be automated. Person B collects these from municipal budgets, state rate schedules and published studies (Appendix A of the roadmap)."
+    }
+  ]
+}
