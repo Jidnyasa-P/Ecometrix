@@ -1,0 +1,178 @@
+{
+  "pipeline_version": "0.4.0",
+  "generated_at": "2026-10-31T01:11:07+00:00",
+  "git_sha": "2127cdc3a57c54008e4d72d0da5e823535fab6d4",
+  "city": "Athens",
+  "city_slug": "athens",
+  "country": "Greece",
+  "currency": "EUR",
+  "locale": "el-GR",
+  "unit_system": "metric",
+  "access": {
+    "distance_m": 300,
+    "min_area_ha": 0.5,
+    "standard": "WHO Regional Office for Europe green-space benchmark",
+    "method": "straight_line",
+    "source": "https://www.who.int/europe/publications/i/item/9789289052498",
+    "note": "International evidence benchmark, not a verified Athens municipal statutory standard."
+  },
+  "h3_resolution": 9,
+  "pixel_m": 30,
+  "boundary": {
+    "source": "OpenStreetMap administrative boundary via Nominatim",
+    "osm_ref": "relation/1370736",
+    "name": "\u0394\u03ae\u03bc\u03bf\u03c2 \u0391\u03b8\u03b7\u03bd\u03b1\u03af\u03c9\u03bd, \u03a0\u03b5\u03c1\u03b9\u03c6\u03b5\u03c1\u03b5\u03b9\u03b1\u03ba\u03ae \u0395\u03bd\u03cc\u03c4\u03b7\u03c4\u03b1 \u039a\u03b5\u03bd\u03c4\u03c1\u03b9\u03ba\u03bf\u03cd \u03a4\u03bf\u03bc\u03ad\u03b1 \u0391\u03b8\u03b7\u03bd\u03ce\u03bd, \u03a0\u03b5\u03c1\u03b9\u03c6\u03ad\u03c1\u03b5\u03b9\u03b1 \u0391\u03c4\u03c4\u03b9\u03ba\u03ae\u03c2, \u0391\u03c0\u03bf\u03ba\u03b5\u03bd\u03c4\u03c1\u03c9\u03bc\u03ad\u03bd\u03b7 \u0394\u03b9\u03bf\u03af\u03ba\u03b7\u03c3\u03b7 \u0391\u03c4\u03c4\u03b9\u03ba\u03ae\u03c2, \u0395\u03bb\u03bb\u03ac\u03c2",
+    "area_km2": 38.1,
+    "fallback": false,
+    "notes": []
+  },
+  "n_cells": 309,
+  "columns": [
+    "h3",
+    "lat",
+    "lng",
+    "area_km2",
+    "dist_park_m",
+    "park_ha",
+    "forest_ha",
+    "treecover_pct",
+    "shrub_pct",
+    "grass_pct",
+    "crop_pct",
+    "builtup_pct",
+    "bare_pct",
+    "water_pct",
+    "lst_c",
+    "lst_nobs",
+    "ndvi",
+    "lst_latest_c",
+    "lst_latest_nobs",
+    "ndvi_latest",
+    "ndvi_latest_nobs",
+    "pop",
+    "pop_access",
+    "pop_unserved_access",
+    "pop_unserved_300m",
+    "open_land_ha",
+    "access_share"
+  ],
+  "layers": {
+    "trees": {
+      "title": "City tree inventory (optional)",
+      "evidence": "MEASURED",
+      "status": "skipped",
+      "reason": "No city-specific open tree inventory has been configured. Canopy is derived from global land-cover products instead; tree counts are intentionally not imputed."
+    },
+    "osm": {
+      "title": "Mapped green space (OpenStreetMap)",
+      "evidence": "MEASURED",
+      "license": "ODbL, \u00a9 OpenStreetMap contributors",
+      "source": "https://www.openstreetmap.org (Overpass API)",
+      "status": "ok",
+      "detail": {
+        "vintage": "queried 2026-10-31",
+        "public_green_polygons": 1527,
+        "public_green_qualifying_polygons": 140,
+        "public_green_total_ha": 636.4,
+        "public_green_qualifying_ha": 515.0,
+        "forest_reserve_polygons": 299,
+        "open_green_polygons": 728
+      }
+    },
+    "worldcover": {
+      "title": "Land cover (ESA WorldCover)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, ESA WorldCover",
+      "source": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover",
+      "status": "ok",
+      "detail": {
+        "vintage": "? (2020, 2021)",
+        "tiles": 2
+      }
+    },
+    "landsat": {
+      "title": "Land-surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-06-07 to 2026-08-25",
+        "scenes": 97,
+        "clear_days": 66
+      }
+    },
+    "sentinel": {
+      "title": "Vegetation index NDVI (Sentinel-2 pre-monsoon baseline)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "pre-monsoon 2024-06-08 to 2026-08-29",
+        "scenes": 135,
+        "clear_days": 68
+      }
+    },
+    "landsat_latest": {
+      "title": "Latest surface temperature (Landsat 8/9)",
+      "evidence": "MEASURED",
+      "license": "Public domain (USGS/NASA)",
+      "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-05/2026-10-31",
+        "first_observation": "2026-05-05",
+        "last_observation": "2026-10-19",
+        "age_days": 12,
+        "scenes": 61,
+        "clear_days": 41,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 23.796,
+        "window_days": 180
+      }
+    },
+    "sentinel_latest": {
+      "title": "Latest greenness NDVI (Sentinel-2)",
+      "evidence": "MEASURED",
+      "license": "Copernicus Sentinel data, free and open",
+      "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
+      "status": "ok",
+      "detail": {
+        "vintage": "latest available; rolling window 2026-05-05/2026-10-31",
+        "first_observation": "2026-05-09",
+        "last_observation": "2026-10-18",
+        "age_days": 13,
+        "scenes": 86,
+        "clear_days": 43,
+        "valid_cells_pct": 100.0,
+        "mean_clear_observations_per_cell": 37.47,
+        "window_days": 180
+      }
+    },
+    "population": {
+      "title": "Population (WorldPop 2020, constrained)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/geodata/summary?id=49804",
+      "status": "ok",
+      "detail": {
+        "vintage": "2020",
+        "read": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
+        "pixels": 5407
+      }
+    },
+    "popseries": {
+      "title": "Population history 2000-2020 (WorldPop yearly)",
+      "evidence": "MODELLED",
+      "license": "CC BY 4.0, WorldPop",
+      "source": "https://hub.worldpop.org/Global1_2000-2020",
+      "status": "ok",
+      "detail": {
+        "vintage": "2000 to 2020",
+        "years_read": 21,
+        "years_missing": 0
+      }
+    }
+  }
+}

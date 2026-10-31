@@ -1,0 +1,18 @@
+{
+  "status": "ok",
+  "n_cells": 309,
+  "pearson_r": -0.254,
+  "spearman_rho": -0.142,
+  "slope_c_per_0p1_ndvi": -0.514,
+  "intercept_c": 45.06,
+  "r2_in_sample": 0.064,
+  "spatial_block_cv": {
+    "blocks": 4,
+    "cells_evaluated": 309,
+    "rmse_ndvi_model_c": 1.91,
+    "rmse_mean_only_c": 1.998,
+    "rmse_improvement_pct": 4.4
+  },
+  "interpretation": "Association between cell-level greenness and surface temperature. It is not proof that adding greenery causes this much cooling; the M4 model and its checks address that more carefully.",
+  "caveat": "LST is a mid-morning surface-temperature snapshot, not air temperature."
+}

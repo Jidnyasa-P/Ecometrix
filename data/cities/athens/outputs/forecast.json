@@ -1,0 +1,349 @@
+{
+  "status": "ok",
+  "method": "naive",
+  "last_observed_year": 2020,
+  "backtest": {
+    "train_years": [
+      2000,
+      2014
+    ],
+    "test_years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020
+    ],
+    "methods": {
+      "naive": {
+        "wape_pct": 2.559,
+        "city_mape_pct": 0.634,
+        "city_bias_pct": 0.634,
+        "wape_by_horizon_pct": [
+          1.853,
+          2.758,
+          3.836,
+          2.35,
+          2.403,
+          2.155
+        ]
+      },
+      "linear_recent10": {
+        "wape_pct": 3.78,
+        "city_mape_pct": 0.044,
+        "city_bias_pct": 0.024,
+        "wape_by_horizon_pct": [
+          1.655,
+          3.57,
+          4.609,
+          4.123,
+          4.235,
+          4.503
+        ]
+      },
+      "linear_all": {
+        "wape_pct": 3.214,
+        "city_mape_pct": 0.045,
+        "city_bias_pct": 0.028,
+        "wape_by_horizon_pct": [
+          2.77,
+          2.943,
+          4.055,
+          2.817,
+          3.677,
+          3.026
+        ]
+      },
+      "exponential_all": {
+        "wape_pct": 3.215,
+        "city_mape_pct": 0.131,
+        "city_bias_pct": 0.122,
+        "wape_by_horizon_pct": [
+          2.764,
+          2.951,
+          4.061,
+          2.814,
+          3.678,
+          3.027
+        ]
+      }
+    }
+  },
+  "selection_rule": "lowest backtest WAPE; a method must beat the simpler ones by at least 1% to replace them",
+  "envelope": {
+    "observed_relative_error_by_horizon": {
+      "1": [
+        0.0004319719016537722,
+        0.003324277892782197
+      ],
+      "2": [
+        0.001919835805751019,
+        0.005575173753094295
+      ],
+      "3": [
+        0.003975094662000887,
+        0.006763975038228575
+      ],
+      "4": [
+        0.006255356817433265,
+        0.008563714648477046
+      ],
+      "5": [
+        0.007655161623843156,
+        0.010843533619984186
+      ],
+      "6": [
+        0.009466576390080217,
+        0.011865405271672354
+      ],
+      "7": [
+        0.011731252116548256,
+        0.013273014233098396
+      ],
+      "8": [
+        0.013710719703951118,
+        0.01509452795139615
+      ],
+      "9": [
+        0.01521833204682436,
+        0.017588019592769673
+      ],
+      "10": [
+        0.01704334277237917,
+        0.018027589024693258
+      ],
+      "11": [
+        0.019129624790882056,
+        0.01954162150828714
+      ],
+      "12": [
+        0.021633028297568947,
+        0.021633028297568947
+      ]
+    },
+    "growth_beyond_tested_per_year": 0.0018027523581307457
+  },
+  "city_series": [
+    {
+      "year": 2000,
+      "kind": "history",
+      "total": 659360.54895401
+    },
+    {
+      "year": 2001,
+      "kind": "history",
+      "total": 657099.1896800995
+    },
+    {
+      "year": 2002,
+      "kind": "history",
+      "total": 656594.0942440033
+    },
+    {
+      "year": 2003,
+      "kind": "history",
+      "total": 655682.2106704712
+    },
+    {
+      "year": 2004,
+      "kind": "history",
+      "total": 654877.9460248947
+    },
+    {
+      "year": 2005,
+      "kind": "history",
+      "total": 653394.909318924
+    },
+    {
+      "year": 2006,
+      "kind": "history",
+      "total": 652146.9462146759
+    },
+    {
+      "year": 2007,
+      "kind": "history",
+      "total": 651369.9717884064
+    },
+    {
+      "year": 2008,
+      "kind": "history",
+      "total": 650211.5240383148
+    },
+    {
+      "year": 2009,
+      "kind": "history",
+      "total": 648618.2495803833
+    },
+    {
+      "year": 2010,
+      "kind": "history",
+      "total": 647454.3510398865
+    },
+    {
+      "year": 2011,
+      "kind": "history",
+      "total": 646554.9265670776
+    },
+    {
+      "year": 2012,
+      "kind": "history",
+      "total": 645901.9779167175
+    },
+    {
+      "year": 2013,
+      "kind": "history",
+      "total": 644445.2345790863
+    },
+    {
+      "year": 2014,
+      "kind": "history",
+      "total": 643295.2491111755
+    },
+    {
+      "year": 2015,
+      "kind": "history",
+      "total": 642535.6368904114
+    },
+    {
+      "year": 2016,
+      "kind": "history",
+      "total": 641097.3746471405
+    },
+    {
+      "year": 2017,
+      "kind": "history",
+      "total": 638973.2499980927
+    },
+    {
+      "year": 2018,
+      "kind": "history",
+      "total": 638697.3506889343
+    },
+    {
+      "year": 2019,
+      "kind": "history",
+      "total": 637748.8768692017
+    },
+    {
+      "year": 2020,
+      "kind": "history",
+      "total": 636443.3275241852
+    },
+    {
+      "year": 2021,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 634334.6229604514,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2022,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 632914.718000442,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2023,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 632167.3632591177,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2024,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 631039.2871371642,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2025,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 629616.0645604419,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2026,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 628980.2222789784,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2027,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 628106.4615205223,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2028,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 626979.3699002768,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2029,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 625443.0233749063,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2030,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 625172.9662198257,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2031,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 624244.576285807,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2032,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 622966.6718829001,
+      "high": 636443.3275248216
+    },
+    {
+      "year": 2033,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 621869.3342111076,
+      "high": 651716.8199665514
+    },
+    {
+      "year": 2034,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 620775.8555984743,
+      "high": 652922.1241089697
+    },
+    {
+      "year": 2035,
+      "kind": "forecast",
+      "total": 636443.3275241852,
+      "low": 619686.2157237291,
+      "high": 654131.8947613279
+    }
+  ],
+  "horizons": [
+    2025,
+    2030,
+    2035
+  ],
+  "caveats": [
+    "History is WorldPop's modelled yearly series, not census counts.",
+    "Band = backtest error envelope across forecast origins, not a statistical interval; beyond the tested horizon it is extended linearly.",
+    "Policy shocks (new transit, master-plan changes) are not modelled."
+  ]
+}
