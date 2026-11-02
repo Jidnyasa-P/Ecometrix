@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T09:57:21+00:00",
+  "generated_at": "2026-11-02T10:25:17+00:00",
   "checks": [
     {
       "id": "boundary",
@@ -49,18 +49,18 @@
           "title": "Landsat 8/9 LST",
           "first_observation": "2026-05-08",
           "last_observation": "2026-10-23",
-          "age_days": 9,
-          "scenes": 13,
-          "clear_days": 13,
+          "age_days": 10,
+          "scenes": 14,
+          "clear_days": 14,
           "valid_cells_pct": 100.0,
-          "mean_clear_observations_per_cell": 10.288,
+          "mean_clear_observations_per_cell": 11.288,
           "window_days": 180
         },
         "sentinel2": {
           "title": "Sentinel-2 NDVI",
           "first_observation": "2026-05-08",
           "last_observation": "2026-10-30",
-          "age_days": 2,
+          "age_days": 3,
           "scenes": 24,
           "clear_days": 24,
           "valid_cells_pct": 100.0,
@@ -126,7 +126,7 @@
         "public_green_total_ha": 666.7,
         "public_green_qualifying_ha": 596.9,
         "forest_reserve_polygons": 101,
-        "open_green_polygons": 485
+        "open_green_polygons": 486
       },
       "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
     },

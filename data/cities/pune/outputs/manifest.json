@@ -1,7 +1,7 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-11-01T09:57:21+00:00",
-  "git_sha": "0f9cda701e62bb5987c0796e4bfb86977745d5dd",
+  "generated_at": "2026-11-02T10:25:17+00:00",
+  "git_sha": "aa43492b67df5eb71f4f04c3f30ca5c931a97858",
   "city": "Pune",
   "city_slug": "pune",
   "country": "India",
@@ -89,13 +89,13 @@
       "source": "https://www.openstreetmap.org (Overpass API)",
       "status": "ok",
       "detail": {
-        "vintage": "queried 2026-11-01",
+        "vintage": "queried 2026-11-02",
         "public_green_polygons": 581,
         "public_green_qualifying_polygons": 198,
         "public_green_total_ha": 666.7,
         "public_green_qualifying_ha": 596.9,
         "forest_reserve_polygons": 101,
-        "open_green_polygons": 485
+        "open_green_polygons": 486
       }
     },
     "worldcover": {
@@ -140,14 +140,14 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-06/2026-11-01",
+        "vintage": "latest available; rolling window 2026-05-07/2026-11-02",
         "first_observation": "2026-05-08",
         "last_observation": "2026-10-23",
-        "age_days": 9,
-        "scenes": 13,
-        "clear_days": 13,
+        "age_days": 10,
+        "scenes": 14,
+        "clear_days": 14,
         "valid_cells_pct": 100.0,
-        "mean_clear_observations_per_cell": 10.288,
+        "mean_clear_observations_per_cell": 11.288,
         "window_days": 180
       }
     },
@@ -158,10 +158,10 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-06/2026-11-01",
+        "vintage": "latest available; rolling window 2026-05-07/2026-11-02",
         "first_observation": "2026-05-08",
         "last_observation": "2026-10-30",
-        "age_days": 2,
+        "age_days": 3,
         "scenes": 24,
         "clear_days": 24,
         "valid_cells_pct": 100.0,
