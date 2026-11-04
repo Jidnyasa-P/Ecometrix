@@ -4,7 +4,7 @@
   "city_slug": "pune",
   "currency": "INR",
   "pipeline_version": "0.4.0",
-  "checked_at": "2026-11-03T11:24:56+00:00",
+  "checked_at": "2026-11-04T11:19:06+00:00",
   "boundary_source": "PMC Electoral Wards 2025 (41 wards; OpenCity resource credited to Parisar)",
   "boundary_area_km2": 479.9,
   "required_layers": [
