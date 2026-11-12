@@ -1,7 +1,7 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-11-11T10:08:40+00:00",
-  "git_sha": "4b2bf7380563fe5f96064a26282e723b59f805a9",
+  "generated_at": "2026-11-12T10:32:16+00:00",
+  "git_sha": "ab87e60833e2950515e89e0d68b671c33ed351a3",
   "city": "Pune",
   "city_slug": "pune",
   "country": "India",
@@ -19,29 +19,28 @@
   "h3_resolution": 9,
   "pixel_m": 30,
   "boundary": {
-    "source": "PMC Electoral Wards 2025 (41 wards; OpenCity resource credited to Parisar)",
+    "source": "Configured bounding box (FALLBACK, not an official boundary)",
     "osm_ref": null,
-    "name": "Pune Municipal Corporation",
-    "area_km2": 479.9,
-    "fallback": false,
-    "boundary_dataset": "pune-wards-info",
-    "boundary_dataset_url": "https://data.opencity.in/dataset/pune-wards-info",
-    "boundary_resource_id": "2badcc86-489c-4b7e-b7dd-a273ef01b798",
-    "boundary_resource_name": "PMC Electoral Wards 2025",
-    "boundary_resource_format": "KML",
-    "boundary_resource_credit": "Parisar",
-    "boundary_metadata_modified": "2026-10-22T13:13:19.055121",
-    "boundary_resource_modified": "2025-11-25T15:53:17.215325",
-    "boundary_ward_features": 41,
-    "notes": []
+    "name": "Pune",
+    "area_km2": 911.2,
+    "fallback": true,
+    "notes": [
+      "Configured OpenCity boundary unavailable: RetryError: HTTPSConnectionPool(host='data.opencity.in', port=443): Max retries exceeded with url: /api/3/action/package_show?id=pune-wards-info (Caused by ResponseError('too many 502 error responses'))",
+      "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='landuse', name='Pune Municipal Corporation Madhavrao Sonba Tupe School, Pune, Pune City Subdistrict, Pune, Maharashtra, 411001, India'.",
+      "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='office', name='Pune Municipal Corporation Development Office, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.",
+      "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='amenity', name='Pune Municipal Corporation Fire Station Wagholi, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.",
+      "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='office', name='Pune Municipal Corporation Kshetriya Karyalaya, Silver Crest Hill Town Road, Shivtirth Nagar, Pune, Pune City Subdistrict, Pune, Maharashtra, 411051, India'.",
+      "Nominatim returned candidates for 'Pune Municipal Corporation, Maharashtra, India', but none was tagged as a boundary.",
+      "Nominatim candidate skipped for 'Pune, Maharashtra, India': category='place', name='Pune, Pune City Subdistrict, Pune, Maharashtra, 411001, India'.",
+      "Nominatim boundary rejected for 'Pune, Maharashtra, India': area 15641.4 km2 outside sanity range 450-600."
+    ]
   },
-  "n_cells": 4877,
+  "n_cells": 9273,
   "columns": [
     "h3",
     "lat",
     "lng",
     "area_km2",
-    "tree_count",
     "dist_park_m",
     "park_ha",
     "forest_ha",
@@ -63,7 +62,6 @@
     "pop_access",
     "pop_unserved_access",
     "pop_unserved_300m",
-    "tree_density_ha",
     "open_land_ha",
     "access_share"
   ],
@@ -73,14 +71,8 @@
       "evidence": "MEASURED",
       "license": "Public domain (PMC open data via OpenCity)",
       "source": "https://data.opencity.in/dataset/pune-tree-census-2019",
-      "status": "ok",
-      "detail": {
-        "vintage": "August 2019",
-        "rows": 4009624,
-        "coordinates": [
-          "combined column 'geom' (lon,lat)"
-        ]
-      }
+      "status": "failed",
+      "reason": "RetryError: HTTPSConnectionPool(host='data.opencity.in', port=443): Max retries exceeded with url: /api/3/action/package_show?id=pune-tree-census-2019 (Caused by ResponseError('too many 502 error responses'))"
     },
     "osm": {
       "title": "Mapped green space (OpenStreetMap)",
@@ -89,13 +81,13 @@
       "source": "https://www.openstreetmap.org (Overpass API)",
       "status": "ok",
       "detail": {
-        "vintage": "queried 2026-11-11",
-        "public_green_polygons": 582,
-        "public_green_qualifying_polygons": 198,
-        "public_green_total_ha": 666.8,
-        "public_green_qualifying_ha": 596.9,
-        "forest_reserve_polygons": 101,
-        "open_green_polygons": 486
+        "vintage": "queried 2026-11-12",
+        "public_green_polygons": 668,
+        "public_green_qualifying_polygons": 241,
+        "public_green_total_ha": 773.5,
+        "public_green_qualifying_ha": 692.5,
+        "forest_reserve_polygons": 105,
+        "open_green_polygons": 500
       }
     },
     "worldcover": {
@@ -140,14 +132,14 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-16/2026-11-11",
-        "first_observation": "2026-05-16",
+        "vintage": "latest available; rolling window 2026-05-17/2026-11-12",
+        "first_observation": "2026-05-24",
         "last_observation": "2026-10-23",
-        "age_days": 19,
-        "scenes": 13,
-        "clear_days": 13,
+        "age_days": 20,
+        "scenes": 12,
+        "clear_days": 12,
         "valid_cells_pct": 100.0,
-        "mean_clear_observations_per_cell": 10.292,
+        "mean_clear_observations_per_cell": 9.349,
         "window_days": 180
       }
     },
@@ -158,14 +150,14 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-16/2026-11-11",
+        "vintage": "latest available; rolling window 2026-05-17/2026-11-12",
         "first_observation": "2026-05-23",
-        "last_observation": "2026-11-09",
-        "age_days": 2,
-        "scenes": 25,
-        "clear_days": 25,
+        "last_observation": "2026-11-11",
+        "age_days": 1,
+        "scenes": 26,
+        "clear_days": 26,
         "valid_cells_pct": 100.0,
-        "mean_clear_observations_per_cell": 17.588,
+        "mean_clear_observations_per_cell": 18.514,
         "window_days": 180
       }
     },
@@ -178,7 +170,7 @@
       "detail": {
         "vintage": "2020",
         "read": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
-        "pixels": 34529
+        "pixels": 58750
       }
     },
     "popseries": {

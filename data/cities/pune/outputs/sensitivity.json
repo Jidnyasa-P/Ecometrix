@@ -3,7 +3,7 @@
   "method": "one at a time, others at base, median-cost site of each type",
   "types": {
     "mini_forest": {
-      "site_id": "89608852e37ffff:mini_forest",
+      "site_id": "89608852d2bffff:mini_forest",
       "type": "mini_forest",
       "area_ha": 1.0,
       "base": {
@@ -215,12 +215,11 @@
       ]
     },
     "pocket_park": {
-      "site_id": "89608852633ffff:pocket_park",
+      "site_id": "8960885194fffff:pocket_park",
       "type": "pocket_park",
       "area_ha": 2.0,
       "base": {
-        "cost_pv_inr": 13012633.90690118,
-        "inr_per_person_newly_served": 6763.694246208283
+        "cost_pv_inr": 13012633.90690118
       },
       "rows": [
         {
@@ -233,10 +232,6 @@
             "cost_pv_inr": {
               "at_low": 6506316.95345059,
               "at_high": 19518950.86035177
-            },
-            "inr_per_person_newly_served": {
-              "at_low": 3381.8471231041417,
-              "at_high": 10145.541369312425
             }
           },
           "max_relative_swing": 1.0
@@ -250,14 +245,10 @@
           "effects": {
             "cost_pv_inr": {
               "at_low": 14542052.50246657,
-              "at_high": 11863423.913328467
-            },
-            "inr_per_person_newly_served": {
-              "at_low": 7558.653962195023,
-              "at_high": 6166.358989040209
+              "at_high": 11863423.91332847
             }
           },
-          "max_relative_swing": 0.20584830160460502
+          "max_relative_swing": 0.2058483016046047
         },
         {
           "parameter": "horizon_years = 5",
@@ -269,10 +260,6 @@
             "cost_pv_inr": {
               "at_low": 7447459.172880182,
               "at_high": 7447459.172880182
-            },
-            "inr_per_person_newly_served": {
-              "at_low": 3871.0331141926686,
-              "at_high": 3871.0331141926686
             }
           },
           "variant": true,
@@ -288,10 +275,6 @@
             "cost_pv_inr": {
               "at_low": 17171256.210326057,
               "at_high": 17171256.210326057
-            },
-            "inr_per_person_newly_served": {
-              "at_low": 8925.258918438933,
-              "at_high": 8925.258918438933
             }
           },
           "variant": true,

@@ -17,10 +17,10 @@
     },
     "sites": {
       "status": "ok",
-      "count": 6624,
+      "count": 11770,
       "by_type": {
-        "mini_forest": 3398,
-        "pocket_park": 3226
+        "mini_forest": 6048,
+        "pocket_park": 5722
       }
     },
     "sensitivity": {

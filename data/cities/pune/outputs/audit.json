@@ -1,43 +1,25 @@
 {
-  "generated_at": "2026-11-11T10:08:40+00:00",
+  "generated_at": "2026-11-12T10:32:16+00:00",
   "checks": [
     {
       "id": "boundary",
       "title": "City boundary",
-      "status": "pass",
+      "status": "warn",
       "rule": "An administrative boundary is obtained and passes geometry, centre-point and city-specific area sanity checks.",
       "evidence": {
-        "source": "PMC Electoral Wards 2025 (41 wards; OpenCity resource credited to Parisar)",
-        "area_km2": 479.9,
+        "source": "Configured bounding box (FALLBACK, not an official boundary)",
+        "area_km2": 911.2,
         "osm_ref": null,
-        "boundary_dataset": "pune-wards-info",
-        "boundary_dataset_url": "https://data.opencity.in/dataset/pune-wards-info",
-        "boundary_resource_name": "PMC Electoral Wards 2025",
-        "boundary_resource_credit": "Parisar",
-        "boundary_metadata_modified": "2026-10-22T13:13:19.055121",
-        "boundary_resource_modified": "2025-11-25T15:53:17.215325",
-        "boundary_ward_features": 41,
-        "h3_cells": 4877
+        "boundary_dataset": null,
+        "boundary_dataset_url": null,
+        "boundary_resource_name": null,
+        "boundary_resource_credit": null,
+        "boundary_metadata_modified": null,
+        "boundary_resource_modified": null,
+        "boundary_ward_features": null,
+        "h3_cells": 9273
       },
-      "note": "Boundary polygon accepted."
-    },
-    {
-      "id": "trees",
-      "title": "City tree inventory loads and is clean",
-      "status": "pass",
-      "rule": "At least 90% of inventory rows have valid coordinates.",
-      "evidence": {
-        "rows_loaded": 4009624,
-        "valid_coordinates_pct": 100.0,
-        "rows_inside_study_area": 3977026,
-        "parts_read": 17,
-        "coordinate_detection": [
-          "combined column 'geom' (lon,lat)"
-        ],
-        "published_claim": 4090000,
-        "listed_parts_total": 4009000
-      },
-      "note": "The loaded row count is what the pipeline actually read."
+      "note": "Configured OpenCity boundary unavailable: RetryError: HTTPSConnectionPool(host='data.opencity.in', port=443): Max retries exceeded with url: /api/3/action/package_show?id=pune-wards-info (Caused by ResponseError('too many 502 error responses')); Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='landuse', name='Pune Municipal Corporation Madhavrao Sonba Tupe School, Pune, Pune City Subdistrict, Pune, Maharashtra, 411001, India'.; Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='office', name='Pune Municipal Corporation Development Office, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.; Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='amenity', name='Pune Municipal Corporation Fire Station Wagholi, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.; Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='office', name='Pune Municipal Corporation Kshetriya Karyalaya, Silver Crest Hill Town Road, Shivtirth Nagar, Pune, Pune City Subdistrict, Pune, Maharashtra, 411051, India'.; Nominatim returned candidates for 'Pune Municipal Corporation, Maharashtra, India', but none was tagged as a boundary.; Nominatim candidate skipped for 'Pune, Maharashtra, India': category='place', name='Pune, Pune City Subdistrict, Pune, Maharashtra, 411001, India'.; Nominatim boundary rejected for 'Pune, Maharashtra, India': area 15641.4 km2 outside sanity range 450-600."
     },
     {
       "id": "latest_satellite",
@@ -47,24 +29,24 @@
       "evidence": {
         "landsat": {
           "title": "Landsat 8/9 LST",
-          "first_observation": "2026-05-16",
+          "first_observation": "2026-05-24",
           "last_observation": "2026-10-23",
-          "age_days": 19,
-          "scenes": 13,
-          "clear_days": 13,
+          "age_days": 20,
+          "scenes": 12,
+          "clear_days": 12,
           "valid_cells_pct": 100.0,
-          "mean_clear_observations_per_cell": 10.292,
+          "mean_clear_observations_per_cell": 9.349,
           "window_days": 180
         },
         "sentinel2": {
           "title": "Sentinel-2 NDVI",
           "first_observation": "2026-05-23",
-          "last_observation": "2026-11-09",
-          "age_days": 2,
-          "scenes": 25,
-          "clear_days": 25,
+          "last_observation": "2026-11-11",
+          "age_days": 1,
+          "scenes": 26,
+          "clear_days": 26,
           "valid_cells_pct": 100.0,
-          "mean_clear_observations_per_cell": 17.588,
+          "mean_clear_observations_per_cell": 18.514,
           "window_days": 180
         }
       },
@@ -108,8 +90,8 @@
       "rule": "A yearly series over about two decades plus an official census anchor.",
       "evidence": {
         "baseline_dataset": "WorldPop constrained 2020 (100 m)",
-        "people_in_study_area": 4088904,
-        "pixels": 34529,
+        "people_in_study_area": 6365486,
+        "pixels": 58750,
         "read_method": "full download (windowed read failed: RasterioIOError('Range downloading not supported by this server!'))",
         "yearly_series_years_read": 21
       },
@@ -121,12 +103,12 @@
       "status": "pass",
       "rule": "Enough mapped public green space to compute who already has access.",
       "evidence": {
-        "public_green_polygons": 582,
-        "public_green_qualifying_polygons": 198,
-        "public_green_total_ha": 666.8,
-        "public_green_qualifying_ha": 596.9,
-        "forest_reserve_polygons": 101,
-        "open_green_polygons": 486
+        "public_green_polygons": 668,
+        "public_green_qualifying_polygons": 241,
+        "public_green_total_ha": 773.5,
+        "public_green_qualifying_ha": 692.5,
+        "forest_reserve_polygons": 105,
+        "open_green_polygons": 500
       },
       "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
     },
