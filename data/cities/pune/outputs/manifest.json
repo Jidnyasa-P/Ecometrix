@@ -1,7 +1,7 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-11-12T10:32:16+00:00",
-  "git_sha": "ab87e60833e2950515e89e0d68b671c33ed351a3",
+  "generated_at": "2026-11-13T10:25:21+00:00",
+  "git_sha": "44fdb1f2a01e5d30b6cb4de28d2513b309f0aa0d",
   "city": "Pune",
   "city_slug": "pune",
   "country": "India",
@@ -25,7 +25,7 @@
     "area_km2": 911.2,
     "fallback": true,
     "notes": [
-      "Configured OpenCity boundary unavailable: RetryError: HTTPSConnectionPool(host='data.opencity.in', port=443): Max retries exceeded with url: /api/3/action/package_show?id=pune-wards-info (Caused by ResponseError('too many 502 error responses'))",
+      "Configured OpenCity boundary unavailable: HTTPError: 403 Client Error: Forbidden for url: https://data.opencity.in/api/3/action/package_show?id=pune-wards-info",
       "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='landuse', name='Pune Municipal Corporation Madhavrao Sonba Tupe School, Pune, Pune City Subdistrict, Pune, Maharashtra, 411001, India'.",
       "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='office', name='Pune Municipal Corporation Development Office, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.",
       "Nominatim candidate skipped for 'Pune Municipal Corporation, Maharashtra, India': category='amenity', name='Pune Municipal Corporation Fire Station Wagholi, road, AWHO Vijay Vihar, Wagholi, Pune City Subdistrict, Pune, Maharashtra, 412207, India'.",
@@ -72,7 +72,7 @@
       "license": "Public domain (PMC open data via OpenCity)",
       "source": "https://data.opencity.in/dataset/pune-tree-census-2019",
       "status": "failed",
-      "reason": "RetryError: HTTPSConnectionPool(host='data.opencity.in', port=443): Max retries exceeded with url: /api/3/action/package_show?id=pune-tree-census-2019 (Caused by ResponseError('too many 502 error responses'))"
+      "reason": "HTTPError: 403 Client Error: Forbidden for url: https://data.opencity.in/api/3/action/package_show?id=pune-tree-census-2019"
     },
     "osm": {
       "title": "Mapped green space (OpenStreetMap)",
@@ -81,7 +81,7 @@
       "source": "https://www.openstreetmap.org (Overpass API)",
       "status": "ok",
       "detail": {
-        "vintage": "queried 2026-11-12",
+        "vintage": "queried 2026-11-13",
         "public_green_polygons": 668,
         "public_green_qualifying_polygons": 241,
         "public_green_total_ha": 773.5,
@@ -132,10 +132,10 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-17/2026-11-12",
+        "vintage": "latest available; rolling window 2026-05-18/2026-11-13",
         "first_observation": "2026-05-24",
         "last_observation": "2026-10-23",
-        "age_days": 20,
+        "age_days": 21,
         "scenes": 12,
         "clear_days": 12,
         "valid_cells_pct": 100.0,
@@ -150,10 +150,10 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-17/2026-11-12",
+        "vintage": "latest available; rolling window 2026-05-18/2026-11-13",
         "first_observation": "2026-05-23",
         "last_observation": "2026-11-11",
-        "age_days": 1,
+        "age_days": 2,
         "scenes": 26,
         "clear_days": 26,
         "valid_cells_pct": 100.0,
