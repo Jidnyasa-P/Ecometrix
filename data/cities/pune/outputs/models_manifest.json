@@ -4,7 +4,8 @@
   "currency": "INR",
   "modules": {
     "heat_model": {
-      "status": "ok"
+      "status": "failed",
+      "reason": "ValueError: heat model needs columns ['builtup_pct', 'water_pct']; build those layers first"
     },
     "greenness_targets": {
       "status": "ok"
@@ -16,12 +17,8 @@
       "status": "ok"
     },
     "sites": {
-      "status": "ok",
-      "count": 11770,
-      "by_type": {
-        "mini_forest": 6048,
-        "pocket_park": 5722
-      }
+      "status": "failed",
+      "reason": "ValueError: cannot generate sites without ['open_land_ha']"
     },
     "sensitivity": {
       "status": "ok"
