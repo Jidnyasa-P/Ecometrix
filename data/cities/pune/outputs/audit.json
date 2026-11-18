@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-17T11:24:26+00:00",
+  "generated_at": "2026-11-18T10:57:07+00:00",
   "checks": [
     {
       "id": "boundary",
@@ -31,7 +31,7 @@
           "title": "Landsat 8/9 LST",
           "first_observation": "2026-05-24",
           "last_observation": "2026-11-08",
-          "age_days": 9,
+          "age_days": 10,
           "scenes": 13,
           "clear_days": 13,
           "valid_cells_pct": 100.0,
@@ -42,7 +42,7 @@
           "title": "Sentinel-2 NDVI",
           "first_observation": "2026-05-23",
           "last_observation": "2026-11-14",
-          "age_days": 3,
+          "age_days": 4,
           "scenes": 27,
           "clear_days": 27,
           "valid_cells_pct": 100.0,
