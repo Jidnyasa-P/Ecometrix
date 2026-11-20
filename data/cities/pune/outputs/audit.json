@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T10:59:40+00:00",
+  "generated_at": "2026-11-20T10:48:17+00:00",
   "checks": [
     {
       "id": "boundary",
@@ -29,20 +29,20 @@
       "evidence": {
         "landsat": {
           "title": "Landsat 8/9 LST",
-          "first_observation": "2026-05-24",
+          "first_observation": "2026-06-01",
           "last_observation": "2026-11-08",
-          "age_days": 11,
-          "scenes": 13,
-          "clear_days": 13,
+          "age_days": 12,
+          "scenes": 12,
+          "clear_days": 12,
           "valid_cells_pct": 100.0,
-          "mean_clear_observations_per_cell": 10.347,
+          "mean_clear_observations_per_cell": 10.144,
           "window_days": 180
         },
         "sentinel2": {
           "title": "Sentinel-2 NDVI",
           "first_observation": "2026-06-02",
           "last_observation": "2026-11-14",
-          "age_days": 5,
+          "age_days": 6,
           "scenes": 26,
           "clear_days": 26,
           "valid_cells_pct": 100.0,

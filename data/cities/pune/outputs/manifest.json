@@ -1,7 +1,7 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-11-19T10:59:40+00:00",
-  "git_sha": "c9bda6f59d90d7986d16cb4bc965640a9da507db",
+  "generated_at": "2026-11-20T10:48:17+00:00",
+  "git_sha": "e0ac3acca7e89bd77cdded0c73d4c379d9ff5046",
   "city": "Pune",
   "city_slug": "pune",
   "country": "India",
@@ -73,7 +73,7 @@
       "source": "https://www.openstreetmap.org (Overpass API)",
       "status": "ok",
       "detail": {
-        "vintage": "queried 2026-11-19",
+        "vintage": "queried 2026-11-20",
         "public_green_polygons": 668,
         "public_green_qualifying_polygons": 241,
         "public_green_total_ha": 773.5,
@@ -121,14 +121,14 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-24/2026-11-19",
-        "first_observation": "2026-05-24",
+        "vintage": "latest available; rolling window 2026-05-25/2026-11-20",
+        "first_observation": "2026-06-01",
         "last_observation": "2026-11-08",
-        "age_days": 11,
-        "scenes": 13,
-        "clear_days": 13,
+        "age_days": 12,
+        "scenes": 12,
+        "clear_days": 12,
         "valid_cells_pct": 100.0,
-        "mean_clear_observations_per_cell": 10.347,
+        "mean_clear_observations_per_cell": 10.144,
         "window_days": 180
       }
     },
@@ -139,10 +139,10 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-05-24/2026-11-19",
+        "vintage": "latest available; rolling window 2026-05-25/2026-11-20",
         "first_observation": "2026-06-02",
         "last_observation": "2026-11-14",
-        "age_days": 5,
+        "age_days": 6,
         "scenes": 26,
         "clear_days": 26,
         "valid_cells_pct": 100.0,
