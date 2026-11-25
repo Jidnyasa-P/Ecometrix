@@ -1,7 +1,5 @@
 # EcoMetrix — multi-city urban greening evidence platform
 
-Off-campus code : ZPSDF7
-
 EcoMetrix is a decision-support prototype for understanding urban heat, mapped green space, population exposure and park-access gaps. It currently contains four city profiles:
 
 | City | Country | Currency | State in this archive | Tree inventory | Local finance / carbon model |
