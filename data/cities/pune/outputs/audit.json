@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T11:46:09+00:00",
+  "generated_at": "2026-11-27T11:39:47+00:00",
   "checks": [
     {
       "id": "boundary",
@@ -30,19 +30,19 @@
         "landsat": {
           "title": "Landsat 8/9 LST",
           "first_observation": "2026-06-01",
-          "last_observation": "2026-11-08",
-          "age_days": 18,
-          "scenes": 12,
-          "clear_days": 12,
+          "last_observation": "2026-11-16",
+          "age_days": 11,
+          "scenes": 13,
+          "clear_days": 13,
           "valid_cells_pct": 100.0,
-          "mean_clear_observations_per_cell": 10.144,
+          "mean_clear_observations_per_cell": 11.121,
           "window_days": 180
         },
         "sentinel2": {
           "title": "Sentinel-2 NDVI",
           "first_observation": "2026-06-02",
           "last_observation": "2026-11-24",
-          "age_days": 2,
+          "age_days": 3,
           "scenes": 27,
           "clear_days": 27,
           "valid_cells_pct": 100.0,
@@ -96,21 +96,6 @@
         "yearly_series_years_read": 21
       },
       "note": "The yearly series is WorldPop's modelled product, not a census count. An official census anchor is still to be added; until then the forecast is labelled MODELLED."
-    },
-    {
-      "id": "parks",
-      "title": "Existing parks and open space",
-      "status": "pass",
-      "rule": "Enough mapped public green space to compute who already has access.",
-      "evidence": {
-        "public_green_polygons": 668,
-        "public_green_qualifying_polygons": 241,
-        "public_green_total_ha": 773.5,
-        "public_green_qualifying_ha": 692.5,
-        "forest_reserve_polygons": 105,
-        "open_green_polygons": 500
-      },
-      "note": "OpenStreetMap is crowd-sourced. Compare against the municipality's own park list before relying on it for decisions."
     },
     {
       "id": "costs",
