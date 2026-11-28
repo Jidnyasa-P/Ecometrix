@@ -4596,34 +4596,34 @@
       "equity_pct": 50,
       "solver": {
         "status": "FEASIBLE",
-        "gap": 0.24128832990557986,
+        "gap": 0.23990169154131524,
         "prefiltered": true,
         "candidates": 3000
       },
-      "n_sites": 104,
+      "n_sites": 101,
       "by_type": {
-        "mini_forest": 65,
-        "pocket_park": 39
+        "mini_forest": 63,
+        "pocket_park": 38
       },
       "cost_pv_inr": {
-        "p10": 675131348.9846327,
-        "p50": 689475338.404969,
-        "p90": 703292655.3380677
+        "p10": 674494396.8475907,
+        "p50": 689119797.6402152,
+        "p90": 703379723.8304614
       },
       "cooling_person_degrees": {
-        "p10": 28591.84134295284,
-        "p50": 30723.8714791959,
-        "p90": 32873.674335216674
+        "p10": 30164.459696150054,
+        "p50": 32243.049899319496,
+        "p90": 34467.62581500533
       },
       "carbon_t_co2e": {
-        "p10": 29800.444684986516,
-        "p50": 30627.14982222233,
-        "p90": 31369.238133529798
+        "p10": 29672.77574556286,
+        "p50": 30490.20200076697,
+        "p90": 31234.061604735256
       },
-      "people_newly_served": 256292.28561401367,
-      "prob_within_budget": 0.125,
-      "high_need_share_of_spend": 0.6949532219659144,
-      "objective_norm": 31.02498791434064,
+      "people_newly_served": 253483.1527557373,
+      "prob_within_budget": 0.133,
+      "high_need_share_of_spend": 0.6997007863226788,
+      "objective_norm": 31.081698943096523,
       "sites": [
         {
           "site_id": "89608840203ffff:pocket_park",
@@ -4702,19 +4702,6 @@
           "high_need": true,
           "lat": 18.656492,
           "lng": 73.779253
-        },
-        {
-          "site_id": "896088414cbffff:pocket_park",
-          "h3": "896088414cbffff",
-          "type": "pocket_park",
-          "area_ha": 0.5419069069069068,
-          "cost_p50_inr": 3537702.1990325646,
-          "cooling_person_degrees_p50": 586.6201985996928,
-          "carbon_t_co2e_p50": 0.0,
-          "people_newly_served_marginal": 5251.697418212891,
-          "high_need": true,
-          "lat": 18.655381,
-          "lng": 73.819606
         },
         {
           "site_id": "8960884156bffff:pocket_park",
@@ -4847,19 +4834,6 @@
           "lng": 73.862268
         },
         {
-          "site_id": "89608850123ffff:pocket_park",
-          "h3": "89608850123ffff",
-          "type": "pocket_park",
-          "area_ha": 1.364464646464646,
-          "cost_p50_inr": 8940146.403563678,
-          "cooling_person_degrees_p50": 689.4372808453155,
-          "carbon_t_co2e_p50": 0.0,
-          "people_newly_served_marginal": 8840.365371704102,
-          "high_need": true,
-          "lat": 18.510169,
-          "lng": 73.851145
-        },
-        {
           "site_id": "89608850127ffff:pocket_park",
           "h3": "89608850127ffff",
           "type": "pocket_park",
@@ -4867,10 +4841,23 @@
           "cost_p50_inr": 6972491.060725376,
           "cooling_person_degrees_p50": 820.2765306679706,
           "carbon_t_co2e_p50": 0.0,
-          "people_newly_served_marginal": 5271.623489379883,
+          "people_newly_served_marginal": 8267.618072509766,
           "high_need": true,
           "lat": 18.509003,
           "lng": 73.848215
+        },
+        {
+          "site_id": "89608850173ffff:pocket_park",
+          "h3": "89608850173ffff",
+          "type": "pocket_park",
+          "area_ha": 2.0,
+          "cost_p50_inr": 13223997.099776223,
+          "cooling_person_degrees_p50": 2197.070167525494,
+          "carbon_t_co2e_p50": 0.0,
+          "people_newly_served_marginal": 9284.715759277344,
+          "high_need": true,
+          "lat": 18.515608,
+          "lng": 73.857605
         },
         {
           "site_id": "896088501bbffff:pocket_park",
@@ -4949,19 +4936,6 @@
           "high_need": true,
           "lat": 18.53386,
           "lng": 73.831361
-        },
-        {
-          "site_id": "89608850eb7ffff:pocket_park",
-          "h3": "89608850eb7ffff",
-          "type": "pocket_park",
-          "area_ha": 0.5177414141414141,
-          "cost_p50_inr": 3416289.730479732,
-          "cooling_person_degrees_p50": -0.0,
-          "carbon_t_co2e_p50": 0.0,
-          "people_newly_served_marginal": 6885.823577880859,
-          "high_need": false,
-          "lat": 18.513664,
-          "lng": 73.838291
         },
         {
           "site_id": "89608851487ffff:pocket_park",
@@ -5105,6 +5079,19 @@
           "high_need": true,
           "lat": 18.523378,
           "lng": 73.913244
+        },
+        {
+          "site_id": "896088572bbffff:pocket_park",
+          "h3": "896088572bbffff",
+          "type": "pocket_park",
+          "area_ha": 0.6527166156982669,
+          "cost_p50_inr": 4257814.43329178,
+          "cooling_person_degrees_p50": 573.9690579895612,
+          "carbon_t_co2e_p50": 0.0,
+          "people_newly_served_marginal": 5888.043167114258,
+          "high_need": true,
+          "lat": 18.479863,
+          "lng": 73.79663
         },
         {
           "site_id": "89608857653ffff:pocket_park",
@@ -5300,19 +5287,6 @@
           "high_need": false,
           "lat": 18.558707,
           "lng": 73.814508
-        },
-        {
-          "site_id": "89608843277ffff:mini_forest",
-          "h3": "89608843277ffff",
-          "type": "mini_forest",
-          "area_ha": 0.13698087486839472,
-          "cost_p50_inr": 1188135.1676912238,
-          "cooling_person_degrees_p50": -0.0,
-          "carbon_t_co2e_p50": 79.4708162543801,
-          "people_newly_served_marginal": 0.0,
-          "high_need": true,
-          "lat": 18.642187,
-          "lng": 73.822474
         },
         {
           "site_id": "896088500b3ffff:mini_forest",
@@ -5692,19 +5666,6 @@
           "lng": 73.876129
         },
         {
-          "site_id": "89608852ed3ffff:mini_forest",
-          "h3": "89608852ed3ffff",
-          "type": "mini_forest",
-          "area_ha": 0.10047551861526915,
-          "cost_p50_inr": 869019.8572166314,
-          "cooling_person_degrees_p50": -0.0,
-          "carbon_t_co2e_p50": 58.29187093168385,
-          "people_newly_served_marginal": 0.0,
-          "high_need": true,
-          "lat": 18.473639,
-          "lng": 73.881991
-        },
-        {
           "site_id": "89608853153ffff:mini_forest",
           "h3": "89608853153ffff",
           "type": "mini_forest",
@@ -5998,7 +5959,7 @@
         },
         "objective_norm": 17.278337594275655
       },
-      "gain_vs_top_need_pct": 79.56002853318063
+      "gain_vs_top_need_pct": 79.88824893312622
     },
     {
       "preset": "balanced",

@@ -1,7 +1,7 @@
 {
   "pipeline_version": "0.4.0",
-  "generated_at": "2026-11-27T11:39:47+00:00",
-  "git_sha": "24ac7bd2fb227ceb0de4e5295b79fbc8510391a6",
+  "generated_at": "2026-11-28T11:14:37+00:00",
+  "git_sha": "d02652d0920d4a8d0599766bd7fa5c2fd4fc1cfe",
   "city": "Pune",
   "city_slug": "pune",
   "country": "India",
@@ -41,6 +41,9 @@
     "lat",
     "lng",
     "area_km2",
+    "dist_park_m",
+    "park_ha",
+    "forest_ha",
     "lst_c",
     "lst_nobs",
     "ndvi",
@@ -48,7 +51,11 @@
     "lst_latest_nobs",
     "ndvi_latest",
     "ndvi_latest_nobs",
-    "pop"
+    "pop",
+    "pop_access",
+    "pop_unserved_access",
+    "pop_unserved_300m",
+    "access_share"
   ],
   "layers": {
     "trees": {
@@ -64,8 +71,16 @@
       "evidence": "MEASURED",
       "license": "ODbL, \u00a9 OpenStreetMap contributors",
       "source": "https://www.openstreetmap.org (Overpass API)",
-      "status": "failed",
-      "reason": "ConnectionError: HTTPSConnectionPool(host='overpass-api.de', port=443): Max retries exceeded with url: /api/interpreter (Caused by NewConnectionError(\"HTTPSConnection(host='overpass-api.de', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))"
+      "status": "ok",
+      "detail": {
+        "vintage": "queried 2026-11-28",
+        "public_green_polygons": 667,
+        "public_green_qualifying_polygons": 241,
+        "public_green_total_ha": 773.3,
+        "public_green_qualifying_ha": 692.5,
+        "forest_reserve_polygons": 105,
+        "open_green_polygons": 500
+      }
     },
     "worldcover": {
       "title": "Land cover (ESA WorldCover)",
@@ -106,14 +121,14 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-06-01/2026-11-27",
-        "first_observation": "2026-06-01",
+        "vintage": "latest available; rolling window 2026-06-02/2026-11-28",
+        "first_observation": "2026-06-09",
         "last_observation": "2026-11-16",
-        "age_days": 11,
-        "scenes": 13,
-        "clear_days": 13,
+        "age_days": 12,
+        "scenes": 12,
+        "clear_days": 12,
         "valid_cells_pct": 100.0,
-        "mean_clear_observations_per_cell": 11.121,
+        "mean_clear_observations_per_cell": 10.128,
         "window_days": 180
       }
     },
@@ -124,10 +139,10 @@
       "source": "https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a",
       "status": "ok",
       "detail": {
-        "vintage": "latest available; rolling window 2026-06-01/2026-11-27",
+        "vintage": "latest available; rolling window 2026-06-02/2026-11-28",
         "first_observation": "2026-06-02",
         "last_observation": "2026-11-24",
-        "age_days": 3,
+        "age_days": 4,
         "scenes": 27,
         "clear_days": 27,
         "valid_cells_pct": 100.0,
